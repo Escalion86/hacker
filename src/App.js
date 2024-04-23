@@ -1,7 +1,22 @@
 import logo from './logo.svg'
 import './App.css'
 // import * as Bluetooth from 'react-bluetooth'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import WiFiIcon from './icons/WiFiIcon'
+import cn from 'classnames'
+import ConnectedDevicesIcon from './icons/ConnectedDevicesIcon'
+import ScenariosIcon from './icons/ScenariosIcon'
+import SoundIcon from './icons/SoundIcon'
+import NotificationsIcon from './icons/NotificationsIcon'
+import BateryIcon from './icons/BateryIcon'
+import DisplayIcon from './icons/DisplayIcon'
+import SearchIcon from './icons/SearchIcon'
+import WallpappersIcon from './icons/WallpappersIcon'
+import ThemesIcon from './icons/ThemesIcon'
+import BlockScreenIcon from './icons/BlockScreenIcon'
+import ShildIcon from './icons/ShildIcon'
+import LocationIcon from './icons/LocationIcon'
+import ExtraIcon from './icons/ExtraIcon'
 
 // const btReq = async () => {
 //   try {
@@ -78,12 +93,94 @@ function getDateTime() {
   return datetime
 }
 
+function toggleTheme() {
+  let htmlClasses = document.querySelector('html').classList
+  if (localStorage.AppName === 'hacker') {
+    localStorage.removeItem('AppName')
+    htmlClasses.remove('dark')
+    localStorage.theme = 'light'
+  } else {
+    localStorage.AppName = 'hacker'
+    htmlClasses.add('dark')
+    localStorage.theme = 'dark'
+  }
+}
+
+const ItemsBlock = ({ children }) => (
+  <div className="flex flex-col items-stretch">{children}</div>
+)
+
+const Item = ({ title, Icon, subItems, children }) => {
+  const itemRef = useRef()
+  useEffect(() => {
+    // let button = document.getElementById('button')
+
+    itemRef.current.addEventListener('mousedown', (e) => {
+      var rect = e.target.getBoundingClientRect()
+      var x = e.clientX - rect.left //x position within the element.
+      var y = e.clientY - rect.top
+
+      // let x = e.x
+      // let y = e.y
+      // console.log('y :>> ', y)
+      itemRef.current.style.setProperty('--mouse-x', x + 'px')
+      itemRef.current.style.setProperty('--mouse-y', y + 'px')
+    })
+    return itemRef.current.removeEventListener('mousedown', () => 123)
+  }, [])
+
+  return (
+    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl bg-dark">
+      <div
+        ref={itemRef}
+        id="button"
+        className={cn(
+          'button flex gap-x-3 px-4 pb-3 items-center group-first:rounded-t-3xl group-last:rounded-b-3xl'
+        )}
+      >
+        {Icon && (
+          <div className="pt-3 pointer-events-none">
+            <Icon />
+          </div>
+        )}
+        <div className="flex-1 pointer-events-none pt-3 gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]">
+          <div className="text-left -mt-0.5">{title}</div>
+          <div className="text-left text-secondary text-xs">
+            {subItems.map((item, index) => (
+              <div key={item} className="inline">
+                <span>{item}</span>
+                {index !== subItems.length - 1 && (
+                  <span className="text-secondary mx-2">{`\u{2022}`}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="pointer-events-none">{children}</div>
+    </div>
+  )
+}
+
 function App() {
   const [input, setInput] = useState('Escalion')
   const [state, setState] = useState('Устройство отключено')
   const [retrievedValue, setRetrievedValue] = useState('NaN')
   const [latestValueSent, setLatestValueSent] = useState('')
   const [timestampContainer, setTimestampContainer] = useState('')
+
+  useEffect(() => {
+    if (
+      localStorage.theme === 'dark' ||
+      (!('theme' in localStorage) &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
+
   function isWebBluetoothEnabled() {
     if (!navigator.bluetooth) {
       console.log('Web Bluetooth API is not available in this browser!')
@@ -252,7 +349,171 @@ function App() {
   // }
 
   return (
-    <div className="App">
+    <div className="select-none px-2 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll">
+      <div
+        className="bg-white dark:bg-black z-10 pl-5 pr-4 sticky top-0 font-bold pt-3 pb-2 flex justify-between items-center"
+        onClick={toggleTheme}
+      >
+        <div className="text-lg">Настройки</div>
+        <SearchIcon />
+      </div>
+      <ItemsBlock>
+        <Item title="Алексей Белинский" subItems={['Samsung account']}>
+          <div className="absolute right-5 -top-3 p-[1px] rounded-full border border-[#2c2d2f] h-[68px] w-[68px]">
+            <img
+              className="rounded-full h-full w-full"
+              src="img/avatar.png"
+              alt="avatar"
+            />
+          </div>
+        </Item>
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Подключения"
+          Icon={WiFiIcon}
+          subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+        />
+        <Item
+          title="Подключенные устройства"
+          Icon={ConnectedDevicesIcon}
+          subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Режимы и сценарии"
+          Icon={ScenariosIcon}
+          subItems={['Режимы', 'Сценарии']}
+        />
+        <Item
+          title="Звуки и вибрация"
+          Icon={SoundIcon}
+          subItems={['Режим звука', 'Мелодия звонка']}
+        />
+        <Item
+          title="Уведомления"
+          Icon={NotificationsIcon}
+          subItems={['Строка состояния', 'Не беспокоить']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Дисплей"
+          Icon={DisplayIcon}
+          subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
+        />
+        <Item
+          title="Батарея"
+          Icon={BateryIcon}
+          subItems={['Энергосбережение', 'Зарядка']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Обои и стиль"
+          Icon={WallpappersIcon}
+          subItems={['Обои', 'Палитра цветов']}
+        />
+        <Item
+          title="Темы"
+          Icon={ThemesIcon}
+          subItems={['Темы', 'Обои', 'Значки']}
+        />
+        <Item
+          title="Экран блокировки"
+          Icon={BlockScreenIcon}
+          subItems={['Тип блокировки экрана', 'Always On Display']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Безопасность и конфиденциальность"
+          Icon={ShildIcon}
+          subItems={['Биометрические данные', 'Диспетчер разрешений']}
+        />
+        <Item
+          title="Локация"
+          Icon={LocationIcon}
+          subItems={['Запросы на доступ к местоположению']}
+        />
+        <Item
+          title="Экстренные ситуации"
+          Icon={ExtraIcon}
+          subItems={['Медицинские сведения', 'Экстренные оповещения']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Учетные записи и архивация"
+          Icon={WallpappersIcon}
+          subItems={['Управление учетными записями', 'Smart Switch']}
+        />
+        <Item title="Google" Icon={ThemesIcon} subItems={['Службы Google']} />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Дополнительные функции"
+          Icon={WallpappersIcon}
+          subItems={['Labs', 'S Pen', 'Боковая кнопка']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Использование устройства и родительский контроль"
+          Icon={WallpappersIcon}
+          subItems={['Время использования экрана', 'Таймеры приложений']}
+        />
+        <Item
+          title="Обслуживание устройства"
+          Icon={ThemesIcon}
+          subItems={['Хранилище', 'Память', 'Защита приложений']}
+        />
+        <Item
+          title="Приложения"
+          Icon={BlockScreenIcon}
+          subItems={['Приложения по умолчанию', 'Настройки приложений']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Общие настройки"
+          Icon={WallpappersIcon}
+          subItems={['Язык и клавиатура', 'Дата и время']}
+        />
+        <Item
+          title="Специальные возможности"
+          Icon={ThemesIcon}
+          subItems={['Отображение', 'Слышимость', 'Подвижность']}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Обновление ПО"
+          Icon={WallpappersIcon}
+          subItems={['Загрузка и установка']}
+        />
+        <Item
+          title="Советы и руководство пользователя"
+          Icon={ThemesIcon}
+          subItems={['Полезные советы', 'Новые функции']}
+        />
+        <Item
+          title="Сведения о телефоне"
+          Icon={WallpappersIcon}
+          subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
+        />
+        <Item
+          title="Параметры разработчика"
+          Icon={WallpappersIcon}
+          subItems={['Параметры разработчика']}
+        />
+      </ItemsBlock>
+    </div>
+  )
+
+  return (
+    <>
       <h1>ESP32 Web BLE App</h1>
       <button
         onClick={(event) => {
@@ -331,17 +592,7 @@ function App() {
         Последнее отправленное значение:{' '}
         <span id="valueSent">{latestValueSent}</span>
       </p>
-      {/* <p>
-        <a href="https://randomnerdtutorials.com/">
-          Created by RandomNerdTutorials.com
-        </a>
-      </p>
-      <p>
-        <a href="https://RandomNerdTutorials.com/esp32-web-bluetooth/">
-          Read the full project here.
-        </a>
-      </p> */}
-    </div>
+    </>
   )
 }
 
