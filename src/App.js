@@ -155,7 +155,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           <div
             className={cn(
               'pointer-events-none',
-              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-4' : 'pt-3.5'
+              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3.5' : 'pt-3.5'
             )}
           >
             <Icon />
@@ -164,7 +164,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
         <div
           className={cn(
             'flex-1 pointer-events-none gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-4' : 'pt-3.5'
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3.5' : 'pt-3.5'
           )}
         >
           <div
@@ -405,7 +405,7 @@ function App() {
           size === 'small'
             ? 'pl-5 pr-4 pt-5 pb-3'
             : size === 'big'
-            ? 'pl-6 pr-6 pt-8 pb-4'
+            ? 'pl-6 pr-6 pt-8 pb-3.5'
             : 'pl-6 pr-5 pt-6 pb-3.5'
         )}
         onClick={toggleTheme}
@@ -435,8 +435,8 @@ function App() {
               size === 'small'
                 ? 'h-[68px] w-[68px] right-5 -top-3'
                 : size === 'big'
-                ? 'h-[82px] w-[82px] right-6 -top-4'
-                : 'h-[72px] w-[72px] right-6 -top-3.5'
+                ? 'h-[82px] w-[82px] right-5 -top-3.5'
+                : 'h-[72px] w-[72px] right-5 -top-3.5'
             )}
           >
             <img
