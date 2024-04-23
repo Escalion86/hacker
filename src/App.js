@@ -110,7 +110,7 @@ const ItemsBlock = ({ children }) => (
   <div className="flex flex-col items-stretch">{children}</div>
 )
 
-const Item = ({ title, Icon, subItems, children }) => {
+const Item = ({ size, title, Icon, subItems, children }) => {
   const itemRef = useRef()
   useEffect(() => {
     // let button = document.getElementById('button')
@@ -143,7 +143,8 @@ const Item = ({ title, Icon, subItems, children }) => {
         ref={itemRef}
         id="button"
         className={cn(
-          'button flex gap-x-3 px-4 pb-3 items-center group-first:rounded-t-3xl group-last:rounded-b-3xl'
+          'button flex gap-x-3 items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
+          size === 'small' ? 'px-4 pb-3' : 'px-5 pb-4'
         )}
       >
         {Icon && (
@@ -151,9 +152,26 @@ const Item = ({ title, Icon, subItems, children }) => {
             <Icon />
           </div>
         )}
-        <div className="flex-1 pointer-events-none pt-3 gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]">
-          <div className="text-left -mt-0.5">{title}</div>
-          <div className="text-left text-secondary text-xs">
+        <div
+          className={cn(
+            'flex-1 pointer-events-none gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]',
+            (size = 'small' ? 'pt-3 ' : 'pt-4')
+          )}
+        >
+          <div
+            className={cn(
+              'text-left -mt-0.5',
+              (size = 'small' ? 'text-base' : 'text-lg')
+            )}
+          >
+            {title}
+          </div>
+          <div
+            className={cn(
+              'text-left text-secondary',
+              (size = 'small' ? 'text-xs' : 'text-base')
+            )}
+          >
             {subItems.map((item, index) => (
               <div key={item} className="inline">
                 <span>{item}</span>
@@ -171,6 +189,7 @@ const Item = ({ title, Icon, subItems, children }) => {
 }
 
 function App() {
+  const [size, setSize] = useState('normal')
   const [input, setInput] = useState('Escalion')
   const [state, setState] = useState('Устройство отключено')
   const [retrievedValue, setRetrievedValue] = useState('NaN')
@@ -359,15 +378,31 @@ function App() {
   return (
     <div className="select-none px-2 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll">
       <div
-        className="bg-white dark:bg-black z-10 pl-5 pr-4 sticky top-0 font-bold pt-3 pb-2 flex justify-between items-center"
+        className={cn(
+          'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
+          size === 'small' ? 'pl-5 pr-4 pt-3 pb-2' : 'pl-6 pr-5 pt-4 pb-3'
+        )}
         onClick={toggleTheme}
       >
-        <div className="text-lg">Настройки</div>
+        <div className={cn(size === 'small' ? 'text-lg' : 'text-xl')}>
+          Настройки
+        </div>
         <SearchIcon />
       </div>
       <ItemsBlock>
-        <Item title="Алексей Белинский" subItems={['Samsung account']}>
-          <div className="absolute right-5 -top-3 p-[1px] rounded-full border border-[#2c2d2f] h-[68px] w-[68px]">
+        <Item
+          title="Алексей Белинский"
+          subItems={['Samsung account']}
+          size={size}
+        >
+          <div
+            className={cn(
+              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
+              size === 'small'
+                ? 'h-[68px] w-[68px] right-5 -top-3'
+                : 'h-[72px] w-[72px] right-6 -top-4'
+            )}
+          >
             <img
               className="rounded-full h-full w-full"
               src="img/avatar.png"
@@ -381,11 +416,13 @@ function App() {
           title="Подключения"
           Icon={WiFiIcon}
           subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
         />
         <Item
           title="Подключенные устройства"
           Icon={ConnectedDevicesIcon}
           subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -393,16 +430,19 @@ function App() {
           title="Режимы и сценарии"
           Icon={ScenariosIcon}
           subItems={['Режимы', 'Сценарии']}
+          size={size}
         />
         <Item
           title="Звуки и вибрация"
           Icon={SoundIcon}
           subItems={['Режим звука', 'Мелодия звонка']}
+          size={size}
         />
         <Item
           title="Уведомления"
           Icon={NotificationsIcon}
           subItems={['Строка состояния', 'Не беспокоить']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -410,11 +450,13 @@ function App() {
           title="Дисплей"
           Icon={DisplayIcon}
           subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
+          size={size}
         />
         <Item
           title="Батарея"
           Icon={BateryIcon}
           subItems={['Энергосбережение', 'Зарядка']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -422,16 +464,19 @@ function App() {
           title="Обои и стиль"
           Icon={WallpappersIcon}
           subItems={['Обои', 'Палитра цветов']}
+          size={size}
         />
         <Item
           title="Темы"
           Icon={ThemesIcon}
           subItems={['Темы', 'Обои', 'Значки']}
+          size={size}
         />
         <Item
           title="Экран блокировки"
           Icon={BlockScreenIcon}
           subItems={['Тип блокировки экрана', 'Always On Display']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -439,16 +484,19 @@ function App() {
           title="Безопасность и конфиденциальность"
           Icon={ShildIcon}
           subItems={['Биометрические данные', 'Диспетчер разрешений']}
+          size={size}
         />
         <Item
           title="Локация"
           Icon={LocationIcon}
           subItems={['Запросы на доступ к местоположению']}
+          size={size}
         />
         <Item
           title="Экстренные ситуации"
           Icon={ExtraIcon}
           subItems={['Медицинские сведения', 'Экстренные оповещения']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -456,14 +504,21 @@ function App() {
           title="Учетные записи и архивация"
           Icon={WallpappersIcon}
           subItems={['Управление учетными записями', 'Smart Switch']}
+          size={size}
         />
-        <Item title="Google" Icon={ThemesIcon} subItems={['Службы Google']} />
+        <Item
+          title="Google"
+          Icon={ThemesIcon}
+          subItems={['Службы Google']}
+          size={size}
+        />
       </ItemsBlock>
       <ItemsBlock>
         <Item
           title="Дополнительные функции"
           Icon={WallpappersIcon}
           subItems={['Labs', 'S Pen', 'Боковая кнопка']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -471,16 +526,19 @@ function App() {
           title="Использование устройства и родительский контроль"
           Icon={WallpappersIcon}
           subItems={['Время использования экрана', 'Таймеры приложений']}
+          size={size}
         />
         <Item
           title="Обслуживание устройства"
           Icon={ThemesIcon}
           subItems={['Хранилище', 'Память', 'Защита приложений']}
+          size={size}
         />
         <Item
           title="Приложения"
           Icon={BlockScreenIcon}
           subItems={['Приложения по умолчанию', 'Настройки приложений']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -488,11 +546,13 @@ function App() {
           title="Общие настройки"
           Icon={WallpappersIcon}
           subItems={['Язык и клавиатура', 'Дата и время']}
+          size={size}
         />
         <Item
           title="Специальные возможности"
           Icon={ThemesIcon}
           subItems={['Отображение', 'Слышимость', 'Подвижность']}
+          size={size}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -500,21 +560,25 @@ function App() {
           title="Обновление ПО"
           Icon={WallpappersIcon}
           subItems={['Загрузка и установка']}
+          size={size}
         />
         <Item
           title="Советы и руководство пользователя"
           Icon={ThemesIcon}
           subItems={['Полезные советы', 'Новые функции']}
+          size={size}
         />
         <Item
           title="Сведения о телефоне"
           Icon={WallpappersIcon}
           subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
+          size={size}
         />
         <Item
           title="Параметры разработчика"
           Icon={WallpappersIcon}
           subItems={['Параметры разработчика']}
+          size={size}
         />
       </ItemsBlock>
     </div>
