@@ -17,6 +17,8 @@ import BlockScreenIcon from './icons/BlockScreenIcon'
 import ShildIcon from './icons/ShildIcon'
 import LocationIcon from './icons/LocationIcon'
 import ExtraIcon from './icons/ExtraIcon'
+import AccountsIcon from './icons/AccountsIcon'
+import GoogleIcon from './icons/GoogleIcon'
 
 // const btReq = async () => {
 //   try {
@@ -538,13 +540,13 @@ function App() {
       <ItemsBlock>
         <Item
           title="Учетные записи и архивация"
-          Icon={WallpappersIcon}
+          Icon={AccountsIcon}
           subItems={['Управление учетными записями', 'Smart Switch']}
           size={size}
         />
         <Item
           title="Google"
-          Icon={ThemesIcon}
+          Icon={GoogleIcon}
           subItems={['Службы Google']}
           size={size}
         />
