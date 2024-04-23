@@ -170,11 +170,11 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           <div
             className={cn(
               'text-left -mt-0.5',
-              (size = 'small'
+              size === 'small'
                 ? 'text-base'
                 : size === 'big'
                 ? 'text-xl'
-                : 'text-lg')
+                : 'text-lg'
             )}
           >
             {title}
@@ -182,11 +182,11 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           <div
             className={cn(
               'text-left text-secondary',
-              (size = 'small'
+              size === 'small'
                 ? 'text-xs'
                 : size === 'big'
                 ? 'text-lg'
-                : 'text-base')
+                : 'text-base'
             )}
           >
             {subItems.map((item, index) => (
