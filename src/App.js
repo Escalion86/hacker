@@ -144,24 +144,37 @@ const Item = ({ size, title, Icon, subItems, children }) => {
         id="button"
         className={cn(
           'button flex gap-x-3 items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
-          size === 'small' ? 'px-4 pb-3' : 'px-5 pb-4'
+          size === 'small'
+            ? 'px-4 pb-3'
+            : size === 'big'
+            ? 'px-6 pb-5'
+            : 'px-5 pb-4'
         )}
       >
         {Icon && (
-          <div className="pt-3 pointer-events-none">
+          <div
+            className={cn(
+              'pointer-events-none',
+              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-5' : 'pt-4'
+            )}
+          >
             <Icon />
           </div>
         )}
         <div
           className={cn(
             'flex-1 pointer-events-none gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]',
-            (size = 'small' ? 'pt-3 ' : 'pt-4')
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-5' : 'pt-4'
           )}
         >
           <div
             className={cn(
               'text-left -mt-0.5',
-              (size = 'small' ? 'text-base' : 'text-lg')
+              (size = 'small'
+                ? 'text-base'
+                : size === 'big'
+                ? 'text-xl'
+                : 'text-lg')
             )}
           >
             {title}
@@ -169,7 +182,11 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           <div
             className={cn(
               'text-left text-secondary',
-              (size = 'small' ? 'text-xs' : 'text-base')
+              (size = 'small'
+                ? 'text-xs'
+                : size === 'big'
+                ? 'text-lg'
+                : 'text-base')
             )}
           >
             {subItems.map((item, index) => (
@@ -189,7 +206,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
 }
 
 function App() {
-  const [size, setSize] = useState('normal')
+  const [size, setSize] = useState('big')
   const [input, setInput] = useState('Escalion')
   const [state, setState] = useState('Устройство отключено')
   const [retrievedValue, setRetrievedValue] = useState('NaN')
@@ -376,15 +393,32 @@ function App() {
   // }
 
   return (
-    <div className="select-none px-2 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll">
+    <div
+      className={cn(
+        'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll',
+        size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
+      )}
+    >
       <div
         className={cn(
           'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-          size === 'small' ? 'pl-5 pr-4 pt-5 pb-3' : 'pl-6 pr-5 pt-6 pb-4'
+          size === 'small'
+            ? 'pl-5 pr-4 pt-5 pb-3'
+            : size === 'big'
+            ? 'pl-6 pr-5 pt-8 pb-5'
+            : 'pl-6 pr-5 pt-6 pb-4'
         )}
         onClick={toggleTheme}
       >
-        <div className={cn(size === 'small' ? 'text-xl' : 'text-2xl')}>
+        <div
+          className={cn(
+            size === 'small'
+              ? 'text-lg'
+              : size === 'big'
+              ? 'text-2xl'
+              : 'text-xl'
+          )}
+        >
           Настройки
         </div>
         <SearchIcon size={size} />
@@ -400,6 +434,8 @@ function App() {
               'absolute p-[1px] rounded-full border border-[#2c2d2f]',
               size === 'small'
                 ? 'h-[68px] w-[68px] right-5 -top-3'
+                : size === 'big'
+                ? 'h-[80px] w-[80px] right-7 -top-5'
                 : 'h-[72px] w-[72px] right-6 -top-4'
             )}
           >
