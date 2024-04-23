@@ -147,15 +147,15 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
-            ? 'px-5 pb-4'
-            : 'px-4.5 pb-3.5'
+            ? 'px-5 pb-3'
+            : 'px-4.5 pb-3'
         )}
       >
         {Icon && (
           <div
             className={cn(
               'pointer-events-none',
-              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3.5' : 'pt-3.5'
+              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3' : 'pt-3'
             )}
           >
             <Icon />
@@ -164,7 +164,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
         <div
           className={cn(
             'flex-1 pointer-events-none gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3.5' : 'pt-3.5'
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-3' : 'pt-3'
           )}
         >
           <div
