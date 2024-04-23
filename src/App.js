@@ -173,7 +173,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
               size === 'small'
                 ? 'text-base'
                 : size === 'big'
-                ? 'text-xl'
+                ? 'text-lg'
                 : 'text-lg'
             )}
           >
@@ -185,7 +185,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
               size === 'small'
                 ? 'text-xs'
                 : size === 'big'
-                ? 'text-base'
+                ? 'text-sm'
                 : 'text-sm'
             )}
           >
@@ -405,8 +405,8 @@ function App() {
           size === 'small'
             ? 'pl-5 pr-4 pt-5 pb-3'
             : size === 'big'
-            ? 'pl-6 pr-5 pt-8 pb-5'
-            : 'pl-6 pr-5 pt-6 pb-4'
+            ? 'pl-6 pr-6 pt-8 pb-4'
+            : 'pl-6 pr-5 pt-6 pb-3.5'
         )}
         onClick={toggleTheme}
       >
@@ -435,8 +435,8 @@ function App() {
               size === 'small'
                 ? 'h-[68px] w-[68px] right-5 -top-3'
                 : size === 'big'
-                ? 'h-[80px] w-[80px] right-7 -top-5'
-                : 'h-[72px] w-[72px] right-6 -top-4'
+                ? 'h-[82px] w-[82px] right-6 -top-4'
+                : 'h-[72px] w-[72px] right-6 -top-3.5'
             )}
           >
             <img
