@@ -115,18 +115,26 @@ const Item = ({ title, Icon, subItems, children }) => {
   useEffect(() => {
     // let button = document.getElementById('button')
 
+    itemRef.current.addEventListener('touchstart', (e) => {
+      var rect = e.target.getBoundingClientRect()
+      var x = e.touches[0].clientX - rect.left //x position within the element.
+      var y = e.touches[0].clientY - rect.top
+
+      itemRef.current.style.setProperty('--mouse-x', x + 'px')
+      itemRef.current.style.setProperty('--mouse-y', y + 'px')
+    })
     itemRef.current.addEventListener('mousedown', (e) => {
       var rect = e.target.getBoundingClientRect()
       var x = e.clientX - rect.left //x position within the element.
       var y = e.clientY - rect.top
 
-      // let x = e.x
-      // let y = e.y
-      // console.log('y :>> ', y)
       itemRef.current.style.setProperty('--mouse-x', x + 'px')
       itemRef.current.style.setProperty('--mouse-y', y + 'px')
     })
-    return itemRef.current.removeEventListener('mousedown', () => 123)
+    return () => {
+      itemRef.current.removeEventListener('touchstart', () => 123)
+      itemRef.current.removeEventListener('mousedown', () => 123)
+    }
   }, [])
 
   return (
