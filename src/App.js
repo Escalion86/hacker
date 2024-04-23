@@ -147,7 +147,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
-            ? 'px-5 pb-[13px]'
+            ? 'px-4.5 pb-[13px]'
             : 'px-4.5 pb-3'
         )}
       >
@@ -173,7 +173,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
               size === 'small'
                 ? 'text-base'
                 : size === 'big'
-                ? 'text-lg'
+                ? 'text-[19px] leading-[28px]'
                 : 'text-lg'
             )}
           >
@@ -185,7 +185,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
               size === 'small'
                 ? 'text-xs'
                 : size === 'big'
-                ? 'text-sm'
+                ? 'text-[15px] leading-[20px]'
                 : 'text-sm'
             )}
           >
