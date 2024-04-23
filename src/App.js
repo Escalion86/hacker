@@ -147,8 +147,8 @@ const Item = ({ size, title, Icon, subItems, children }) => {
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
-            ? 'px-4.5 pb-[13px]'
-            : 'px-4.5 pb-3'
+            ? 'px-[18px] pb-[13px]'
+            : 'px-[18px] pb-3'
         )}
       >
         {Icon && (
