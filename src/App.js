@@ -380,14 +380,14 @@ function App() {
       <div
         className={cn(
           'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-          size === 'small' ? 'pl-5 pr-4 pt-3 pb-2' : 'pl-6 pr-5 pt-4 pb-3'
+          size === 'small' ? 'pl-5 pr-4 pt-5 pb-3' : 'pl-6 pr-5 pt-6 pb-4'
         )}
         onClick={toggleTheme}
       >
-        <div className={cn(size === 'small' ? 'text-lg' : 'text-xl')}>
+        <div className={cn(size === 'small' ? 'text-xl' : 'text-2xl')}>
           Настройки
         </div>
-        <SearchIcon />
+        <SearchIcon size={size} />
       </div>
       <ItemsBlock>
         <Item
