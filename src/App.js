@@ -958,7 +958,7 @@ function App() {
       //   // }
       // })
       .catch((error) => {
-        setBLEStatus('Error: ', error)
+        // setBLEStatus('Error: ', error)
         console.log('Error: ', error)
       })
 
