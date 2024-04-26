@@ -803,6 +803,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => (
 )
 
 function App() {
+  const [BLEStatus, setBLEStatus] = useState('')
   const hack = useRecoilValue(hackAtom)
   const [page, setPage] = useState('general')
   const [size, setSize] = useState('big')
@@ -878,28 +879,34 @@ function App() {
   }
 
   function disconnectDevice() {
+    setBLEStatus('Disconnect Device.')
     console.log('Disconnect Device.')
     if (bleServer && bleServer.connected) {
       if (sensorCharacteristicFound) {
         sensorCharacteristicFound
           .stopNotifications()
           .then(() => {
+            setBLEStatus('Notifications Stopped')
             console.log('Notifications Stopped')
             return bleServer.disconnect()
           })
           .then(() => {
+            setBLEStatus('Устройство отключено')
             console.log('Устройство отключено')
             setState('Устройство отключено')
             setIsConnected(false)
           })
           .catch((error) => {
+            setBLEStatus('An error occurred:', error)
             console.log('An error occurred:', error)
           })
       } else {
+        setBLEStatus('No characteristic found to disconnect.')
         console.log('No characteristic found to disconnect.')
       }
     } else {
       // Throw an error if Bluetooth is not connected
+      setBLEStatus('Bluetooth is not connected.')
       console.error('Bluetooth is not connected.')
       window.alert('Bluetooth is not connected.')
     }
@@ -909,15 +916,18 @@ function App() {
     promise
       .then((gattServer) => {
         bleServer = gattServer
+        setBLEStatus('Connected to GATT Server')
         console.log('Connected to GATT Server')
         return bleServer.getPrimaryService(bleService)
       })
       .then((service) => {
         bleServiceFound = service
+        setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
         return service.getCharacteristic(sensorCharacteristic)
       })
       .then((characteristic) => {
+        setBLEStatus('Characteristic discovered:', characteristic.uuid)
         console.log('Characteristic discovered:', characteristic.uuid)
         sensorCharacteristicFound = characteristic
         characteristic.addEventListener(
@@ -929,8 +939,10 @@ function App() {
         return characteristic.readValue()
       })
       .then((value) => {
+        setBLEStatus('Read value: ', value)
         console.log('Read value: ', value)
         const decodedValue = new TextDecoder().decode(value)
+        setBLEStatus('Decoded value: ', decodedValue)
         console.log('Decoded value: ', decodedValue)
         setRetrievedValue(decodedValue)
         setIsConnected(true)
@@ -939,6 +951,7 @@ function App() {
         // }
       })
       .catch((error) => {
+        setBLEStatus('Error: ', error)
         console.log('Error: ', error)
       })
 
@@ -975,6 +988,7 @@ function App() {
 
   // Connect to BLE Device and Enable Notifications
   function connectToDevice(autostart) {
+    setBLEStatus('Initializing Bluetooth...')
     console.log('Initializing Bluetooth...')
     navigator.bluetooth
       .requestDevice({
@@ -983,6 +997,7 @@ function App() {
       })
       .then((device) => {
         console.log('Device Selected:', device.name)
+        setBLEStatus('Connected to device ' + device.name)
         setState('Connected to device ' + device.name)
         // bleStateContainer.style.color = '#24af37'
         device.addEventListener('gattservicedisconnected', onDisconnected)
@@ -1026,6 +1041,7 @@ function App() {
 
   function onDisconnected(event) {
     console.log('Устройство отключено:', event.target.device.name)
+    setBLEStatus('Устройство отключено')
     setState('Устройство отключено')
     setIsConnected(false)
 
@@ -1077,27 +1093,32 @@ function App() {
 
   return !page || page === 'general' ? (
     <>
-      <button
-        onClick={() => {
-          if (isWebBluetoothEnabled()) autoConnectDevice()
-          // chrome://flags/#enable-web-bluetooth-new-permissions-backend
-        }}
-      >
-        test
-      </button>
+      <div className="flex flex-col">
+        <div>
+          <button
+            onClick={() => {
+              if (isWebBluetoothEnabled()) autoConnectDevice()
+              // chrome://flags/#enable-web-bluetooth-new-permissions-backend
+            }}
+          >
+            test
+          </button>
 
-      {!isConnected && (
-        <button
-          ref={connectRef}
-          onClick={(event) => {
-            if (isWebBluetoothEnabled()) {
-              connectToDevice()
-            }
-          }}
-        >
-          Connect to BLE Device
-        </button>
-      )}
+          {!isConnected && (
+            <button
+              ref={connectRef}
+              onClick={(event) => {
+                if (isWebBluetoothEnabled()) {
+                  connectToDevice()
+                }
+              }}
+            >
+              Connect to BLE Device
+            </button>
+          )}
+        </div>
+        <div className="text-white bg-black">{BLEStatus}</div>
+      </div>
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
   ) : page === 'connections' ? (
