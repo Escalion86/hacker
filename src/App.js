@@ -1099,9 +1099,9 @@ function App() {
   // }
 
   useEffect(() => {
-    // setTimeout(() => {
-    if (isWebBluetoothEnabled()) autoConnectDevice()
-    // }, 2000)
+    setTimeout(() => {
+      if (isWebBluetoothEnabled()) autoConnectDevice()
+    }, 100)
   })
 
   return !page || page === 'general' ? (
@@ -1136,7 +1136,7 @@ function App() {
             </button>
           )}
         </div> */}
-        {/* <div className="text-white bg-black">{BLEStatus}</div> */}
+        <div className="text-white bg-black">{BLEStatus}</div>
       </div>
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
