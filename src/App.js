@@ -387,7 +387,7 @@ const Item = ({
                   <div key={item} className="inline">
                     <span>{item}</span>
                     {index !== subItems.length - 1 && (
-                      <span className="text-secondary mx-2">{`\u{2022}`}</span>
+                      <span className="mx-2 text-secondary">{`\u{2022}`}</span>
                     )}
                   </div>
                 ))}
@@ -468,6 +468,20 @@ const PageWrapper = ({
 )
 
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
+  useEffect(() => {
+    const onBackButtonEvent = (e) => {
+      e.preventDefault()
+      // window.history.pushState(null, null, window.location.pathname)
+      setPage('general')
+    }
+
+    window.addEventListener('popstate', onBackButtonEvent)
+
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent)
+    }
+  }, [setPage])
+
   return (
     <PageWrapper
       size={size}
@@ -475,10 +489,10 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
       title="Настройка Hacker"
       onClickBack={() => setPage('general')}
     >
-      <div className="px-5 flex gap-x-1 flex-wrap items-center">
+      <div className="flex flex-wrap items-center px-5 gap-x-1">
         <label>Название точки Wi-Fi</label>
         <input
-          className="text-white bg-dark px-2 py-1"
+          className="px-2 py-1 text-white bg-dark"
           value={localStorage.wifi}
           onChange={(e) => {
             localStorage.wifi = e.target.value
@@ -491,6 +505,20 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
 
 const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const [hack, setHack] = useRecoilState(hackAtom)
+
+  useEffect(() => {
+    const onBackButtonEvent = (e) => {
+      e.preventDefault()
+      // window.history.pushState(null, null, window.location.pathname)
+      setPage('connections')
+    }
+
+    window.addEventListener('popstate', onBackButtonEvent)
+
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent)
+    }
+  }, [setPage])
 
   return (
     <PageWrapper
@@ -534,6 +562,20 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
 }
 
 const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
+  useEffect(() => {
+    const onBackButtonEvent = (e) => {
+      e.preventDefault()
+      // window.history.pushState(null, null, window.location.pathname)
+      setPage('general')
+    }
+
+    window.addEventListener('popstate', onBackButtonEvent)
+
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent)
+    }
+  }, [setPage])
+
   return (
     <PageWrapper
       size={size}
@@ -601,206 +643,208 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
   )
 }
 
-const GeneralPage = ({ size, toggleTheme, setPage }) => (
-  <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
-    <ItemsBlock>
-      <Item
-        title="Алексей Белинский"
-        subItems={['Samsung account']}
-        size={size}
-      >
-        <div
-          className={cn(
-            'absolute p-[1px] rounded-full border border-[#2c2d2f]',
-            size === 'small'
-              ? 'h-[68px] w-[68px] right-5 -top-3'
-              : size === 'big'
-              ? 'h-[82px] w-[82px] right-5 -top-3.5'
-              : 'h-[72px] w-[72px] right-5 -top-3.5'
-          )}
+const GeneralPage = ({ size, toggleTheme, setPage }) => {
+  return (
+    <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
+      <ItemsBlock>
+        <Item
+          title="Алексей Белинский"
+          subItems={['Samsung account']}
+          size={size}
         >
-          <img
-            className="rounded-full h-full w-full"
-            src="img/avatar.png"
-            alt="avatar"
-          />
-        </div>
-      </Item>
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Подключения"
-        Icon={WiFiIcon}
-        subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-        size={size}
-        onClick={() => setPage('connections')}
-      />
-      <Item
-        title="Подключенные устройства"
-        Icon={ConnectedDevicesIcon}
-        subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Режимы и сценарии"
-        Icon={ScenariosIcon}
-        subItems={['Режимы', 'Сценарии']}
-        size={size}
-      />
-      <Item
-        title="Звуки и вибрация"
-        Icon={SoundIcon}
-        subItems={['Режим звука', 'Мелодия звонка']}
-        size={size}
-      />
-      <Item
-        title="Уведомления"
-        Icon={NotificationsIcon}
-        subItems={['Строка состояния', 'Не беспокоить']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Дисплей"
-        Icon={DisplayIcon}
-        subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
-        size={size}
-      />
-      <Item
-        title="Батарея"
-        Icon={BateryIcon}
-        subItems={['Энергосбережение', 'Зарядка']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Обои и стиль"
-        Icon={WallpappersIcon}
-        subItems={['Обои', 'Палитра цветов']}
-        size={size}
-      />
-      <Item
-        title="Темы"
-        Icon={ThemesIcon}
-        subItems={['Темы', 'Обои', 'Значки']}
-        size={size}
-      />
-      <Item
-        title="Экран блокировки"
-        Icon={BlockScreenIcon}
-        subItems={['Тип блокировки экрана', 'Always On Display']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Безопасность и конфиденциальность"
-        Icon={ShildIcon}
-        subItems={['Биометрические данные', 'Диспетчер разрешений']}
-        size={size}
-      />
-      <Item
-        title="Локация"
-        Icon={LocationIcon}
-        subItems={['Запросы на доступ к местоположению']}
-        size={size}
-      />
-      <Item
-        title="Экстренные ситуации"
-        Icon={ExtraIcon}
-        subItems={['Медицинские сведения', 'Экстренные оповещения']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Учетные записи и архивация"
-        Icon={AccountsIcon}
-        subItems={['Управление учетными записями', 'Smart Switch']}
-        size={size}
-      />
-      <Item
-        title="Google"
-        Icon={GoogleIcon}
-        subItems={['Службы Google']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Дополнительные функции"
-        Icon={AdditionalFunctionsIcon}
-        subItems={['Labs', 'S Pen', 'Боковая кнопка']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Использование устройства и родительский контроль"
-        Icon={ParentsControlIcon}
-        subItems={['Время использования экрана', 'Таймеры приложений']}
-        size={size}
-      />
-      <Item
-        title="Обслуживание устройства"
-        Icon={CleanUpIcon}
-        subItems={['Хранилище', 'Память', 'Защита приложений']}
-        size={size}
-      />
-      <Item
-        title="Приложения"
-        Icon={AppsIcon}
-        subItems={['Приложения по умолчанию', 'Настройки приложений']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Общие настройки"
-        Icon={SettingsIcon}
-        subItems={['Язык и клавиатура', 'Дата и время']}
-        size={size}
-      />
-      <Item
-        title="Специальные возможности"
-        Icon={SpecialIcon}
-        subItems={['Отображение', 'Слышимость', 'Подвижность']}
-        size={size}
-      />
-    </ItemsBlock>
-    <ItemsBlock>
-      <Item
-        title="Обновление ПО"
-        Icon={RefreshIcon}
-        subItems={['Загрузка и установка']}
-        size={size}
-      />
-      <Item
-        title="Советы и руководство пользователя"
-        Icon={DocumentationIcon}
-        subItems={['Полезные советы', 'Новые функции']}
-        size={size}
-      />
-      <Item
-        title="Сведения о телефоне"
-        Icon={InfoIcon}
-        subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
-        size={size}
-      />
-      <Item
-        title="Параметры разработчика"
-        Icon={DevIcon}
-        subItems={['Параметры разработчика']}
-        size={size}
-        onClick={() => setPage('settings')}
-      />
-    </ItemsBlock>
-  </PageWrapper>
-)
+          <div
+            className={cn(
+              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
+              size === 'small'
+                ? 'h-[68px] w-[68px] right-5 -top-3'
+                : size === 'big'
+                ? 'h-[82px] w-[82px] right-5 -top-3.5'
+                : 'h-[72px] w-[72px] right-5 -top-3.5'
+            )}
+          >
+            <img
+              className="w-full h-full rounded-full"
+              src="img/avatar.png"
+              alt="avatar"
+            />
+          </div>
+        </Item>
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Подключения"
+          Icon={WiFiIcon}
+          subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          onClick={() => setPage('connections')}
+        />
+        <Item
+          title="Подключенные устройства"
+          Icon={ConnectedDevicesIcon}
+          subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Режимы и сценарии"
+          Icon={ScenariosIcon}
+          subItems={['Режимы', 'Сценарии']}
+          size={size}
+        />
+        <Item
+          title="Звуки и вибрация"
+          Icon={SoundIcon}
+          subItems={['Режим звука', 'Мелодия звонка']}
+          size={size}
+        />
+        <Item
+          title="Уведомления"
+          Icon={NotificationsIcon}
+          subItems={['Строка состояния', 'Не беспокоить']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Дисплей"
+          Icon={DisplayIcon}
+          subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
+          size={size}
+        />
+        <Item
+          title="Батарея"
+          Icon={BateryIcon}
+          subItems={['Энергосбережение', 'Зарядка']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Обои и стиль"
+          Icon={WallpappersIcon}
+          subItems={['Обои', 'Палитра цветов']}
+          size={size}
+        />
+        <Item
+          title="Темы"
+          Icon={ThemesIcon}
+          subItems={['Темы', 'Обои', 'Значки']}
+          size={size}
+        />
+        <Item
+          title="Экран блокировки"
+          Icon={BlockScreenIcon}
+          subItems={['Тип блокировки экрана', 'Always On Display']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Безопасность и конфиденциальность"
+          Icon={ShildIcon}
+          subItems={['Биометрические данные', 'Диспетчер разрешений']}
+          size={size}
+        />
+        <Item
+          title="Локация"
+          Icon={LocationIcon}
+          subItems={['Запросы на доступ к местоположению']}
+          size={size}
+        />
+        <Item
+          title="Экстренные ситуации"
+          Icon={ExtraIcon}
+          subItems={['Медицинские сведения', 'Экстренные оповещения']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Учетные записи и архивация"
+          Icon={AccountsIcon}
+          subItems={['Управление учетными записями', 'Smart Switch']}
+          size={size}
+        />
+        <Item
+          title="Google"
+          Icon={GoogleIcon}
+          subItems={['Службы Google']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Дополнительные функции"
+          Icon={AdditionalFunctionsIcon}
+          subItems={['Labs', 'S Pen', 'Боковая кнопка']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Использование устройства и родительский контроль"
+          Icon={ParentsControlIcon}
+          subItems={['Время использования экрана', 'Таймеры приложений']}
+          size={size}
+        />
+        <Item
+          title="Обслуживание устройства"
+          Icon={CleanUpIcon}
+          subItems={['Хранилище', 'Память', 'Защита приложений']}
+          size={size}
+        />
+        <Item
+          title="Приложения"
+          Icon={AppsIcon}
+          subItems={['Приложения по умолчанию', 'Настройки приложений']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Общие настройки"
+          Icon={SettingsIcon}
+          subItems={['Язык и клавиатура', 'Дата и время']}
+          size={size}
+        />
+        <Item
+          title="Специальные возможности"
+          Icon={SpecialIcon}
+          subItems={['Отображение', 'Слышимость', 'Подвижность']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Обновление ПО"
+          Icon={RefreshIcon}
+          subItems={['Загрузка и установка']}
+          size={size}
+        />
+        <Item
+          title="Советы и руководство пользователя"
+          Icon={DocumentationIcon}
+          subItems={['Полезные советы', 'Новые функции']}
+          size={size}
+        />
+        <Item
+          title="Сведения о телефоне"
+          Icon={InfoIcon}
+          subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
+          size={size}
+        />
+        <Item
+          title="Параметры разработчика"
+          Icon={DevIcon}
+          subItems={['Параметры разработчика']}
+          size={size}
+          onClick={() => setPage('settings')}
+        />
+      </ItemsBlock>
+    </PageWrapper>
+  )
+}
 
 function App() {
   const [BLEStatus, setBLEStatus] = useState('-')
@@ -1109,11 +1153,11 @@ function App() {
       {isConnected && (
         <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-500" />
       )}
-      <div className="flex bg-black py-1 px-2">
+      <div className="flex px-2 py-1 bg-black">
         {/* <div> */}
         {showConnectDeviceButton && (
           <button
-            className="py-1 px-2 border-gray-400 font-bold border rounded w-full text-white"
+            className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
             onClick={() => {
               if (isWebBluetoothEnabled()) connectToDevice()
               // chrome://flags/#enable-web-bluetooth-new-permissions-backend
