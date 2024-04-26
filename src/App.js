@@ -926,6 +926,7 @@ function App() {
         // setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
         setBLEStatus('Device connected')
+        showConnectDeviceButton(false)
         setIsConnected(true)
         if (autostart) {
           writeOnCharacteristic(localStorage.wifi)
@@ -967,7 +968,8 @@ function App() {
       // devices[0].watchAdvertisements().then((e) => {
       //   console.log('e :>> ', e)
       // })
-      if (devices?.length > 0)
+      if (devices?.length > 0) {
+        showConnectDeviceButton(false)
         for (var device of devices) {
           let abortController = new AbortController()
           device
@@ -985,7 +987,7 @@ function App() {
             afterConnectDevice(evt.device.gatt.connect())
           })
         }
-      else {
+      } else {
         setBLEStatus('No devices paired')
         setShowConnectDeviceButton(true)
       }
