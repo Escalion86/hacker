@@ -1104,10 +1104,10 @@ function App() {
     }, 1000)
   })
 
-  return !page || page === 'general' ? (
+  return (
     <>
       {isConnected && (
-        <div className="absolute left-0 top-0 h-1 w-1 bg-green-500" />
+        <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-500" />
       )}
       <div className="flex bg-black py-1 px-2">
         {/* <div> */}
@@ -1124,34 +1124,41 @@ function App() {
         )}
 
         {/* {!isConnected && (
-            <button
-              ref={connectRef}
-              onClick={(event) => {
-                if (isWebBluetoothEnabled()) {
-                  connectToDevice()
-                }
-              }}
-            >
-              Connect to BLE Device
-            </button>
-          )}
-        </div> */}
-        <div className="text-white bg-black">{BLEStatus}</div>
+        <button
+          ref={connectRef}
+          onClick={(event) => {
+            if (isWebBluetoothEnabled()) {
+              connectToDevice()
+            }
+          }}
+        >
+          Connect to BLE Device
+        </button>
+      )}
+    </div> */}
+        {/* <div className="text-white bg-black">{BLEStatus}</div> */}
       </div>
-      <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+
+      {!page || page === 'general' ? (
+        <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+      ) : page === 'connections' ? (
+        <ConnectionsPage
+          size={size}
+          toggleTheme={toggleTheme}
+          setPage={setPage}
+        />
+      ) : page === 'wifi' ? (
+        <WiFiPage
+          size={size}
+          toggleTheme={toggleTheme}
+          setPage={setPage}
+          writeOnCharacteristic={writeOnCharacteristic}
+        />
+      ) : page === 'settings' ? (
+        <SettingsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+      ) : null}
     </>
-  ) : page === 'connections' ? (
-    <ConnectionsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
-  ) : page === 'wifi' ? (
-    <WiFiPage
-      size={size}
-      toggleTheme={toggleTheme}
-      setPage={setPage}
-      writeOnCharacteristic={writeOnCharacteristic}
-    />
-  ) : page === 'settings' ? (
-    <SettingsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
-  ) : null
+  )
 
   return (
     <>
