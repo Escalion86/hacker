@@ -804,6 +804,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => (
 
 function App() {
   const [BLEStatus, setBLEStatus] = useState('')
+  const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hack = useRecoilValue(hackAtom)
   const [page, setPage] = useState('general')
   const [size, setSize] = useState('big')
@@ -986,7 +987,7 @@ function App() {
         }
       else {
         setBLEStatus('No devices paired')
-        connectToDevice()
+        setShowConnectDeviceButton(true)
       }
       // devices[0].gatt
       //   .connect()
@@ -1103,18 +1104,20 @@ function App() {
 
   return !page || page === 'general' ? (
     <>
-      <div className="flex flex-col">
-        {/* <div>
-          <button
-            onClick={() => {
-              if (isWebBluetoothEnabled()) autoConnectDevice()
-              // chrome://flags/#enable-web-bluetooth-new-permissions-backend
-            }}
-          >
-            test
-          </button>
+      {/* <div className="flex flex-col"> */}
+      {/* <div> */}
+      {showConnectDeviceButton && (
+        <button
+          onClick={() => {
+            if (isWebBluetoothEnabled()) connectToDevice()
+            // chrome://flags/#enable-web-bluetooth-new-permissions-backend
+          }}
+        >
+          Подключить устройство hacker
+        </button>
+      )}
 
-          {!isConnected && (
+      {/* {!isConnected && (
             <button
               ref={connectRef}
               onClick={(event) => {
@@ -1127,8 +1130,8 @@ function App() {
             </button>
           )}
         </div> */}
-        <div className="text-white bg-black">{BLEStatus}</div>
-      </div>
+      {/* <div className="text-white bg-black">{BLEStatus}</div> */}
+      {/* </div> */}
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
   ) : page === 'connections' ? (
