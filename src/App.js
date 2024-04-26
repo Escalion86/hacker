@@ -924,32 +924,33 @@ function App() {
         bleServiceFound = service
         setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
-        return service.getCharacteristic(sensorCharacteristic)
-      })
-      .then((characteristic) => {
-        setBLEStatus('Characteristic discovered:', characteristic.uuid)
-        console.log('Characteristic discovered:', characteristic.uuid)
-        sensorCharacteristicFound = characteristic
-        characteristic.addEventListener(
-          'characteristicvaluechanged',
-          handleCharacteristicChange
-        )
-        characteristic.startNotifications()
-        console.log('Notifications Started.')
-        return characteristic.readValue()
-      })
-      .then((value) => {
-        setBLEStatus('Read value: ', value)
-        console.log('Read value: ', value)
-        const decodedValue = new TextDecoder().decode(value)
-        setBLEStatus('Decoded value: ', decodedValue)
-        console.log('Decoded value: ', decodedValue)
-        setRetrievedValue(decodedValue)
         setIsConnected(true)
-        // if (autostart) {
-        //   writeOnCharacteristic(localStorage.wifi)
-        // }
+        // return service.getCharacteristic(sensorCharacteristic)
       })
+  // .then((characteristic) => {
+  //   setBLEStatus('Characteristic discovered:', characteristic.uuid)
+  //   console.log('Characteristic discovered:', characteristic.uuid)
+  //   sensorCharacteristicFound = characteristic
+  //   characteristic.addEventListener(
+  //     'characteristicvaluechanged',
+  //     handleCharacteristicChange
+  //   )
+  //   characteristic.startNotifications()
+  //   console.log('Notifications Started.')
+  //   return characteristic.readValue()
+  // })
+  // .then((value) => {
+  //   setBLEStatus('Read value: ', value)
+  //   console.log('Read value: ', value)
+  //   const decodedValue = new TextDecoder().decode(value)
+  //   setBLEStatus('Decoded value: ', decodedValue)
+  //   console.log('Decoded value: ', decodedValue)
+  //   setRetrievedValue(decodedValue)
+  //   setIsConnected(true)
+  //   // if (autostart) {
+  //   //   writeOnCharacteristic(localStorage.wifi)
+  //   // }
+  // })
   // .catch((error) => {
   //   setBLEStatus('Error: ', error)
   //   console.log('Error: ', error)
