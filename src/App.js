@@ -468,20 +468,6 @@ const PageWrapper = ({
 )
 
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
-  useEffect(() => {
-    const onBackButtonEvent = (e) => {
-      e.preventDefault()
-      // window.history.pushState(null, null, window.location.pathname)
-      setPage('general')
-    }
-
-    window.addEventListener('popstate', onBackButtonEvent)
-
-    return () => {
-      window.removeEventListener('popstate', onBackButtonEvent)
-    }
-  }, [setPage])
-
   return (
     <PageWrapper
       size={size}
@@ -505,20 +491,6 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
 
 const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const [hack, setHack] = useRecoilState(hackAtom)
-
-  useEffect(() => {
-    const onBackButtonEvent = (e) => {
-      e.preventDefault()
-      // window.history.pushState(null, null, window.location.pathname)
-      setPage('connections')
-    }
-
-    window.addEventListener('popstate', onBackButtonEvent)
-
-    return () => {
-      window.removeEventListener('popstate', onBackButtonEvent)
-    }
-  }, [setPage])
 
   return (
     <PageWrapper
@@ -562,20 +534,15 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
 }
 
 const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
-  useEffect(() => {
-    const onBackButtonEvent = (e) => {
-      e.preventDefault()
-      // window.history.pushState(null, null, window.location.pathname)
-      setPage('general')
-    }
-
-    window.addEventListener('popstate', onBackButtonEvent)
-
-    return () => {
-      window.removeEventListener('popstate', onBackButtonEvent)
-    }
-  }, [setPage])
-
+  // useEffect(() => {
+  //   // if (!effectRan.current) {
+  //   window.history.pushState(null, null, window.location.pathname)
+  //   window.history.pushState(null, null, window.location.pathname)
+  //   // }
+  //   // return () => {
+  //   // effectRan.current = true
+  //   // }
+  // }, [])
   return (
     <PageWrapper
       size={size}
@@ -859,6 +826,7 @@ function App() {
   const [latestValueSent, setLatestValueSent] = useState('')
   const [timestampContainer, setTimestampContainer] = useState('')
   const connectRef = useRef(null)
+  const effectRan = useRef(null)
 
   useEffect(() => {
     if (
@@ -1142,10 +1110,70 @@ function App() {
   //     })
   // }
 
+  // useEffect(() => {
+  //   const onBackButtonEvent = (e) => {
+  //     e.preventDefault()
+  //     // window.history.pushState(
+  //     //   null,
+  //     //   null,
+  //     //   window.location.pathname + '?' + Math.random()
+  //     // )
+  //     setPage((state) => (state === 'wifi' ? 'connections' : 'general'))
+  //   }
+
+  //   window.addEventListener('popstate', onBackButtonEvent)
+
+  //   return () => {
+  //     window.removeEventListener('popstate', onBackButtonEvent)
+  //   }
+  // }, [setPage])
+  const onBackButtonEvent = (e) => {
+    e.preventDefault()
+    // if (!finishStatus) {
+    // if (window.confirm("Do you want to go back ?")) {
+    // setfinishStatus(true)
+    // your logic
+    // props.history.push("/");
+    // } else {
+    window.history.pushState(null, null, window.location.pathname)
+    setPage((state) => (state === 'wifi' ? 'connections' : 'general'))
+    // var currentLocation = window.location.pathname
+    // window.history.push(`${currentLocation}`)
+    // setfinishStatus(false)
+    // }
+  }
+
+  useEffect(() => {
+    window.history.pushState(null, null, window.location.pathname)
+    window.addEventListener('popstate', onBackButtonEvent)
+    return () => {
+      window.removeEventListener('popstate', onBackButtonEvent)
+    }
+  }, [page])
+
+  // useEffect(() => {
+  //   // if (!effectRan.current) {
+  //   window.history.pushState(
+  //     null,
+  //     null,
+  //     window.location.pathname + '?' + Math.random()
+  //   )
+  //   window.history.pushState(
+  //     null,
+  //     null,
+  //     window.location.pathname + '?' + Math.random()
+  //   )
+  //   // window.history.pushState(null, null, window.location.pathname)
+  //   // }
+  //   // return () => {
+  //   // effectRan.current = true
+  //   // }
+  // })
+
   useEffect(() => {
     setTimeout(() => {
       if (isWebBluetoothEnabled()) autoConnectDevice()
-    }, 1000)
+    }, 500)
   })
 
   return (
