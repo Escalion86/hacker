@@ -926,7 +926,7 @@ function App() {
         // setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
         setBLEStatus('Device connected')
-        showConnectDeviceButton(false)
+        setShowConnectDeviceButton(false)
         setIsConnected(true)
         if (autostart) {
           writeOnCharacteristic(localStorage.wifi)
@@ -969,7 +969,7 @@ function App() {
       //   console.log('e :>> ', e)
       // })
       if (devices?.length > 0) {
-        showConnectDeviceButton(false)
+        setShowConnectDeviceButton(false)
         for (var device of devices) {
           let abortController = new AbortController()
           device
