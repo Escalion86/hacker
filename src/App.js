@@ -985,6 +985,7 @@ function App() {
           })
         }
       else {
+        setBLEStatus('No devices paired')
         connectToDevice()
       }
       // devices[0].gatt
@@ -1095,15 +1096,15 @@ function App() {
   // }
 
   useEffect(() => {
-    setTimeout(() => {
-      if (isWebBluetoothEnabled()) autoConnectDevice()
-    }, 2000)
+    // setTimeout(() => {
+    if (isWebBluetoothEnabled()) autoConnectDevice()
+    // }, 2000)
   })
 
   return !page || page === 'general' ? (
     <>
-      {/* <div className="flex flex-col">
-        <div>
+      <div className="flex flex-col">
+        {/* <div>
           <button
             onClick={() => {
               if (isWebBluetoothEnabled()) autoConnectDevice()
@@ -1125,9 +1126,9 @@ function App() {
               Connect to BLE Device
             </button>
           )}
-        </div>
+        </div> */}
         <div className="text-white bg-black">{BLEStatus}</div>
-      </div> */}
+      </div>
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
   ) : page === 'connections' ? (
