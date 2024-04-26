@@ -950,10 +950,10 @@ function App() {
         //   writeOnCharacteristic(localStorage.wifi)
         // }
       })
-      .catch((error) => {
-        setBLEStatus('Error: ', error)
-        console.log('Error: ', error)
-      })
+  // .catch((error) => {
+  //   setBLEStatus('Error: ', error)
+  //   console.log('Error: ', error)
+  // })
 
   function autoConnectDevice() {
     navigator.bluetooth.getDevices().then((devices) => {
