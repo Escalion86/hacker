@@ -1104,20 +1104,24 @@ function App() {
 
   return !page || page === 'general' ? (
     <>
-      {/* <div className="flex flex-col"> */}
-      {/* <div> */}
-      {showConnectDeviceButton && (
-        <button
-          onClick={() => {
-            if (isWebBluetoothEnabled()) connectToDevice()
-            // chrome://flags/#enable-web-bluetooth-new-permissions-backend
-          }}
-        >
-          Подключить устройство hacker
-        </button>
+      {isConnected && (
+        <div className="absolute left-0 top-0 h-1 w-1 bg-green-500" />
       )}
+      <div className="flex bg-black py-1 px-2">
+        {/* <div> */}
+        {!showConnectDeviceButton && (
+          <button
+            className="py-1 px-2 border-gray-400 font-bold border rounded w-full text-white"
+            onClick={() => {
+              if (isWebBluetoothEnabled()) connectToDevice()
+              // chrome://flags/#enable-web-bluetooth-new-permissions-backend
+            }}
+          >
+            !!! Подключить устройство hacker !!!
+          </button>
+        )}
 
-      {/* {!isConnected && (
+        {/* {!isConnected && (
             <button
               ref={connectRef}
               onClick={(event) => {
@@ -1130,8 +1134,8 @@ function App() {
             </button>
           )}
         </div> */}
-      {/* <div className="text-white bg-black">{BLEStatus}</div> */}
-      {/* </div> */}
+        {/* <div className="text-white bg-black">{BLEStatus}</div> */}
+      </div>
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
   ) : page === 'connections' ? (
