@@ -803,7 +803,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => (
 )
 
 function App() {
-  const [BLEStatus, setBLEStatus] = useState('')
+  const [BLEStatus, setBLEStatus] = useState('-')
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hack = useRecoilValue(hackAtom)
   const [page, setPage] = useState('general')
