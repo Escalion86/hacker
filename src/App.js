@@ -19,6 +19,19 @@ import LocationIcon from './icons/LocationIcon'
 import ExtraIcon from './icons/ExtraIcon'
 import AccountsIcon from './icons/AccountsIcon'
 import GoogleIcon from './icons/GoogleIcon'
+import AdditionalFunctionsIcon from './icons/AdditionalFunctionsIcon'
+import ParentsControlIcon from './icons/ParentsControlIcon'
+import AppsIcon from './icons/AppsIcon'
+import SettingsIcon from './icons/SettingsIcon'
+import SpecialIcon from './icons/SpecialIcon'
+import RefreshIcon from './icons/RefreshIcon'
+import DocumentationIcon from './icons/DocumentationIcon'
+import InfoIcon from './icons/InfoIcon'
+import DevIcon from './icons/DevIcon'
+import CleanUpIcon from './icons/CleanUpIcon'
+import ArrowBack from './icons/ArrowBack'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import hackAtom from './state/hackAtom'
 
 // const btReq = async () => {
 //   try {
@@ -45,7 +58,7 @@ import GoogleIcon from './icons/GoogleIcon'
 // const timestampContainer = document.getElementById('timestamp')
 
 //Define BLE Device Specs
-var deviceName = 'ESP32'
+var deviceName = 'Hacker'
 var bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
 var ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
 var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
@@ -97,55 +110,227 @@ function getDateTime() {
 
 function toggleTheme() {
   let htmlClasses = document.querySelector('html').classList
-  if (localStorage.AppName === 'hacker') {
-    localStorage.removeItem('AppName')
+  if (
+    (localStorage.theme = 'dark')
+    // localStorage.AppName === 'hacker'
+  ) {
+    // localStorage.removeItem('AppName')
     htmlClasses.remove('dark')
     localStorage.theme = 'light'
   } else {
-    localStorage.AppName = 'hacker'
+    // localStorage.AppName = 'hacker'
     htmlClasses.add('dark')
     localStorage.theme = 'dark'
   }
 }
 
-const ItemsBlock = ({ children }) => (
-  <div className="flex flex-col items-stretch">{children}</div>
-)
+const ItemsBlock = ({ title, children }) => {
+  return (
+    <div>
+      {title && (
+        <div className="font-bold text-[#999999] text-sm ml-6 mb-1.5">
+          {title}
+        </div>
+      )}
+      <div className="flex flex-col items-stretch">{children}</div>
+    </div>
+  )
+}
 
-const Item = ({ size, title, Icon, subItems, children }) => {
+function makeid(length) {
+  let result = ''
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ@_+-/\\&?:;%$##!`><|[]{}*^0123456789'
+  const charactersLength = characters.length
+  let counter = 0
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    counter += 1
+  }
+  return result
+}
+
+function getRandomInt(min, max) {
+  const minCeiled = Math.ceil(min)
+  const maxFloored = Math.floor(max)
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled) // The maximum is exclusive and the minimum is inclusive
+}
+
+const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
+  const hack = useRecoilValue(hackAtom)
+  const [titleState, setTitleState] = useState(title)
+  const [iteration, setIteration] = useState(0)
   const itemRef = useRef()
+  const interval = useRef()
+
+  useEffect(() => {
+    if (hack && iteration === 0) {
+      setIteration(0)
+      interval.current = setInterval(() => {
+        setIteration((state) => state + 1)
+        setTitleState(makeid(localStorage.wifi?.length || ' '))
+      }, getRandomInt(300, 700))
+    }
+    if (!hack || iteration >= index) {
+      clearInterval(interval.current)
+      if (hack) setTitleState(localStorage.wifi)
+      else setTitleState(title)
+      // setIteration(0)
+    }
+  }, [hack, iteration])
+
+  useEffect(() => {
+    if (!hack) setIteration(0)
+  }, [hack])
+
   useEffect(() => {
     // let button = document.getElementById('button')
-
-    itemRef.current.addEventListener('touchstart', (e) => {
+    const touchStartEventListener = (e) => {
       var rect = e.target.getBoundingClientRect()
       var x = e.touches[0].clientX - rect.left //x position within the element.
       var y = e.touches[0].clientY - rect.top
 
       itemRef.current.style.setProperty('--mouse-x', x + 'px')
       itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    })
-    itemRef.current.addEventListener('mousedown', (e) => {
+    }
+
+    itemRef.current.addEventListener('touchstart', touchStartEventListener)
+    // return () => {
+    //   itemRef.current.removeEventListener('touchstart', touchStartEventListener)
+    // }
+  }, [])
+
+  useEffect(() => {
+    const mouseDownEventListener = (e) => {
       var rect = e.target.getBoundingClientRect()
       var x = e.clientX - rect.left //x position within the element.
       var y = e.clientY - rect.top
 
       itemRef.current.style.setProperty('--mouse-x', x + 'px')
       itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    })
-    return () => {
-      itemRef.current.removeEventListener('touchstart', () => 123)
-      itemRef.current.removeEventListener('mousedown', () => 123)
     }
+
+    itemRef.current.addEventListener('mousedown', mouseDownEventListener)
+    // return () => {
+    //   itemRef.current.removeEventListener('mousedown', mouseDownEventListener)
+    // }
   }, [])
 
   return (
-    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl bg-dark">
+    <div
+      className={cn(
+        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity',
+        hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
+      )}
+      onClick={onClick}
+    >
       <div
         ref={itemRef}
-        id="button"
         className={cn(
-          'button flex gap-x-3 items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
+          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
+          size === 'small'
+            ? 'px-4 pb-3'
+            : size === 'big'
+            ? 'px-[18px] pb-[13px]'
+            : 'px-[18px] pb-3'
+        )}
+      >
+        <div
+          className={cn(
+            'pointer-events-none mr-1.5',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <WiFiIcon />
+        </div>
+        <div
+          className={cn(
+            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <div
+            className={cn(
+              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+            )}
+          >
+            <div
+              className={cn(
+                'text-left -mt-0.5',
+                size === 'small'
+                  ? 'text-base'
+                  : size === 'big'
+                  ? 'text-[19px] leading-[28px]'
+                  : 'text-lg'
+              )}
+            >
+              {titleState}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const Item = ({
+  size,
+  title,
+  Icon,
+  subItems,
+  children,
+  onClick,
+  checkbox,
+  checkboxBorder = true,
+  activeTitle,
+}) => {
+  const [isChecked, setIsChecked] = useState(checkbox)
+  const itemRef = useRef()
+  useEffect(() => {
+    // let button = document.getElementById('button')
+    const touchStartEventListener = (e) => {
+      var rect = e.target.getBoundingClientRect()
+      var x = e.touches[0].clientX - rect.left //x position within the element.
+      var y = e.touches[0].clientY - rect.top
+
+      itemRef.current.style.setProperty('--mouse-x', x + 'px')
+      itemRef.current.style.setProperty('--mouse-y', y + 'px')
+    }
+
+    itemRef.current.addEventListener('touchstart', touchStartEventListener)
+    // return () => {
+    //   itemRef.current.removeEventListener('touchstart', touchStartEventListener)
+    // }
+  }, [])
+
+  useEffect(() => {
+    const mouseDownEventListener = (e) => {
+      var rect = e.target.getBoundingClientRect()
+      var x = e.clientX - rect.left //x position within the element.
+      var y = e.clientY - rect.top
+
+      itemRef.current.style.setProperty('--mouse-x', x + 'px')
+      itemRef.current.style.setProperty('--mouse-y', y + 'px')
+    }
+
+    itemRef.current.addEventListener('mousedown', mouseDownEventListener)
+    // return () => {
+    //   itemRef.current.removeEventListener('mousedown', mouseDownEventListener)
+    // }
+  }, [])
+
+  return (
+    <div
+      className={cn(
+        'relative group first:rounded-t-3xl last:rounded-b-3xl',
+        activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
+      )}
+      onClick={onClick}
+    >
+      <div
+        ref={itemRef}
+        className={cn(
+          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
@@ -156,7 +341,7 @@ const Item = ({ size, title, Icon, subItems, children }) => {
         {Icon && (
           <div
             className={cn(
-              'pointer-events-none',
+              'pointer-events-none mr-1.5',
               size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
             )}
           >
@@ -165,41 +350,69 @@ const Item = ({ size, title, Icon, subItems, children }) => {
         )}
         <div
           className={cn(
-            'flex-1 pointer-events-none gap-x-2 flex-col items-start group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
           <div
             className={cn(
-              'text-left -mt-0.5',
-              size === 'small'
-                ? 'text-base'
-                : size === 'big'
-                ? 'text-[19px] leading-[28px]'
-                : 'text-lg'
+              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
             )}
           >
-            {title}
-          </div>
-          <div
-            className={cn(
-              'text-left text-secondary',
-              size === 'small'
-                ? 'text-xs'
-                : size === 'big'
-                ? 'text-[15px] leading-[20px]'
-                : 'text-sm'
-            )}
-          >
-            {subItems.map((item, index) => (
-              <div key={item} className="inline">
-                <span>{item}</span>
-                {index !== subItems.length - 1 && (
-                  <span className="text-secondary mx-2">{`\u{2022}`}</span>
+            <div
+              className={cn(
+                'text-left -mt-0.5',
+                activeTitle ? 'text-[#578ffe] font-bold' : '',
+                size === 'small'
+                  ? 'text-base'
+                  : size === 'big'
+                  ? 'text-[19px] leading-[28px]'
+                  : 'text-lg'
+              )}
+            >
+              {title}
+            </div>
+            {subItems && (
+              <div
+                className={cn(
+                  'text-left text-secondary',
+                  size === 'small'
+                    ? 'text-xs'
+                    : size === 'big'
+                    ? 'text-[15px] leading-[20px]'
+                    : 'text-sm'
                 )}
+              >
+                {subItems.map((item, index) => (
+                  <div key={item} className="inline">
+                    <span>{item}</span>
+                    {index !== subItems.length - 1 && (
+                      <span className="text-secondary mx-2">{`\u{2022}`}</span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
+          {typeof checkbox === 'boolean' && (
+            <div
+              // onClick={(e) => e.stopPropagation()}
+              className={cn(
+                'pl-3 h-[18px]',
+                checkboxBorder ? 'border-l border-[#474749]' : ''
+              )}
+            >
+              <input
+                type="checkbox"
+                className="switch_1"
+                checked={isChecked}
+                onChange={(e) => {
+                  // e.stopPropagation()
+                  setIsChecked(!isChecked)
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="pointer-events-none">{children}</div>
@@ -207,13 +420,399 @@ const Item = ({ size, title, Icon, subItems, children }) => {
   )
 }
 
+const PageWrapper = ({
+  title,
+  size,
+  toggleTheme,
+  children,
+  onClickBack,
+  activeTitle,
+}) => (
+  <div
+    className={cn(
+      'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll pb-5',
+      size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
+    )}
+  >
+    <div
+      className={cn(
+        'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
+        size === 'small'
+          ? 'pl-5 pr-4 pt-5 pb-3'
+          : size === 'big'
+          ? 'pl-6 pr-6 pt-8 pb-3.5'
+          : 'pl-6 pr-5 pt-6 pb-3.5'
+      )}
+      // onClick={toggleTheme}
+    >
+      {onClickBack && (
+        <div
+          onClick={onClickBack}
+          className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+        >
+          <ArrowBack size={size} />
+        </div>
+      )}
+      <div
+        className={cn(
+          'text-left flex-1',
+          size === 'small' ? 'text-lg' : size === 'big' ? 'text-2xl' : 'text-xl'
+        )}
+      >
+        {title}
+      </div>
+      <SearchIcon size={size} />
+    </div>
+    {children}
+  </div>
+)
+
+const SettingsPage = ({ size, toggleTheme, setPage }) => {
+  return (
+    <PageWrapper
+      size={size}
+      toggleTheme={toggleTheme}
+      title="Настройка Hacker"
+      onClickBack={() => setPage('general')}
+    >
+      <div className="px-5 flex gap-x-1 flex-wrap items-center">
+        <label>Название точки Wi-Fi</label>
+        <input
+          className="text-white bg-dark px-2 py-1"
+          value={localStorage.wifi}
+          onChange={(e) => {
+            localStorage.wifi = e.target.value
+          }}
+        />
+      </div>
+    </PageWrapper>
+  )
+}
+
+const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
+  const [hack, setHack] = useRecoilState(hackAtom)
+
+  return (
+    <PageWrapper
+      size={size}
+      toggleTheme={toggleTheme}
+      title="Wi-Fi"
+      onClickBack={() => setPage('connections')}
+    >
+      <ItemsBlock>
+        <Item
+          title="Включено"
+          activeTitle={true}
+          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          onClick={() => {
+            setHack(!hack)
+            if (!hack) {
+              writeOnCharacteristic(localStorage.wifi, true)
+            } else {
+              writeOnCharacteristic(0, true)
+            }
+          }}
+          checkbox
+          checkboxBorder={false}
+        />
+      </ItemsBlock>
+      <ItemsBlock title="Доступные сети">
+        <ItemWiFi title="Wi-Fi 1" size={size} index={5} />
+        <ItemWiFi title="Wi-Fi 2" size={size} index={5} />
+        <ItemWiFi title="Wi-Fi 3" size={size} index={6} />
+        <ItemWiFi title="Wi-Fi 4" size={size} index={7} />
+        <ItemWiFi title="Wi-Fi 5" size={size} index={8} />
+        <ItemWiFi title="Wi-Fi 6" size={size} index={8} hidden />
+        <ItemWiFi title="Wi-Fi 7" size={size} index={9} hidden />
+        <ItemWiFi title="Wi-Fi 8" size={size} index={10} hidden />
+        <ItemWiFi title="Wi-Fi 9" size={size} index={11} hidden />
+        <ItemWiFi title="Wi-Fi 10" size={size} index={12} hidden />
+      </ItemsBlock>
+    </PageWrapper>
+  )
+}
+
+const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
+  return (
+    <PageWrapper
+      size={size}
+      toggleTheme={toggleTheme}
+      title="Подключения"
+      onClickBack={() => setPage('general')}
+    >
+      <ItemsBlock>
+        <Item
+          title="Wi-Fi"
+          // Icon={WiFiIcon}
+          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          onClick={() => setPage('wifi')}
+          checkbox
+        />
+        <Item
+          title="Вызовы по Wi-Fi"
+          // Icon={WiFiIcon}
+          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          // onClick={() => setPage('connections')}
+          checkbox={false}
+        />
+        <Item
+          title="Bluetooth"
+          // Icon={WiFiIcon}
+          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          // onClick={() => setPage('connections')}
+          checkbox
+        />
+        <Item
+          title="NFC и бесконтактные платежи"
+          // Icon={WiFiIcon}
+          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+          size={size}
+          // onClick={() => setPage('connections')}
+          checkbox
+        />
+        <Item
+          title="Сверхширокая полоса (UWB)"
+          // Icon={WiFiIcon}
+          subItems={[
+            'Определение точного местоположения устройства поблизости.',
+          ]}
+          size={size}
+          // onClick={() => setPage('connections')}
+          checkbox={false}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item title="Авиарежим" size={size} checkbox={false} />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item title="Диспетчер SIM-карт" size={size} />
+        <Item title="Мобильные сети" size={size} />
+        <Item title="Использование данных" size={size} />
+        <Item title="Мобильная точка доступа и модем" size={size} />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item title="Другие настройки" size={size} />
+      </ItemsBlock>
+    </PageWrapper>
+  )
+}
+
+const GeneralPage = ({ size, toggleTheme, setPage }) => (
+  <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
+    <ItemsBlock>
+      <Item
+        title="Алексей Белинский"
+        subItems={['Samsung account']}
+        size={size}
+      >
+        <div
+          className={cn(
+            'absolute p-[1px] rounded-full border border-[#2c2d2f]',
+            size === 'small'
+              ? 'h-[68px] w-[68px] right-5 -top-3'
+              : size === 'big'
+              ? 'h-[82px] w-[82px] right-5 -top-3.5'
+              : 'h-[72px] w-[72px] right-5 -top-3.5'
+          )}
+        >
+          <img
+            className="rounded-full h-full w-full"
+            src="img/avatar.png"
+            alt="avatar"
+          />
+        </div>
+      </Item>
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Подключения"
+        Icon={WiFiIcon}
+        subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
+        size={size}
+        onClick={() => setPage('connections')}
+      />
+      <Item
+        title="Подключенные устройства"
+        Icon={ConnectedDevicesIcon}
+        subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Режимы и сценарии"
+        Icon={ScenariosIcon}
+        subItems={['Режимы', 'Сценарии']}
+        size={size}
+      />
+      <Item
+        title="Звуки и вибрация"
+        Icon={SoundIcon}
+        subItems={['Режим звука', 'Мелодия звонка']}
+        size={size}
+      />
+      <Item
+        title="Уведомления"
+        Icon={NotificationsIcon}
+        subItems={['Строка состояния', 'Не беспокоить']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Дисплей"
+        Icon={DisplayIcon}
+        subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
+        size={size}
+      />
+      <Item
+        title="Батарея"
+        Icon={BateryIcon}
+        subItems={['Энергосбережение', 'Зарядка']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Обои и стиль"
+        Icon={WallpappersIcon}
+        subItems={['Обои', 'Палитра цветов']}
+        size={size}
+      />
+      <Item
+        title="Темы"
+        Icon={ThemesIcon}
+        subItems={['Темы', 'Обои', 'Значки']}
+        size={size}
+      />
+      <Item
+        title="Экран блокировки"
+        Icon={BlockScreenIcon}
+        subItems={['Тип блокировки экрана', 'Always On Display']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Безопасность и конфиденциальность"
+        Icon={ShildIcon}
+        subItems={['Биометрические данные', 'Диспетчер разрешений']}
+        size={size}
+      />
+      <Item
+        title="Локация"
+        Icon={LocationIcon}
+        subItems={['Запросы на доступ к местоположению']}
+        size={size}
+      />
+      <Item
+        title="Экстренные ситуации"
+        Icon={ExtraIcon}
+        subItems={['Медицинские сведения', 'Экстренные оповещения']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Учетные записи и архивация"
+        Icon={AccountsIcon}
+        subItems={['Управление учетными записями', 'Smart Switch']}
+        size={size}
+      />
+      <Item
+        title="Google"
+        Icon={GoogleIcon}
+        subItems={['Службы Google']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Дополнительные функции"
+        Icon={AdditionalFunctionsIcon}
+        subItems={['Labs', 'S Pen', 'Боковая кнопка']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Использование устройства и родительский контроль"
+        Icon={ParentsControlIcon}
+        subItems={['Время использования экрана', 'Таймеры приложений']}
+        size={size}
+      />
+      <Item
+        title="Обслуживание устройства"
+        Icon={CleanUpIcon}
+        subItems={['Хранилище', 'Память', 'Защита приложений']}
+        size={size}
+      />
+      <Item
+        title="Приложения"
+        Icon={AppsIcon}
+        subItems={['Приложения по умолчанию', 'Настройки приложений']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Общие настройки"
+        Icon={SettingsIcon}
+        subItems={['Язык и клавиатура', 'Дата и время']}
+        size={size}
+      />
+      <Item
+        title="Специальные возможности"
+        Icon={SpecialIcon}
+        subItems={['Отображение', 'Слышимость', 'Подвижность']}
+        size={size}
+      />
+    </ItemsBlock>
+    <ItemsBlock>
+      <Item
+        title="Обновление ПО"
+        Icon={RefreshIcon}
+        subItems={['Загрузка и установка']}
+        size={size}
+      />
+      <Item
+        title="Советы и руководство пользователя"
+        Icon={DocumentationIcon}
+        subItems={['Полезные советы', 'Новые функции']}
+        size={size}
+      />
+      <Item
+        title="Сведения о телефоне"
+        Icon={InfoIcon}
+        subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
+        size={size}
+      />
+      <Item
+        title="Параметры разработчика"
+        Icon={DevIcon}
+        subItems={['Параметры разработчика']}
+        size={size}
+        onClick={() => setPage('settings')}
+      />
+    </ItemsBlock>
+  </PageWrapper>
+)
+
 function App() {
+  const hack = useRecoilValue(hackAtom)
+  const [page, setPage] = useState('general')
   const [size, setSize] = useState('big')
   const [input, setInput] = useState('Escalion')
+  const [isConnected, setIsConnected] = useState(false)
   const [state, setState] = useState('Устройство отключено')
   const [retrievedValue, setRetrievedValue] = useState('NaN')
   const [latestValueSent, setLatestValueSent] = useState('')
   const [timestampContainer, setTimestampContainer] = useState('')
+  const connectRef = useRef(null)
 
   useEffect(() => {
     if (
@@ -244,7 +843,7 @@ function App() {
     setTimestampContainer(getDateTime())
   }
 
-  function writeOnCharacteristic(value) {
+  function writeOnCharacteristic(value, autostart) {
     if (bleServer && bleServer.connected) {
       bleServiceFound
         .getCharacteristic(ledCharacteristic)
@@ -260,19 +859,21 @@ function App() {
           return characteristic.writeValue(data)
         })
         .then(() => {
-          setLatestValueSent(value)
+          // setLatestValueSent(value)
           console.log('Value written to LEDcharacteristic:', value)
         })
         .catch((error) => {
           console.error('Error writing to the LED characteristic: ', error)
         })
     } else {
-      console.error(
-        'Bluetooth is not connected. Cannot write to characteristic.'
-      )
-      window.alert(
-        'Bluetooth is not connected. Cannot write to characteristic. \n Connect to BLE first!'
-      )
+      connectToDevice(autostart)
+
+      // console.error(
+      //   'Bluetooth is not connected. Cannot write to characteristic.'
+      // )
+      // window.alert(
+      //   'Bluetooth is not connected. Cannot write to characteristic. \n Connect to BLE first!'
+      // )
     }
   }
 
@@ -289,6 +890,7 @@ function App() {
           .then(() => {
             console.log('Устройство отключено')
             setState('Устройство отключено')
+            setIsConnected(false)
           })
           .catch((error) => {
             console.log('An error occurred:', error)
@@ -303,21 +905,8 @@ function App() {
     }
   }
 
-  // Connect to BLE Device and Enable Notifications
-  function connectToDevice() {
-    console.log('Initializing Bluetooth...')
-    navigator.bluetooth
-      .requestDevice({
-        filters: [{ name: deviceName }],
-        optionalServices: [bleService],
-      })
-      .then((device) => {
-        console.log('Device Selected:', device.name)
-        setState('Connected to device ' + device.name)
-        // bleStateContainer.style.color = '#24af37'
-        device.addEventListener('gattservicedisconnected', onDisconnected)
-        return device.gatt.connect()
-      })
+  const afterConnectDevice = (promise) =>
+    promise
       .then((gattServer) => {
         bleServer = gattServer
         console.log('Connected to GATT Server')
@@ -344,15 +933,101 @@ function App() {
         const decodedValue = new TextDecoder().decode(value)
         console.log('Decoded value: ', decodedValue)
         setRetrievedValue(decodedValue)
+        setIsConnected(true)
+        // if (autostart) {
+        //   writeOnCharacteristic(localStorage.wifi)
+        // }
       })
       .catch((error) => {
         console.log('Error: ', error)
       })
+
+  function autoConnectDevice() {
+    navigator.bluetooth.getDevices().then((devices) => {
+      console.log('devices :>> ', devices)
+      // devices[0].watchAdvertisements().then((e) => {
+      //   console.log('e :>> ', e)
+      // })
+      for (var device of devices) {
+        let abortController = new AbortController()
+        device
+          .watchAdvertisements({ signal: abortController.signal })
+          .then((w) => {
+            console.log('w :>> ', w)
+          })
+        device.addEventListener('advertisementreceived', async (evt) => {
+          // Stop the scan to conserve power on mobile devices.
+          abortController.abort()
+          console.log('evt :>> ', evt)
+
+          // At this point, we know that the device is in range, and we can attempt
+          // to connect to it.
+          afterConnectDevice(evt.device.gatt.connect())
+        })
+      }
+      // devices[0].gatt
+      //   .connect()
+      //   .then((result) => console.log('result :>> ', result))
+    })
+    // const test2 = navigator.bluetooth.watchAdvertisements()
+    // watchAdvertisements(options)
+  }
+
+  // Connect to BLE Device and Enable Notifications
+  function connectToDevice(autostart) {
+    console.log('Initializing Bluetooth...')
+    navigator.bluetooth
+      .requestDevice({
+        filters: [{ name: deviceName }],
+        optionalServices: [bleService],
+      })
+      .then((device) => {
+        console.log('Device Selected:', device.name)
+        setState('Connected to device ' + device.name)
+        // bleStateContainer.style.color = '#24af37'
+        device.addEventListener('gattservicedisconnected', onDisconnected)
+        afterConnectDevice(device.gatt.connect())
+      })
+    // .then((gattServer) => {
+    //   bleServer = gattServer
+    //   console.log('Connected to GATT Server')
+    //   return bleServer.getPrimaryService(bleService)
+    // })
+    // .then((service) => {
+    //   bleServiceFound = service
+    //   console.log('Service discovered:', service.uuid)
+    //   return service.getCharacteristic(sensorCharacteristic)
+    // })
+    // .then((characteristic) => {
+    //   console.log('Characteristic discovered:', characteristic.uuid)
+    //   sensorCharacteristicFound = characteristic
+    //   characteristic.addEventListener(
+    //     'characteristicvaluechanged',
+    //     handleCharacteristicChange
+    //   )
+    //   characteristic.startNotifications()
+    //   console.log('Notifications Started.')
+    //   return characteristic.readValue()
+    // })
+    // .then((value) => {
+    //   console.log('Read value: ', value)
+    //   const decodedValue = new TextDecoder().decode(value)
+    //   console.log('Decoded value: ', decodedValue)
+    //   setRetrievedValue(decodedValue)
+    //   setIsConnected(true)
+    //   if (autostart) {
+    //     writeOnCharacteristic(localStorage.wifi)
+    //   }
+    // })
+    // .catch((error) => {
+    //   console.log('Error: ', error)
+    // })
   }
 
   function onDisconnected(event) {
     console.log('Устройство отключено:', event.target.device.name)
     setState('Устройство отключено')
+    setIsConnected(false)
 
     connectToDevice()
   }
@@ -394,233 +1069,49 @@ function App() {
   //     })
   // }
 
-  return (
-    <div
-      className={cn(
-        'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll',
-        size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
-      )}
-    >
-      <div
-        className={cn(
-          'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-          size === 'small'
-            ? 'pl-5 pr-4 pt-5 pb-3'
-            : size === 'big'
-            ? 'pl-6 pr-6 pt-8 pb-3.5'
-            : 'pl-6 pr-5 pt-6 pb-3.5'
-        )}
-        onClick={toggleTheme}
+  useEffect(() => {
+    setTimeout(() => {
+      if (isWebBluetoothEnabled()) autoConnectDevice()
+    }, 2000)
+  })
+
+  return !page || page === 'general' ? (
+    <>
+      <button
+        onClick={() => {
+          if (isWebBluetoothEnabled()) autoConnectDevice()
+          // chrome://flags/#enable-web-bluetooth-new-permissions-backend
+        }}
       >
-        <div
-          className={cn(
-            size === 'small'
-              ? 'text-lg'
-              : size === 'big'
-              ? 'text-2xl'
-              : 'text-xl'
-          )}
+        test
+      </button>
+
+      {!isConnected && (
+        <button
+          ref={connectRef}
+          onClick={(event) => {
+            if (isWebBluetoothEnabled()) {
+              connectToDevice()
+            }
+          }}
         >
-          Настройки
-        </div>
-        <SearchIcon size={size} />
-      </div>
-      <ItemsBlock>
-        <Item
-          title="Алексей Белинский"
-          subItems={['Samsung account']}
-          size={size}
-        >
-          <div
-            className={cn(
-              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
-              size === 'small'
-                ? 'h-[68px] w-[68px] right-5 -top-3'
-                : size === 'big'
-                ? 'h-[82px] w-[82px] right-5 -top-3.5'
-                : 'h-[72px] w-[72px] right-5 -top-3.5'
-            )}
-          >
-            <img
-              className="rounded-full h-full w-full"
-              src="img/avatar.png"
-              alt="avatar"
-            />
-          </div>
-        </Item>
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Подключения"
-          Icon={WiFiIcon}
-          subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-        />
-        <Item
-          title="Подключенные устройства"
-          Icon={ConnectedDevicesIcon}
-          subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Режимы и сценарии"
-          Icon={ScenariosIcon}
-          subItems={['Режимы', 'Сценарии']}
-          size={size}
-        />
-        <Item
-          title="Звуки и вибрация"
-          Icon={SoundIcon}
-          subItems={['Режим звука', 'Мелодия звонка']}
-          size={size}
-        />
-        <Item
-          title="Уведомления"
-          Icon={NotificationsIcon}
-          subItems={['Строка состояния', 'Не беспокоить']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Дисплей"
-          Icon={DisplayIcon}
-          subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
-          size={size}
-        />
-        <Item
-          title="Батарея"
-          Icon={BateryIcon}
-          subItems={['Энергосбережение', 'Зарядка']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Обои и стиль"
-          Icon={WallpappersIcon}
-          subItems={['Обои', 'Палитра цветов']}
-          size={size}
-        />
-        <Item
-          title="Темы"
-          Icon={ThemesIcon}
-          subItems={['Темы', 'Обои', 'Значки']}
-          size={size}
-        />
-        <Item
-          title="Экран блокировки"
-          Icon={BlockScreenIcon}
-          subItems={['Тип блокировки экрана', 'Always On Display']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Безопасность и конфиденциальность"
-          Icon={ShildIcon}
-          subItems={['Биометрические данные', 'Диспетчер разрешений']}
-          size={size}
-        />
-        <Item
-          title="Локация"
-          Icon={LocationIcon}
-          subItems={['Запросы на доступ к местоположению']}
-          size={size}
-        />
-        <Item
-          title="Экстренные ситуации"
-          Icon={ExtraIcon}
-          subItems={['Медицинские сведения', 'Экстренные оповещения']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Учетные записи и архивация"
-          Icon={AccountsIcon}
-          subItems={['Управление учетными записями', 'Smart Switch']}
-          size={size}
-        />
-        <Item
-          title="Google"
-          Icon={GoogleIcon}
-          subItems={['Службы Google']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Дополнительные функции"
-          Icon={WallpappersIcon}
-          subItems={['Labs', 'S Pen', 'Боковая кнопка']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Использование устройства и родительский контроль"
-          Icon={WallpappersIcon}
-          subItems={['Время использования экрана', 'Таймеры приложений']}
-          size={size}
-        />
-        <Item
-          title="Обслуживание устройства"
-          Icon={ThemesIcon}
-          subItems={['Хранилище', 'Память', 'Защита приложений']}
-          size={size}
-        />
-        <Item
-          title="Приложения"
-          Icon={BlockScreenIcon}
-          subItems={['Приложения по умолчанию', 'Настройки приложений']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Общие настройки"
-          Icon={WallpappersIcon}
-          subItems={['Язык и клавиатура', 'Дата и время']}
-          size={size}
-        />
-        <Item
-          title="Специальные возможности"
-          Icon={ThemesIcon}
-          subItems={['Отображение', 'Слышимость', 'Подвижность']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Обновление ПО"
-          Icon={WallpappersIcon}
-          subItems={['Загрузка и установка']}
-          size={size}
-        />
-        <Item
-          title="Советы и руководство пользователя"
-          Icon={ThemesIcon}
-          subItems={['Полезные советы', 'Новые функции']}
-          size={size}
-        />
-        <Item
-          title="Сведения о телефоне"
-          Icon={WallpappersIcon}
-          subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
-          size={size}
-        />
-        <Item
-          title="Параметры разработчика"
-          Icon={WallpappersIcon}
-          subItems={['Параметры разработчика']}
-          size={size}
-        />
-      </ItemsBlock>
-    </div>
-  )
+          Connect to BLE Device
+        </button>
+      )}
+      <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+    </>
+  ) : page === 'connections' ? (
+    <ConnectionsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+  ) : page === 'wifi' ? (
+    <WiFiPage
+      size={size}
+      toggleTheme={toggleTheme}
+      setPage={setPage}
+      writeOnCharacteristic={writeOnCharacteristic}
+    />
+  ) : page === 'settings' ? (
+    <SettingsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+  ) : null
 
   return (
     <>
