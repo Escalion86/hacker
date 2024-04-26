@@ -1101,7 +1101,7 @@ function App() {
   useEffect(() => {
     setTimeout(() => {
       if (isWebBluetoothEnabled()) autoConnectDevice()
-    }, 100)
+    }, 1000)
   })
 
   return !page || page === 'general' ? (
