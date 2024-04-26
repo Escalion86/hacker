@@ -912,7 +912,7 @@ function App() {
     }
   }
 
-  const afterConnectDevice = (promise) =>
+  const afterConnectDevice = (promise, autostart) =>
     promise
       .then((gattServer) => {
         bleServer = gattServer
@@ -926,6 +926,9 @@ function App() {
         console.log('Service discovered:', service.uuid)
         setBLEStatus('Device connected')
         setIsConnected(true)
+        if (autostart) {
+          writeOnCharacteristic(localStorage.wifi)
+        }
         // return service.getCharacteristic(sensorCharacteristic)
       })
       // .then((characteristic) => {
@@ -963,22 +966,26 @@ function App() {
       // devices[0].watchAdvertisements().then((e) => {
       //   console.log('e :>> ', e)
       // })
-      for (var device of devices) {
-        let abortController = new AbortController()
-        device
-          .watchAdvertisements({ signal: abortController.signal })
-          .then((w) => {
-            console.log('w :>> ', w)
-          })
-        device.addEventListener('advertisementreceived', async (evt) => {
-          // Stop the scan to conserve power on mobile devices.
-          abortController.abort()
-          console.log('evt :>> ', evt)
+      if (devices?.length > 0)
+        for (var device of devices) {
+          let abortController = new AbortController()
+          device
+            .watchAdvertisements({ signal: abortController.signal })
+            .then((w) => {
+              console.log('w :>> ', w)
+            })
+          device.addEventListener('advertisementreceived', async (evt) => {
+            // Stop the scan to conserve power on mobile devices.
+            abortController.abort()
+            console.log('evt :>> ', evt)
 
-          // At this point, we know that the device is in range, and we can attempt
-          // to connect to it.
-          afterConnectDevice(evt.device.gatt.connect())
-        })
+            // At this point, we know that the device is in range, and we can attempt
+            // to connect to it.
+            afterConnectDevice(evt.device.gatt.connect())
+          })
+        }
+      else {
+        connectToDevice()
       }
       // devices[0].gatt
       //   .connect()
@@ -1003,7 +1010,7 @@ function App() {
         setState('Connected to device ' + device.name)
         // bleStateContainer.style.color = '#24af37'
         device.addEventListener('gattservicedisconnected', onDisconnected)
-        afterConnectDevice(device.gatt.connect())
+        afterConnectDevice(device.gatt.connect(), autostart)
       })
     // .then((gattServer) => {
     //   bleServer = gattServer
