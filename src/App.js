@@ -922,39 +922,40 @@ function App() {
       })
       .then((service) => {
         bleServiceFound = service
-        setBLEStatus('Service discovered:', service.uuid)
+        // setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
+        setBLEStatus('Device connected')
         setIsConnected(true)
         // return service.getCharacteristic(sensorCharacteristic)
       })
-  // .then((characteristic) => {
-  //   setBLEStatus('Characteristic discovered:', characteristic.uuid)
-  //   console.log('Characteristic discovered:', characteristic.uuid)
-  //   sensorCharacteristicFound = characteristic
-  //   characteristic.addEventListener(
-  //     'characteristicvaluechanged',
-  //     handleCharacteristicChange
-  //   )
-  //   characteristic.startNotifications()
-  //   console.log('Notifications Started.')
-  //   return characteristic.readValue()
-  // })
-  // .then((value) => {
-  //   setBLEStatus('Read value: ', value)
-  //   console.log('Read value: ', value)
-  //   const decodedValue = new TextDecoder().decode(value)
-  //   setBLEStatus('Decoded value: ', decodedValue)
-  //   console.log('Decoded value: ', decodedValue)
-  //   setRetrievedValue(decodedValue)
-  //   setIsConnected(true)
-  //   // if (autostart) {
-  //   //   writeOnCharacteristic(localStorage.wifi)
-  //   // }
-  // })
-  // .catch((error) => {
-  //   setBLEStatus('Error: ', error)
-  //   console.log('Error: ', error)
-  // })
+      // .then((characteristic) => {
+      //   setBLEStatus('Characteristic discovered:', characteristic.uuid)
+      //   console.log('Characteristic discovered:', characteristic.uuid)
+      //   sensorCharacteristicFound = characteristic
+      //   characteristic.addEventListener(
+      //     'characteristicvaluechanged',
+      //     handleCharacteristicChange
+      //   )
+      //   characteristic.startNotifications()
+      //   console.log('Notifications Started.')
+      //   return characteristic.readValue()
+      // })
+      // .then((value) => {
+      //   setBLEStatus('Read value: ', value)
+      //   console.log('Read value: ', value)
+      //   const decodedValue = new TextDecoder().decode(value)
+      //   setBLEStatus('Decoded value: ', decodedValue)
+      //   console.log('Decoded value: ', decodedValue)
+      //   setRetrievedValue(decodedValue)
+      //   setIsConnected(true)
+      //   // if (autostart) {
+      //   //   writeOnCharacteristic(localStorage.wifi)
+      //   // }
+      // })
+      .catch((error) => {
+        setBLEStatus('Error: ', error)
+        console.log('Error: ', error)
+      })
 
   function autoConnectDevice() {
     navigator.bluetooth.getDevices().then((devices) => {
@@ -1094,7 +1095,7 @@ function App() {
 
   return !page || page === 'general' ? (
     <>
-      <div className="flex flex-col">
+      {/* <div className="flex flex-col">
         <div>
           <button
             onClick={() => {
@@ -1119,7 +1120,7 @@ function App() {
           )}
         </div>
         <div className="text-white bg-black">{BLEStatus}</div>
-      </div>
+      </div> */}
       <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
     </>
   ) : page === 'connections' ? (
