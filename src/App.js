@@ -1109,7 +1109,7 @@ function App() {
       )}
       <div className="flex bg-black py-1 px-2">
         {/* <div> */}
-        {!showConnectDeviceButton && (
+        {showConnectDeviceButton && (
           <button
             className="py-1 px-2 border-gray-400 font-bold border rounded w-full text-white"
             onClick={() => {
