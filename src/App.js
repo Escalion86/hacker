@@ -314,6 +314,7 @@ const Item = ({
   checkboxBorder = true,
   activeTitle,
   hiddenSwipeElementsFunc,
+  hiddenSwipeElementsNames,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -381,13 +382,20 @@ const Item = ({
             {hiddenSwipeElementsFunc.map((func, index) => (
               <div
                 key={index}
-                className="flex-1"
+                className={cn(
+                  'flex-1',
+                  localStorage.learn === 'true'
+                    ? 'border border-gray-400 text-gray-400 text-6xl font-bold flex justify-center items-center bg-black bg-opacity-30'
+                    : 'text-transparent'
+                )}
                 onTouchStart={func}
                 // onClick={() => {
                 //   console.log('! :>> ')
                 //   func()
                 // }}
-              />
+              >
+                {hiddenSwipeElementsNames[index]}
+              </div>
             ))}
           </div>
         )}
@@ -522,6 +530,7 @@ const PageWrapper = ({
 
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
   const [mode, setMode] = useState(localStorage.mode)
+  const [learn, setLearn] = useState(localStorage.learn)
 
   return (
     <PageWrapper
@@ -568,16 +577,47 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           />
         </div>
       )}
+      <div className="flex flex-wrap items-center px-5 gap-x-1">
+        <label htmlFor="delay">
+          Задержка в секундах от момента нажатия на тригер, до старта анимации
+        </label>
+        <input
+          id="delay"
+          type="number"
+          className="px-2 py-1 text-white bg-dark"
+          defaultValue={localStorage.delay || 3}
+          onChange={(e) => {
+            localStorage.delay = e.target.value
+          }}
+        />
+      </div>
+      <div className="flex flex-wrap items-center px-5 gap-x-3">
+        <label htmlFor="learn">Режим обучения</label>
+        <input
+          id="learn"
+          type="checkbox"
+          className="switch_1"
+          checked={learn === 'true'}
+          onChange={(e) => {
+            const newValue =
+              !localStorage.learn || localStorage.learn === 'false'
+                ? 'true'
+                : 'false'
+            localStorage.learn = newValue
+            setLearn(newValue)
+          }}
+        />
+      </div>
     </PageWrapper>
   )
 }
 
 const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const [hack, setHack] = useRecoilState(hackAtom)
+  const [waitingForHack, setWaitingForHack] = useState(false)
   const mast = useRecoilValue(cardMastAtom)
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
-  console.log('mode :>> ', mode)
 
   return (
     <PageWrapper
@@ -593,19 +633,24 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
           // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
           size={size}
           onClick={() => {
-            setHack(!hack)
+            if (waitingForHack) return
             if (!hack) {
-              if (!mode || mode === 'wifi') {
-                console.log('1 :>> ', 1)
-                writeOnCharacteristic(localStorage.wifi, true)
-              } else if (mode === 'card') {
-                console.log('2 :>> ', 2)
-                writeOnCharacteristic(
-                  `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
-                  true
-                )
-              }
+              setWaitingForHack(true)
+              setTimeout(() => {
+                setHack(true)
+                setWaitingForHack(false)
+                if (!mode || mode === 'wifi') {
+                  writeOnCharacteristic(localStorage.wifi, true)
+                } else if (mode === 'card') {
+                  writeOnCharacteristic(
+                    `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
+                    true
+                  )
+                }
+              }, (localStorage.delay || 3) * 1000)
             } else {
+              setHack(false)
+              setWaitingForHack(false)
               writeOnCharacteristic(' ', true)
             }
           }}
@@ -625,6 +670,14 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         <ItemWiFi title="Wi-Fi 9" size={size} index={11} hidden />
         <ItemWiFi title="Wi-Fi 10" size={size} index={12} hidden />
       </ItemsBlock>
+      {localStorage.learn === 'true' && (
+        <>
+          <div className="min-h-16" />
+          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
+            Осталось нажать на кнопку "Включено" и дождаться старта анимации
+          </div>
+        </>
+      )}
     </PageWrapper>
   )
 }
@@ -661,6 +714,7 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
             () => setMast(3),
             () => setMast(4),
           ]}
+          hiddenSwipeElementsNames={[masts[1], masts[2], masts[3], masts[4]]}
         />
         <Item
           title="Вызовы по Wi-Fi"
@@ -709,6 +763,16 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
       <ItemsBlock>
         <Item title="Другие настройки" size={size} />
       </ItemsBlock>
+      {localStorage.learn === 'true' && (
+        <>
+          <div className="min-h-16" />
+          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
+            Аналогично предыдущему экрану - выделены поля при свайпе по которым
+            приложение запомнит масть карты, после чего нужно кликнуть по пункту
+            меню "Wi-Fi"
+          </div>
+        </>
+      )}
     </PageWrapper>
   )
 }
@@ -771,6 +835,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
               setSuit(4)
             },
           ]}
+          hiddenSwipeElementsNames={[suits[1], suits[2], suits[3], suits[4]]}
         />
         <Item
           title="Подключенные устройства"
@@ -783,6 +848,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
             () => setSuit(7),
             () => setSuit(8),
           ]}
+          hiddenSwipeElementsNames={[suits[5], suits[6], suits[7], suits[8]]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -797,6 +863,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
             () => setSuit(11),
             () => setSuit(12),
           ]}
+          hiddenSwipeElementsNames={[suits[9], suits[10], suits[11], suits[12]]}
         />
         <Item
           title="Звуки и вибрация"
@@ -804,13 +871,13 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           subItems={['Режим звука', 'Мелодия звонка']}
           size={size}
           hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
+          hiddenSwipeElementsNames={[suits[13], suits[14]]}
         />
         <Item
           title="Уведомления"
           Icon={NotificationsIcon}
           subItems={['Строка состояния', 'Не беспокоить']}
           size={size}
-          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -950,6 +1017,16 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           onClick={() => setPage('settings')}
         />
       </ItemsBlock>
+      {localStorage.learn === 'true' && (
+        <>
+          <div className="min-h-16" />
+          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
+            Обратите внимание, что выделены поля при свайпе по которым
+            приложение запомнит номинал карты, после чего нужно кликнуть по
+            пункту меню "Подключения"
+          </div>
+        </>
+      )}
     </PageWrapper>
   )
 }
@@ -1313,11 +1390,15 @@ function App() {
   //   // }
   // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (isWebBluetoothEnabled()) autoConnectDevice()
-    }, 500)
-  })
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     try {
+  //       if (isWebBluetoothEnabled()) autoConnectDevice()
+  //     } catch (error) {
+  //       console.log('error :>> ', error)
+  //     }
+  //   }, 500)
+  // })
 
   return (
     <>
