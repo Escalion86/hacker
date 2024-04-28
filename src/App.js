@@ -1313,11 +1313,11 @@ function App() {
   //   // }
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (isWebBluetoothEnabled()) autoConnectDevice()
-  //   }, 500)
-  // })
+  useEffect(() => {
+    setTimeout(() => {
+      if (isWebBluetoothEnabled()) autoConnectDevice()
+    }, 500)
+  })
 
   return (
     <>
