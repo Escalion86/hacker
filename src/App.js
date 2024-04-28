@@ -30,8 +30,10 @@ import InfoIcon from './icons/InfoIcon'
 import DevIcon from './icons/DevIcon'
 import CleanUpIcon from './icons/CleanUpIcon'
 import ArrowBack from './icons/ArrowBack'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import hackAtom from './state/hackAtom'
+import cardSuitAtom from './state/cardSuitAtom'
+import cardMastAtom from './state/cardMastAtom'
 
 // const btReq = async () => {
 //   try {
@@ -67,6 +69,26 @@ var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
 var bleServer
 var bleServiceFound
 var sensorCharacteristicFound
+
+const suits = [
+  '?',
+  'A',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  'J',
+  'Q',
+  'K',
+  'JOKER',
+]
+const masts = [' ', '♠', '♥', '♣', '♦']
+const mastsEmoji = [' ', `\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
 
 // Connect Button (search for BLE Devices only if BLE is available)
 // connectButton.addEventListener('click', (event) => {
@@ -160,6 +182,9 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   const hack = useRecoilValue(hackAtom)
   const [titleState, setTitleState] = useState(title)
   const [iteration, setIteration] = useState(0)
+  const mast = useRecoilValue(cardMastAtom)
+  const suit = useRecoilValue(cardSuitAtom)
+  const mode = localStorage.mode
   const itemRef = useRef()
   const interval = useRef()
 
@@ -173,11 +198,16 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
     }
     if (!hack || iteration >= index) {
       clearInterval(interval.current)
-      if (hack) setTitleState(localStorage.wifi)
-      else setTitleState(title)
+      if (hack) {
+        if (!mode || mode === 'wifi') {
+          setTitleState(localStorage.wifi)
+        } else if (mode === 'card') {
+          setTitleState(`${suits[suit]}${suit <= 13 ? mastsEmoji[mast] : ''}`)
+        }
+      } else setTitleState(title)
       // setIteration(0)
     }
-  }, [hack, iteration])
+  }, [hack, iteration, mast, suit, mode])
 
   useEffect(() => {
     if (!hack) setIteration(0)
@@ -256,7 +286,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
           >
             <div
               className={cn(
-                'text-left -mt-0.5',
+                'text-left -mt-0.5 text-current',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -283,6 +313,7 @@ const Item = ({
   checkbox,
   checkboxBorder = true,
   activeTitle,
+  hiddenSwipeElementsFunc,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -325,10 +356,10 @@ const Item = ({
         'relative group first:rounded-t-3xl last:rounded-b-3xl',
         activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
       )}
-      onClick={onClick}
     >
       <div
         ref={itemRef}
+        onClick={onClick}
         className={cn(
           'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
           size === 'small'
@@ -338,6 +369,28 @@ const Item = ({
             : 'px-[18px] pb-3'
         )}
       >
+        {hiddenSwipeElementsFunc?.length > 0 && (
+          <div
+            // onClick={(e) => e.stopPropagation()}
+            // onClick={() => {
+            //   console.log('!! :>> ')
+            //   // func()
+            // }}
+            className="absolute top-0 bottom-0 left-0 right-0 z-[1] flex items-stretch"
+          >
+            {hiddenSwipeElementsFunc.map((func, index) => (
+              <div
+                key={index}
+                className="flex-1"
+                onTouchStart={func}
+                // onClick={() => {
+                //   console.log('! :>> ')
+                //   func()
+                // }}
+              />
+            ))}
+          </div>
+        )}
         {Icon && (
           <div
             className={cn(
@@ -468,6 +521,8 @@ const PageWrapper = ({
 )
 
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
+  const [mode, setMode] = useState(localStorage.mode)
+
   return (
     <PageWrapper
       size={size}
@@ -476,21 +531,53 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
       onClickBack={() => setPage('general')}
     >
       <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label>Название точки Wi-Fi</label>
-        <input
+        <label htmlFor="mode">Режим:</label>
+        <select
+          id="mode"
+          defaultValue={mode}
           className="px-2 py-1 text-white bg-dark"
-          value={localStorage.wifi}
           onChange={(e) => {
-            localStorage.wifi = e.target.value
+            localStorage.mode = e.target.value
+            setMode(e.target.value)
           }}
-        />
+        >
+          <option
+            value="wifi"
+            // selected={localStorage.mode === 'wifi'}
+          >
+            Слово
+          </option>
+          <option
+            value="card"
+            // selected={localStorage.mode === 'card'}
+          >
+            Карта
+          </option>
+        </select>
       </div>
+      {mode === 'wifi' && (
+        <div className="flex flex-wrap items-center px-5 gap-x-1">
+          <label htmlFor="wifiname">Название точки Wi-Fi</label>
+          <input
+            id="wifiname"
+            className="px-2 py-1 text-white bg-dark"
+            defaultValue={localStorage.wifi}
+            onChange={(e) => {
+              localStorage.wifi = e.target.value
+            }}
+          />
+        </div>
+      )}
     </PageWrapper>
   )
 }
 
 const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const [hack, setHack] = useRecoilState(hackAtom)
+  const mast = useRecoilValue(cardMastAtom)
+  const suit = useRecoilValue(cardSuitAtom)
+  const mode = localStorage.mode
+  console.log('mode :>> ', mode)
 
   return (
     <PageWrapper
@@ -508,9 +595,18 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
           onClick={() => {
             setHack(!hack)
             if (!hack) {
-              writeOnCharacteristic(localStorage.wifi, true)
+              if (!mode || mode === 'wifi') {
+                console.log('1 :>> ', 1)
+                writeOnCharacteristic(localStorage.wifi, true)
+              } else if (mode === 'card') {
+                console.log('2 :>> ', 2)
+                writeOnCharacteristic(
+                  `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
+                  true
+                )
+              }
             } else {
-              writeOnCharacteristic(0, true)
+              writeOnCharacteristic(' ', true)
             }
           }}
           checkbox
@@ -534,6 +630,7 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
 }
 
 const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
+  const setMast = useSetRecoilState(cardMastAtom)
   // useEffect(() => {
   //   // if (!effectRan.current) {
   //   window.history.pushState(null, null, window.location.pathname)
@@ -558,6 +655,12 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
           size={size}
           onClick={() => setPage('wifi')}
           checkbox
+          hiddenSwipeElementsFunc={[
+            () => setMast(1),
+            () => setMast(2),
+            () => setMast(3),
+            () => setMast(4),
+          ]}
         />
         <Item
           title="Вызовы по Wi-Fi"
@@ -611,6 +714,9 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
 }
 
 const GeneralPage = ({ size, toggleTheme, setPage }) => {
+  const [prevSuit, setPrevSuit] = useState(0)
+  const [suit, setSuit] = useRecoilState(cardSuitAtom)
+
   return (
     <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
       <ItemsBlock>
@@ -643,13 +749,40 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           Icon={WiFiIcon}
           subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
           size={size}
-          onClick={() => setPage('connections')}
+          onClick={() => {
+            if (suit !== prevSuit && prevSuit !== 0) setSuit(prevSuit)
+            setPage('connections')
+          }}
+          hiddenSwipeElementsFunc={[
+            () => {
+              setPrevSuit(suit)
+              setSuit(1)
+            },
+            () => {
+              setPrevSuit(suit)
+              setSuit(2)
+            },
+            () => {
+              setPrevSuit(suit)
+              setSuit(3)
+            },
+            () => {
+              setPrevSuit(suit)
+              setSuit(4)
+            },
+          ]}
         />
         <Item
           title="Подключенные устройства"
           Icon={ConnectedDevicesIcon}
           subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
           size={size}
+          hiddenSwipeElementsFunc={[
+            () => setSuit(5),
+            () => setSuit(6),
+            () => setSuit(7),
+            () => setSuit(8),
+          ]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -658,18 +791,26 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           Icon={ScenariosIcon}
           subItems={['Режимы', 'Сценарии']}
           size={size}
+          hiddenSwipeElementsFunc={[
+            () => setSuit(9),
+            () => setSuit(10),
+            () => setSuit(11),
+            () => setSuit(12),
+          ]}
         />
         <Item
           title="Звуки и вибрация"
           Icon={SoundIcon}
           subItems={['Режим звука', 'Мелодия звонка']}
           size={size}
+          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
         />
         <Item
           title="Уведомления"
           Icon={NotificationsIcon}
           subItems={['Строка состояния', 'Не беспокоить']}
           size={size}
+          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -865,12 +1006,14 @@ function App() {
           console.log('Found the LED characteristic: ', characteristic.uuid)
           // console.log('test :>> ', value.split(''))
           // const data = new Uint8Array(value.split(''))
-          const data =
-            typeof value === 'number'
-              ? new Uint8Array([value])
-              : Uint8Array.from(value.split('').map((x) => x.charCodeAt()))
-          // console.log('data :>> ', data)
-          return characteristic.writeValue(data)
+
+          // const data =
+          //   typeof value === 'number'
+          //     ? new Uint32Array([value])
+          //     : Uint32Array.from(value.split('').map((x) => x.charCodeAt()))
+          // // // console.log('data :>> ', data)
+          // return characteristic.writeValue(data)
+          return characteristic.writeValue(new TextEncoder().encode(value))
         })
         .then(() => {
           // setLatestValueSent(value)
@@ -880,7 +1023,7 @@ function App() {
           console.error('Error writing to the LED characteristic: ', error)
         })
     } else {
-      connectToDevice(autostart)
+      connectToDevice(value)
 
       // console.error(
       //   'Bluetooth is not connected. Cannot write to characteristic.'
@@ -925,7 +1068,7 @@ function App() {
     }
   }
 
-  const afterConnectDevice = (promise, autostart) =>
+  const afterConnectDevice = (promise, autostartName) =>
     promise
       .then((gattServer) => {
         bleServer = gattServer
@@ -940,8 +1083,8 @@ function App() {
         setBLEStatus('Device connected')
         setShowConnectDeviceButton(false)
         setIsConnected(true)
-        if (autostart) {
-          writeOnCharacteristic(localStorage.wifi)
+        if (autostartName) {
+          writeOnCharacteristic(autostartName)
         }
         // return service.getCharacteristic(sensorCharacteristic)
       })
@@ -1012,7 +1155,7 @@ function App() {
   }
 
   // Connect to BLE Device and Enable Notifications
-  function connectToDevice(autostart) {
+  function connectToDevice(autostartName) {
     setBLEStatus('Initializing Bluetooth...')
     console.log('Initializing Bluetooth...')
     navigator.bluetooth
@@ -1026,42 +1169,42 @@ function App() {
         setState('Connected to device ' + device.name)
         // bleStateContainer.style.color = '#24af37'
         device.addEventListener('gattservicedisconnected', onDisconnected)
-        afterConnectDevice(device.gatt.connect(), autostart)
+        afterConnectDevice(device.gatt.connect(), autostartName)
       })
-    // .then((gattServer) => {
-    //   bleServer = gattServer
-    //   console.log('Connected to GATT Server')
-    //   return bleServer.getPrimaryService(bleService)
-    // })
-    // .then((service) => {
-    //   bleServiceFound = service
-    //   console.log('Service discovered:', service.uuid)
-    //   return service.getCharacteristic(sensorCharacteristic)
-    // })
-    // .then((characteristic) => {
-    //   console.log('Characteristic discovered:', characteristic.uuid)
-    //   sensorCharacteristicFound = characteristic
-    //   characteristic.addEventListener(
-    //     'characteristicvaluechanged',
-    //     handleCharacteristicChange
-    //   )
-    //   characteristic.startNotifications()
-    //   console.log('Notifications Started.')
-    //   return characteristic.readValue()
-    // })
-    // .then((value) => {
-    //   console.log('Read value: ', value)
-    //   const decodedValue = new TextDecoder().decode(value)
-    //   console.log('Decoded value: ', decodedValue)
-    //   setRetrievedValue(decodedValue)
-    //   setIsConnected(true)
-    //   if (autostart) {
-    //     writeOnCharacteristic(localStorage.wifi)
-    //   }
-    // })
-    // .catch((error) => {
-    //   console.log('Error: ', error)
-    // })
+      // .then((gattServer) => {
+      //   bleServer = gattServer
+      //   console.log('Connected to GATT Server')
+      //   return bleServer.getPrimaryService(bleService)
+      // })
+      // .then((service) => {
+      //   bleServiceFound = service
+      //   console.log('Service discovered:', service.uuid)
+      //   return service.getCharacteristic(sensorCharacteristic)
+      // })
+      // .then((characteristic) => {
+      //   console.log('Characteristic discovered:', characteristic.uuid)
+      //   sensorCharacteristicFound = characteristic
+      //   characteristic.addEventListener(
+      //     'characteristicvaluechanged',
+      //     handleCharacteristicChange
+      //   )
+      //   characteristic.startNotifications()
+      //   console.log('Notifications Started.')
+      //   return characteristic.readValue()
+      // })
+      // .then((value) => {
+      //   console.log('Read value: ', value)
+      //   const decodedValue = new TextDecoder().decode(value)
+      //   console.log('Decoded value: ', decodedValue)
+      //   setRetrievedValue(decodedValue)
+      //   setIsConnected(true)
+      //   if (autostart) {
+      //     writeOnCharacteristic(localStorage.wifi)
+      //   }
+      // })
+      .catch((error) => {
+        console.log('Error: ', error)
+      })
   }
 
   function onDisconnected(event) {
@@ -1170,11 +1313,11 @@ function App() {
   //   // }
   // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (isWebBluetoothEnabled()) autoConnectDevice()
-    }, 500)
-  })
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (isWebBluetoothEnabled()) autoConnectDevice()
+  //   }, 500)
+  // })
 
   return (
     <>
