@@ -367,7 +367,7 @@ const Item = ({
                 className={cn(
                   'flex-1',
                   localStorage.learn === 'true'
-                    ? 'border border-gray-400 text-gray-400 text-6xl font-bold flex justify-center items-center bg-black bg-opacity-30'
+                    ? 'border border-gray-400 text-gray-400 text-5xl font-bold flex justify-center items-center bg-black bg-opacity-30'
                     : 'text-transparent'
                 )}
                 onTouchStart={func}
@@ -700,16 +700,6 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
 }
 
 const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
-  const setMast = useSetRecoilState(cardMastAtom)
-  // useEffect(() => {
-  //   // if (!effectRan.current) {
-  //   window.history.pushState(null, null, window.location.pathname)
-  //   window.history.pushState(null, null, window.location.pathname)
-  //   // }
-  //   // return () => {
-  //   // effectRan.current = true
-  //   // }
-  // }, [])
   return (
     <PageWrapper
       size={size}
@@ -725,13 +715,6 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
           size={size}
           onClick={() => setPage('wifi')}
           checkbox
-          hiddenSwipeElementsFunc={[
-            () => setMast(1),
-            () => setMast(2),
-            () => setMast(3),
-            () => setMast(4),
-          ]}
-          hiddenSwipeElementsNames={[masts[1], masts[2], masts[3], masts[4]]}
         />
         <Item
           title="Вызовы по Wi-Fi"
@@ -782,11 +765,9 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
-          <div className="min-h-16" />
+          <div className="min-h-10" />
           <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Аналогично предыдущему экрану - выделены поля при свайпе по которым
-            приложение запомнит масть карты, после чего нужно кликнуть по пункту
-            меню "Wi-Fi"
+            Теперь перейдите в меню Wi-Fi
           </div>
         </>
       )}
@@ -795,8 +776,12 @@ const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
 }
 
 const GeneralPage = ({ size, toggleTheme, setPage }) => {
-  const [prevSuit, setPrevSuit] = useState(0)
-  const [suit, setSuit] = useRecoilState(cardSuitAtom)
+  const setSuit = useSetRecoilState(cardSuitAtom)
+  const setMast = useSetRecoilState(cardMastAtom)
+  // const mast = useRecoilValue(cardMastAtom)
+  // const suit = useRecoilValue(cardSuitAtom)
+  // console.log('suit :>> ', suit)
+  // console.log('mast :>> ', mast)
 
   return (
     <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
@@ -831,33 +816,43 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
           size={size}
           onClick={() => {
-            if (suit !== prevSuit && prevSuit !== 0) setSuit(prevSuit)
             setPage('connections')
           }}
           hiddenSwipeElementsFunc={[
             () => {
-              setPrevSuit(suit)
-              setSuit(1)
+              setMast(1)
             },
             () => {
-              setPrevSuit(suit)
-              setSuit(2)
+              setMast(2)
             },
             () => {
-              setPrevSuit(suit)
-              setSuit(3)
+              setMast(3)
             },
             () => {
-              setPrevSuit(suit)
-              setSuit(4)
+              setMast(4)
             },
           ]}
-          hiddenSwipeElementsNames={[suits[1], suits[2], suits[3], suits[4]]}
+          hiddenSwipeElementsNames={[masts[1], masts[2], masts[3], masts[4]]}
         />
         <Item
           title="Подключенные устройства"
           Icon={ConnectedDevicesIcon}
           subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
+          size={size}
+          hiddenSwipeElementsFunc={[
+            () => setSuit(1),
+            () => setSuit(2),
+            () => setSuit(3),
+            () => setSuit(4),
+          ]}
+          hiddenSwipeElementsNames={[suits[1], suits[2], suits[3], suits[4]]}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
+          title="Режимы и сценарии"
+          Icon={ScenariosIcon}
+          subItems={['Режимы', 'Сценарии']}
           size={size}
           hiddenSwipeElementsFunc={[
             () => setSuit(5),
@@ -867,12 +862,10 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           ]}
           hiddenSwipeElementsNames={[suits[5], suits[6], suits[7], suits[8]]}
         />
-      </ItemsBlock>
-      <ItemsBlock>
         <Item
-          title="Режимы и сценарии"
-          Icon={ScenariosIcon}
-          subItems={['Режимы', 'Сценарии']}
+          title="Звуки и вибрация"
+          Icon={SoundIcon}
+          subItems={['Режим звука', 'Мелодия звонка']}
           size={size}
           hiddenSwipeElementsFunc={[
             () => setSuit(9),
@@ -883,18 +876,12 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           hiddenSwipeElementsNames={[suits[9], suits[10], suits[11], suits[12]]}
         />
         <Item
-          title="Звуки и вибрация"
-          Icon={SoundIcon}
-          subItems={['Режим звука', 'Мелодия звонка']}
-          size={size}
-          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
-          hiddenSwipeElementsNames={[suits[13], suits[14]]}
-        />
-        <Item
           title="Уведомления"
           Icon={NotificationsIcon}
           subItems={['Строка состояния', 'Не беспокоить']}
           size={size}
+          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
+          hiddenSwipeElementsNames={[suits[13], suits[14]]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -1036,11 +1023,11 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
-          <div className="min-h-16" />
-          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Обратите внимание, что выделены поля при свайпе по которым
-            приложение запомнит номинал карты, после чего нужно кликнуть по
-            пункту меню "Подключения"
+          <div className="min-h-24" />
+          <div className="absolute bottom-0 left-0 right-0 z-30 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
+            Обратите внимание, что выделены поля! Первое что нужно сделать это
+            сначала свайпнуть сверху вниз по номиналу карты, а затем нужно
+            кликнуть по масти (пункту меню "Подключения")
           </div>
         </>
       )}
@@ -1415,15 +1402,15 @@ function App() {
   //   // }
   // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      try {
-        if (isWebBluetoothEnabled()) autoConnectDevice()
-      } catch (error) {
-        console.log('error :>> ', error)
-      }
-    }, 500)
-  })
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     try {
+  //       if (isWebBluetoothEnabled()) autoConnectDevice()
+  //     } catch (error) {
+  //       console.log('error :>> ', error)
+  //     }
+  //   }, 500)
+  // })
 
   return (
     <>
