@@ -170,7 +170,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
       interval.current = setInterval(() => {
         setIteration((state) => state + 1)
         setTitleState(makeid(localStorage.wifi?.length || ' '))
-      }, getRandomInt(300, 700))
+      }, getRandomInt(350, 650))
     }
     if (!hack || iteration >= index) {
       clearInterval(interval.current)
@@ -686,6 +686,8 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         <ItemWiFi title="Wi-Fi 8" size={size} index={10} hidden />
         <ItemWiFi title="Wi-Fi 9" size={size} index={11} hidden />
         <ItemWiFi title="Wi-Fi 10" size={size} index={12} hidden />
+        <ItemWiFi title="Wi-Fi 11" size={size} index={13} hidden />
+        <ItemWiFi title="Wi-Fi 12" size={size} index={14} hidden />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
