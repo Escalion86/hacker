@@ -1402,15 +1402,15 @@ function App() {
   //   // }
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     try {
-  //       if (isWebBluetoothEnabled()) autoConnectDevice()
-  //     } catch (error) {
-  //       console.log('error :>> ', error)
-  //     }
-  //   }, 500)
-  // })
+  useEffect(() => {
+    setTimeout(() => {
+      try {
+        if (isWebBluetoothEnabled()) autoConnectDevice()
+      } catch (error) {
+        console.log('error :>> ', error)
+      }
+    }, 500)
+  })
 
   return (
     <>
