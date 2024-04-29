@@ -35,35 +35,11 @@ import hackAtom from './state/hackAtom'
 import cardSuitAtom from './state/cardSuitAtom'
 import cardMastAtom from './state/cardMastAtom'
 
-// const btReq = async () => {
-//   try {
-//     const result = await Bluetooth.requestDeviceAsync()
-
-//     if (result.type === 'cancel') {
-//       return
-//     }
-
-//     const device = result.device
-//     console.log('device :>> ', device)
-//   } catch ({ message, code }) {
-//     console.log('Error:', message, code)
-//   }
-// }
-
-// const connectButton = document.getElementById('connectBleButton')
-// const disconnectButton = document.getElementById('disconnectBleButton')
-// const onButton = document.getElementById('onButton')
-// const offButton = document.getElementById('offButton')
-// const retrievedValue = document.getElementById('valueContainer')
-// const latestValueSent = document.getElementById('valueSent')
-// const bleStateContainer = document.getElementById('bleState')
-// const timestampContainer = document.getElementById('timestamp')
-
 //Define BLE Device Specs
 var deviceName = 'Hacker'
 var bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
 var ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
-var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
+// var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
 
 //Global Variables to Handle Bluetooth
 var bleServer
@@ -200,9 +176,15 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
       clearInterval(interval.current)
       if (hack) {
         if (!mode || mode === 'wifi') {
-          setTitleState(localStorage.wifi)
+          setTitleState(
+            `${localStorage.dot === 'true' ? '.' : ''}${localStorage.wifi}`
+          )
         } else if (mode === 'card') {
-          setTitleState(`${suits[suit]}${suit <= 13 ? mastsEmoji[mast] : ''}`)
+          setTitleState(
+            `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
+              suit <= 13 ? mastsEmoji[mast] : ''
+            }`
+          )
         }
       } else setTitleState(title)
       // setIteration(0)
@@ -281,12 +263,12 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
         >
           <div
             className={cn(
-              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
             )}
           >
             <div
               className={cn(
-                'text-left -mt-0.5 text-current',
+                'text-left -mt-0.5 text-current ',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -531,6 +513,7 @@ const PageWrapper = ({
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
   const [mode, setMode] = useState(localStorage.mode)
   const [learn, setLearn] = useState(localStorage.learn)
+  const [dot, setDot] = useState(localStorage.dot)
 
   return (
     <PageWrapper
@@ -588,6 +571,40 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           defaultValue={localStorage.delay || 3}
           onChange={(e) => {
             localStorage.delay = e.target.value
+          }}
+        />
+      </div>
+      <div className="flex flex-wrap items-center px-5 gap-x-1">
+        <label htmlFor="minutesBeforeStop">
+          Количество минут через которое спам автоматически остановится
+        </label>
+        <input
+          id="minutesBeforeStop"
+          type="number"
+          className="px-2 py-1 text-white bg-dark"
+          defaultValue={localStorage.minutesBeforeStop || 3}
+          onChange={(e) => {
+            localStorage.minutesBeforeStop = e.target.value
+          }}
+        />
+      </div>
+      <div className="flex flex-wrap items-center px-5 gap-x-1">
+        <label htmlFor="dot">
+          Добавить "." в начале названия точки (чтобы wi-fi точки были вверху
+          списка)
+        </label>
+        <input
+          id="dot"
+          type="checkbox"
+          className="switch_1"
+          checked={dot === 'true'}
+          onChange={(e) => {
+            const newValue =
+              !localStorage.dot || localStorage.dot === 'false'
+                ? 'true'
+                : 'false'
+            localStorage.dot = newValue
+            setDot(newValue)
           }}
         />
       </div>
@@ -1090,7 +1107,15 @@ function App() {
           //     : Uint32Array.from(value.split('').map((x) => x.charCodeAt()))
           // // // console.log('data :>> ', data)
           // return characteristic.writeValue(data)
-          return characteristic.writeValue(new TextEncoder().encode(value))
+          return characteristic.writeValue(
+            new TextEncoder().encode(
+              !value || value === ' '
+                ? ' '
+                : (localStorage.minutesBeforeStop || '3') +
+                    (localStorage.dot === 'true' ? '.' : '') +
+                    value
+            )
+          )
         })
         .then(() => {
           // setLatestValueSent(value)
@@ -1390,15 +1415,15 @@ function App() {
   //   // }
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     try {
-  //       if (isWebBluetoothEnabled()) autoConnectDevice()
-  //     } catch (error) {
-  //       console.log('error :>> ', error)
-  //     }
-  //   }, 500)
-  // })
+  useEffect(() => {
+    setTimeout(() => {
+      try {
+        if (isWebBluetoothEnabled()) autoConnectDevice()
+      } catch (error) {
+        console.log('error :>> ', error)
+      }
+    }, 500)
+  })
 
   return (
     <>
