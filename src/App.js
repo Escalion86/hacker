@@ -676,18 +676,18 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         />
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
-        <ItemWiFi title="Wi-Fi 1" size={size} index={5} />
-        <ItemWiFi title="Wi-Fi 2" size={size} index={5} />
-        <ItemWiFi title="Wi-Fi 3" size={size} index={6} />
-        <ItemWiFi title="Wi-Fi 4" size={size} index={7} />
-        <ItemWiFi title="Wi-Fi 5" size={size} index={8} />
-        <ItemWiFi title="Wi-Fi 6" size={size} index={8} hidden />
-        <ItemWiFi title="Wi-Fi 7" size={size} index={9} hidden />
-        <ItemWiFi title="Wi-Fi 8" size={size} index={10} hidden />
-        <ItemWiFi title="Wi-Fi 9" size={size} index={11} hidden />
-        <ItemWiFi title="Wi-Fi 10" size={size} index={12} hidden />
-        <ItemWiFi title="Wi-Fi 11" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi 12" size={size} index={14} hidden />
+        <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
+        <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
+        <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
+        <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
+        <ItemWiFi title="Telecoma-68C8" size={size} index={8} />
+        <ItemWiFi title="Wi-Fi" size={size} index={8} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={9} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={10} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -1404,15 +1404,15 @@ function App() {
   //   // }
   // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      try {
-        if (isWebBluetoothEnabled()) autoConnectDevice()
-      } catch (error) {
-        console.log('error :>> ', error)
-      }
-    }, 500)
-  })
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     try {
+  //       if (isWebBluetoothEnabled()) autoConnectDevice()
+  //     } catch (error) {
+  //       console.log('error :>> ', error)
+  //     }
+  //   }, 500)
+  // })
 
   return (
     <>
