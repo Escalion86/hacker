@@ -682,6 +682,42 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         {wifiSpots.map((title, index) => (
           <ItemWiFi key={title} title={title} size={size} index={index + 5} />
         ))}
+        {wifiSpots?.length < 1 && (
+          <ItemWiFi title="" size={size} index={5} hidden />
+        )}
+        {wifiSpots?.length < 2 && (
+          <ItemWiFi title="" size={size} index={5} hidden />
+        )}
+        {wifiSpots?.length < 3 && (
+          <ItemWiFi title="" size={size} index={6} hidden />
+        )}
+        {wifiSpots?.length < 4 && (
+          <ItemWiFi title="" size={size} index={7} hidden />
+        )}
+        {wifiSpots?.length < 5 && (
+          <ItemWiFi title="" size={size} index={8} hidden />
+        )}
+        {wifiSpots?.length < 6 && (
+          <ItemWiFi title="" size={size} index={9} hidden />
+        )}
+        {wifiSpots?.length < 7 && (
+          <ItemWiFi title="" size={size} index={10} hidden />
+        )}
+        {wifiSpots?.length < 8 && (
+          <ItemWiFi title="" size={size} index={11} hidden />
+        )}
+        {wifiSpots?.length < 9 && (
+          <ItemWiFi title="" size={size} index={12} hidden />
+        )}
+        {wifiSpots?.length < 10 && (
+          <ItemWiFi title="" size={size} index={13} hidden />
+        )}
+        {wifiSpots?.length < 11 && (
+          <ItemWiFi title="" size={size} index={14} hidden />
+        )}
+        {wifiSpots?.length < 12 && (
+          <ItemWiFi title="" size={size} index={15} hidden />
+        )}
         {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
         <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
         <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
