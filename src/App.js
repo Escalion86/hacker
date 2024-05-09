@@ -664,9 +664,8 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   useEffect(() => {
     if (startOnSetWiFiPage && !waitingForHack) {
       if (!hack) {
-        setWaitingForHack(true)
-        setTest('waiting')
         setTimeout(() => {
+          setTest('hacking')
           setHack(true)
           setWaitingForHack(false)
           if (!mode || mode === 'wifi') {
@@ -680,6 +679,8 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
             )
           }
         }, (localStorage.delay || 3) * 1000)
+        setWaitingForHack(true)
+        setTest('waiting')
       } else {
         setHack(false)
         setWaitingForHack(false)
@@ -687,15 +688,7 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         writeOnCharacteristic(' ', true)
       }
     }
-  }, [
-    startOnSetWiFiPage,
-    waitingForHack,
-    setWaitingForHack,
-    hack,
-    setHack,
-    mode,
-    writeOnCharacteristic,
-  ])
+  }, [startOnSetWiFiPage])
 
   return (
     <PageWrapper
