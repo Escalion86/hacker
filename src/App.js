@@ -38,10 +38,10 @@ import wifiSpotsAtom from './state/wifiSpotsAtom'
 import logsAtom from './state/logsAtom'
 
 //Define BLE Device Specs
-var deviceName = 'Hacker'
-var bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
-var ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
-var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
+const deviceName = 'Hacker'
+const bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
+const sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
+const ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
 
 //Global Variables to Handle Bluetooth
 var bleServer
@@ -1227,10 +1227,10 @@ function App() {
         bleServiceFound = service
         // setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
-        setLog((state) => [...state, 'Service discovered:' + service.uuid])
-        setBLEStatus('Device connected')
-        setShowConnectDeviceButton(false)
-        setIsConnected(true)
+        // setLog((state) => [...state, 'Service discovered:' + service.uuid])
+        // setBLEStatus('Device connected')
+        // setShowConnectDeviceButton(false)
+        // setIsConnected(true)
         // if (autostartName) {
         //   writeOnCharacteristic(autostartName)
         // }
