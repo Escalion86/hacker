@@ -1489,7 +1489,7 @@ function App() {
       {JSON.stringify(wifiSpots)} */}
       <div className="flex px-2 py-1 bg-black">
         {/* <div> */}
-        {(showConnectDeviceButton || true) && (
+        {showConnectDeviceButton && (
           <button
             className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
             onClick={() => {
