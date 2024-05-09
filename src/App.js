@@ -700,6 +700,7 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
       onClickBack={() => setPage('connections')}
     >
       <ItemsBlock>
+        <div className="text-white">{hack ? 'вкл' : 'выкл'}</div>
         <Item
           title="Включено"
           activeTitle={true}
