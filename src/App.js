@@ -1228,12 +1228,12 @@ function App() {
         // setBLEStatus('Service discovered:', service.uuid)
         console.log('Service discovered:', service.uuid)
         // setLog((state) => [...state, 'Service discovered:' + service.uuid])
-        // setBLEStatus('Device connected')
-        // setShowConnectDeviceButton(false)
-        // setIsConnected(true)
-        // if (autostartName) {
-        //   writeOnCharacteristic(autostartName)
-        // }
+        setBLEStatus('Device connected')
+        setShowConnectDeviceButton(false)
+        setIsConnected(true)
+        if (autostartName) {
+          writeOnCharacteristic(autostartName)
+        }
         return service.getCharacteristic(sensorCharacteristic)
       })
       .then((characteristic) => {
@@ -1259,10 +1259,10 @@ function App() {
         // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
         setWifiSpots(decodedValue.split('||'))
         setRetrievedValue(decodedValue)
-        setIsConnected(true)
-        if (autostartName) {
-          writeOnCharacteristic(autostartName)
-        }
+        // setIsConnected(true)
+        // if (autostartName) {
+        //   writeOnCharacteristic(autostartName)
+        // }
       })
       .catch((error) => {
         // setBLEStatus('Error: ', error)
