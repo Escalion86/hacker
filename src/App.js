@@ -515,6 +515,9 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
   const [mode, setMode] = useState(localStorage.mode)
   const [learn, setLearn] = useState(localStorage.learn)
   const [dot, setDot] = useState(localStorage.dot)
+  const [startOnSetWiFiPage, setStartOnSetWiFiPage] = useState(
+    localStorage.startOnSetWiFiPage
+  )
 
   return (
     <PageWrapper
@@ -561,9 +564,27 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           />
         </div>
       )}
+      <div className="flex flex-wrap items-center px-5 gap-x-3">
+        <label htmlFor="learn">Стартовать при переходе в меню Wi-Fi</label>
+        <input
+          id="learn"
+          type="checkbox"
+          className="switch_1"
+          checked={startOnSetWiFiPage === 'true'}
+          onChange={(e) => {
+            const newValue =
+              !localStorage.startOnSetWiFiPage ||
+              localStorage.startOnSetWiFiPage === 'false'
+                ? 'true'
+                : 'false'
+            localStorage.startOnSetWiFiPage = newValue
+            setStartOnSetWiFiPage(newValue)
+          }}
+        />
+      </div>
       <div className="flex flex-wrap items-center px-5 gap-x-1">
         <label htmlFor="delay">
-          Задержка в секундах от момента нажатия на тригер, до старта анимации
+          Задержка в секундах до старта анимации и трансляции спама
         </label>
         <input
           id="delay"
@@ -637,6 +658,31 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const mast = useRecoilValue(cardMastAtom)
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
+  const startOnSetWiFiPage = localStorage.startOnSetWiFiPage
+
+  useEffect(() => {
+    if (startOnSetWiFiPage && !waitingForHack) {
+      if (!hack) {
+        setWaitingForHack(true)
+        setTimeout(() => {
+          setHack(true)
+          setWaitingForHack(false)
+          if (!mode || mode === 'wifi') {
+            writeOnCharacteristic(localStorage.wifi, true)
+          } else if (mode === 'card') {
+            writeOnCharacteristic(
+              `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
+              true
+            )
+          }
+        }, (localStorage.delay || 3) * 1000)
+      } else {
+        setHack(false)
+        setWaitingForHack(false)
+        writeOnCharacteristic(' ', true)
+      }
+    }
+  }, [startOnSetWiFiPage, waitingForHack, hack, mode])
 
   return (
     <PageWrapper
