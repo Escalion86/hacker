@@ -1122,6 +1122,11 @@ function App() {
   function handleCharacteristicChange(event) {
     const newValueReceived = new TextDecoder().decode(event.target.value)
     console.log('Characteristic value changed: ', newValueReceived)
+    setLog((state) => [
+      ...state,
+      'Characteristic value changed: ' + newValueReceived,
+    ])
+    setWifiSpots(newValueReceived.split('||'))
     setRetrievedValue(newValueReceived)
     setTimestampContainer(getDateTime())
   }
