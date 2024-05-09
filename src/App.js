@@ -34,12 +34,13 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import hackAtom from './state/hackAtom'
 import cardSuitAtom from './state/cardSuitAtom'
 import cardMastAtom from './state/cardMastAtom'
+import wifiSpotsAtom from './state/wifiSpotsAtom'
 
 //Define BLE Device Specs
 var deviceName = 'Hacker'
 var bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
 var ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
-// var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
+var sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
 
 //Global Variables to Handle Bluetooth
 var bleServer
@@ -630,11 +631,13 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
 }
 
 const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
+  const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
   const [waitingForHack, setWaitingForHack] = useState(false)
   const mast = useRecoilValue(cardMastAtom)
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
+  console.log('wifiSpots :>> ', wifiSpots)
 
   return (
     <PageWrapper
@@ -676,7 +679,10 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         />
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
-        <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
+        {wifiSpots.map((title, index) => (
+          <ItemWiFi key={title} title={title} size={size} index={index + 5} />
+        ))}
+        {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
         <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
         <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
         <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
@@ -687,7 +693,7 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
         <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
         <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden />
+        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden /> */}
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -1038,6 +1044,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
 }
 
 function App() {
+  const setWifiSpots = useSetRecoilState(wifiSpotsAtom)
   const [BLEStatus, setBLEStatus] = useState('-')
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hack = useRecoilValue(hackAtom)
@@ -1159,7 +1166,7 @@ function App() {
     }
   }
 
-  const afterConnectDevice = (promise, autostartName) =>
+  const afterConnectDevice = (promise, autostartName = false) =>
     promise
       .then((gattServer) => {
         bleServer = gattServer
@@ -1174,35 +1181,36 @@ function App() {
         setBLEStatus('Device connected')
         setShowConnectDeviceButton(false)
         setIsConnected(true)
+        // if (autostartName) {
+        //   writeOnCharacteristic(autostartName)
+        // }
+        return service.getCharacteristic(sensorCharacteristic)
+      })
+      .then((characteristic) => {
+        setBLEStatus('Characteristic discovered:', characteristic.uuid)
+        console.log('Characteristic discovered:', characteristic.uuid)
+        sensorCharacteristicFound = characteristic
+        characteristic.addEventListener(
+          'characteristicvaluechanged',
+          handleCharacteristicChange
+        )
+        characteristic.startNotifications()
+        console.log('Notifications Started.')
+        return characteristic.readValue()
+      })
+      .then((value) => {
+        setBLEStatus('Read value: ', value)
+        console.log('Read value: ', value)
+        const decodedValue = new TextDecoder().decode(value)
+        setBLEStatus('Decoded value: ', decodedValue)
+        console.log('Decoded value: ', decodedValue)
+        setWifiSpots(decodedValue.split('||'))
+        setRetrievedValue(decodedValue)
+        setIsConnected(true)
         if (autostartName) {
           writeOnCharacteristic(autostartName)
         }
-        // return service.getCharacteristic(sensorCharacteristic)
       })
-      // .then((characteristic) => {
-      //   setBLEStatus('Characteristic discovered:', characteristic.uuid)
-      //   console.log('Characteristic discovered:', characteristic.uuid)
-      //   sensorCharacteristicFound = characteristic
-      //   characteristic.addEventListener(
-      //     'characteristicvaluechanged',
-      //     handleCharacteristicChange
-      //   )
-      //   characteristic.startNotifications()
-      //   console.log('Notifications Started.')
-      //   return characteristic.readValue()
-      // })
-      // .then((value) => {
-      //   setBLEStatus('Read value: ', value)
-      //   console.log('Read value: ', value)
-      //   const decodedValue = new TextDecoder().decode(value)
-      //   setBLEStatus('Decoded value: ', decodedValue)
-      //   console.log('Decoded value: ', decodedValue)
-      //   setRetrievedValue(decodedValue)
-      //   setIsConnected(true)
-      //   // if (autostart) {
-      //   //   writeOnCharacteristic(localStorage.wifi)
-      //   // }
-      // })
       .catch((error) => {
         // setBLEStatus('Error: ', error)
         console.log('Error: ', error)
@@ -1287,6 +1295,7 @@ function App() {
       //   console.log('Read value: ', value)
       //   const decodedValue = new TextDecoder().decode(value)
       //   console.log('Decoded value: ', decodedValue)
+      //   setWifiSpots(decodedValue)
       //   setRetrievedValue(decodedValue)
       //   setIsConnected(true)
       //   if (autostart) {
@@ -1404,15 +1413,15 @@ function App() {
   //   // }
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     try {
-  //       if (isWebBluetoothEnabled()) autoConnectDevice()
-  //     } catch (error) {
-  //       console.log('error :>> ', error)
-  //     }
-  //   }, 500)
-  // })
+  useEffect(() => {
+    setTimeout(() => {
+      try {
+        if (isWebBluetoothEnabled()) autoConnectDevice()
+      } catch (error) {
+        console.log('error :>> ', error)
+      }
+    }, 500)
+  })
 
   return (
     <>
