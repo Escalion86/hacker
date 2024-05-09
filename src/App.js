@@ -658,7 +658,7 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const mast = useRecoilValue(cardMastAtom)
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
-  const startOnSetWiFiPage = localStorage.startOnSetWiFiPage
+  const startOnSetWiFiPage = localStorage.startOnSetWiFiPage === 'true'
 
   useEffect(() => {
     if (startOnSetWiFiPage && !waitingForHack) {
