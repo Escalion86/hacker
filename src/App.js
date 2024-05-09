@@ -1245,9 +1245,9 @@ function App() {
         return characteristic.readValue()
       })
       .then((value) => {
-        setBLEStatus('Read value: ', value)
-        console.log('Read value: ', value)
-        setLog((state) => [...state, 'Read value: ' + value])
+        // setBLEStatus('Read value: ', value)
+        // console.log('Read value: ', value)
+        // setLog((state) => [...state, 'Read value: ' + value])
         const decodedValue = new TextDecoder().decode(value)
         setBLEStatus('Decoded value: ', decodedValue)
         console.log('Decoded value: ', decodedValue)
