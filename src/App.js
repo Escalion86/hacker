@@ -682,7 +682,15 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
         writeOnCharacteristic(' ', true)
       }
     }
-  }, [startOnSetWiFiPage, waitingForHack, hack, mode])
+  }, [
+    startOnSetWiFiPage,
+    waitingForHack,
+    setWaitingForHack,
+    hack,
+    setHack,
+    mode,
+    writeOnCharacteristic,
+  ])
 
   return (
     <PageWrapper
