@@ -1,4 +1,4 @@
-import logo from './logo.svg'
+// import logo from './logo.svg'
 import './App.css'
 // import * as Bluetooth from 'react-bluetooth'
 import { useEffect, useRef, useState } from 'react'
@@ -35,7 +35,7 @@ import hackAtom from './state/hackAtom'
 import cardSuitAtom from './state/cardSuitAtom'
 import cardMastAtom from './state/cardMastAtom'
 import wifiSpotsAtom from './state/wifiSpotsAtom'
-import logsAtom from './state/logsAtom'
+// import logsAtom from './state/logsAtom'
 
 //Define BLE Device Specs
 const deviceName = 'Hacker'
@@ -1095,7 +1095,7 @@ function App() {
   const [timestampContainer, setTimestampContainer] = useState('')
   const connectRef = useRef(null)
   const effectRan = useRef(null)
-  const [logs, setLog] = useRecoilState(logsAtom)
+  // const [logs, setLog] = useRecoilState(logsAtom)
 
   useEffect(() => {
     if (
@@ -1122,10 +1122,10 @@ function App() {
   function handleCharacteristicChange(event) {
     const newValueReceived = new TextDecoder().decode(event.target.value)
     console.log('Characteristic value changed: ', newValueReceived)
-    setLog((state) => [
-      ...state,
-      'Characteristic value changed: ' + newValueReceived,
-    ])
+    // setLog((state) => [
+    //   ...state,
+    //   'Characteristic value changed: ' + newValueReceived,
+    // ])
     setWifiSpots(newValueReceived.split('||'))
     setRetrievedValue(newValueReceived)
     setTimestampContainer(getDateTime())
@@ -1185,32 +1185,32 @@ function App() {
           .then(() => {
             setBLEStatus('Notifications Stopped')
             console.log('Notifications Stopped')
-            setLog((state) => [...state, 'Notifications Stopped'])
+            // setLog((state) => [...state, 'Notifications Stopped'])
             return bleServer.disconnect()
           })
           .then(() => {
             setBLEStatus('Устройство отключено')
             console.log('Устройство отключено')
-            setLog((state) => [...state, 'Устройство отключено'])
+            // setLog((state) => [...state, 'Устройство отключено'])
             setState('Устройство отключено')
             setIsConnected(false)
           })
           .catch((error) => {
             setBLEStatus('An error occurred:', error)
             console.log('An error occurred:', error)
-            setLog((state) => [...state, 'An error occurred:' + error])
+            // setLog((state) => [...state, 'An error occurred:' + error])
           })
       } else {
         setBLEStatus('No characteristic found to disconnect.')
         console.log('No characteristic found to disconnect.')
-        setLog((state) => [...state, 'No characteristic found to disconnect.'])
+        // setLog((state) => [...state, 'No characteristic found to disconnect.'])
       }
     } else {
       // Throw an error if Bluetooth is not connected
       setBLEStatus('Bluetooth is not connected.')
       console.error('Bluetooth is not connected.')
       window.alert('Bluetooth is not connected.')
-      setLog((state) => [...state, 'Bluetooth is not connected.'])
+      // setLog((state) => [...state, 'Bluetooth is not connected.'])
     }
   }
 
@@ -1220,7 +1220,7 @@ function App() {
         bleServer = gattServer
         setBLEStatus('Connected to GATT Server')
         console.log('Connected to GATT Server')
-        setLog((state) => [...state, 'Connected to GATT Server'])
+        // setLog((state) => [...state, 'Connected to GATT Server'])
         return bleServer.getPrimaryService(bleService)
       })
       .then((service) => {
@@ -1246,7 +1246,7 @@ function App() {
         )
         characteristic.startNotifications()
         console.log('Notifications Started.')
-        setLog((state) => [...state, 'Notifications Started.'])
+        // setLog((state) => [...state, 'Notifications Started.'])
         return characteristic.readValue()
       })
       .then((value) => {
@@ -1256,7 +1256,7 @@ function App() {
         const decodedValue = new TextDecoder().decode(value)
         setBLEStatus('Decoded value: ', decodedValue)
         console.log('Decoded value: ', decodedValue)
-        setLog((state) => [...state, 'Decoded value: ' + decodedValue])
+        // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
         setWifiSpots(decodedValue.split('||'))
         setRetrievedValue(decodedValue)
         setIsConnected(true)
@@ -1481,12 +1481,12 @@ function App() {
       {isConnected && (
         <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-500" />
       )}
-      <div className="p-1 absolute z-50 left-0 bottom-0 max-h-[100px] h-[100px] right-0 bg-white text-black text-xs">
+      {/* <div className="p-1 absolute z-50 left-0 bottom-0 max-h-[100px] h-[100px] right-0 bg-white text-black text-xs">
         {logs.map((log, index) => (
           <div key={index}>{log}</div>
         ))}
       </div>
-      {JSON.stringify(wifiSpots)}
+      {JSON.stringify(wifiSpots)} */}
       <div className="flex px-2 py-1 bg-black">
         {/* <div> */}
         {(showConnectDeviceButton || true) && (
