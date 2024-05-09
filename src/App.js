@@ -659,20 +659,16 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
   const startOnSetWiFiPage = localStorage.startOnSetWiFiPage === 'true'
-  const [test, setTest] = useState('test')
 
   useEffect(() => {
     if (startOnSetWiFiPage && !waitingForHack) {
       if (!hack) {
         setTimeout(() => {
-          setTest('hacking')
           setHack(true)
           setWaitingForHack(false)
           if (!mode || mode === 'wifi') {
-            setTest('wifi')
             writeOnCharacteristic(localStorage.wifi, true)
           } else if (mode === 'card') {
-            setTest('card')
             writeOnCharacteristic(
               `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
               true
@@ -680,11 +676,9 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
           }
         }, (localStorage.delay || 3) * 1000)
         setWaitingForHack(true)
-        setTest('waiting')
       } else {
         setHack(false)
         setWaitingForHack(false)
-        setTest('turnOff')
         writeOnCharacteristic(' ', true)
       }
     }
@@ -698,7 +692,6 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
       onClickBack={() => setPage('connections')}
     >
       <ItemsBlock>
-        <div className="text-white">{test}</div>
         <Item
           title="Включено"
           activeTitle={true}
