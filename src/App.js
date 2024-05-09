@@ -637,7 +637,6 @@ const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
   const mast = useRecoilValue(cardMastAtom)
   const suit = useRecoilValue(cardSuitAtom)
   const mode = localStorage.mode
-  console.log('wifiSpots :>> ', wifiSpots)
 
   return (
     <PageWrapper
@@ -1081,6 +1080,7 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
 
 function App() {
   const setWifiSpots = useSetRecoilState(wifiSpotsAtom)
+  const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [BLEStatus, setBLEStatus] = useState('-')
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hack = useRecoilValue(hackAtom)
@@ -1464,6 +1464,7 @@ function App() {
       {isConnected && (
         <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-500" />
       )}
+      {JSON.stringify(wifiSpots)}
       <div className="flex px-2 py-1 bg-black">
         {/* <div> */}
         {showConnectDeviceButton && (
