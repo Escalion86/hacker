@@ -49,7 +49,6 @@ var bleServiceFound
 var sensorCharacteristicFound
 
 const suits = [
-  '?',
   'A',
   '2',
   '3',
@@ -65,8 +64,8 @@ const suits = [
   'K',
   'JOKER',
 ]
-const masts = [' ', '♠', '♥', '♣', '♦']
-const mastsEmoji = [' ', `\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
+const masts = ['♠', '♥', '♣', '♦']
+const mastsEmoji = [`\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
 
 // Connect Button (search for BLE Devices only if BLE is available)
 // connectButton.addEventListener('click', (event) => {
@@ -184,7 +183,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
         } else if (mode === 'card') {
           setTitleState(
             `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
-              suit <= 13 ? mastsEmoji[mast] : ''
+              suit <= 12 ? mastsEmoji[mast] : ''
             }`
           )
         }
@@ -864,6 +863,9 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           }}
           hiddenSwipeElementsFunc={[
             () => {
+              setMast(0)
+            },
+            () => {
               setMast(1)
             },
             () => {
@@ -872,11 +874,8 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
             () => {
               setMast(3)
             },
-            () => {
-              setMast(4)
-            },
           ]}
-          hiddenSwipeElementsNames={[masts[1], masts[2], masts[3], masts[4]]}
+          hiddenSwipeElementsNames={[masts[0], masts[1], masts[2], masts[3]]}
         />
         <Item
           title="Подключенные устройства"
@@ -884,12 +883,12 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
           size={size}
           hiddenSwipeElementsFunc={[
+            () => setSuit(0),
             () => setSuit(1),
             () => setSuit(2),
             () => setSuit(3),
-            () => setSuit(4),
           ]}
-          hiddenSwipeElementsNames={[suits[1], suits[2], suits[3], suits[4]]}
+          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
         />
       </ItemsBlock>
       <ItemsBlock>
@@ -899,12 +898,12 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           subItems={['Режимы', 'Сценарии']}
           size={size}
           hiddenSwipeElementsFunc={[
+            () => setSuit(4),
             () => setSuit(5),
             () => setSuit(6),
             () => setSuit(7),
-            () => setSuit(8),
           ]}
-          hiddenSwipeElementsNames={[suits[5], suits[6], suits[7], suits[8]]}
+          hiddenSwipeElementsNames={[suits[4], suits[5], suits[6], suits[7]]}
         />
         <Item
           title="Звуки и вибрация"
@@ -912,20 +911,20 @@ const GeneralPage = ({ size, toggleTheme, setPage }) => {
           subItems={['Режим звука', 'Мелодия звонка']}
           size={size}
           hiddenSwipeElementsFunc={[
+            () => setSuit(8),
             () => setSuit(9),
             () => setSuit(10),
             () => setSuit(11),
-            () => setSuit(12),
           ]}
-          hiddenSwipeElementsNames={[suits[9], suits[10], suits[11], suits[12]]}
+          hiddenSwipeElementsNames={[suits[8], suits[9], suits[10], suits[11]]}
         />
         <Item
           title="Уведомления"
           Icon={NotificationsIcon}
           subItems={['Строка состояния', 'Не беспокоить']}
           size={size}
-          hiddenSwipeElementsFunc={[() => setSuit(13), () => setSuit(14)]}
-          hiddenSwipeElementsNames={[suits[13], suits[14]]}
+          hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
+          hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
       </ItemsBlock>
       <ItemsBlock>
