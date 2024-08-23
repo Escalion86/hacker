@@ -78,7 +78,9 @@ const PageWrapper = ({
       >
         {title}
       </div>
-      {!noSearchIcon && <SearchIcon size={size} />}
+      {!noSearchIcon && (
+        <SearchIcon size={size} className="fill-black dark:fill-white" />
+      )}
     </div>
     {children}
   </div>

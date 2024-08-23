@@ -36,6 +36,11 @@ import SearchIcon from '../icons/SearchIcon'
 import ArrowBack from '../icons/ArrowBack'
 import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
+import { motion, useScroll, useTransform } from 'framer-motion'
+
+function useParallax(value, distance) {
+  return useTransform(value, [0, 1], [-distance, distance])
+}
 
 const PageWrapper = ({
   title,
@@ -44,45 +49,105 @@ const PageWrapper = ({
   onClickBack,
   activeTitle,
   noSearchIcon,
-}) => (
-  <div
-    className={cn(
-      'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll pb-5',
-      size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
-    )}
-  >
+  collapsedTitle = false,
+}) => {
+  const { scrollY } = useScroll()
+
+  // const height = useTransform(scrollYProgress, [0, 100], [100, 60])
+  // console.log('height :>> ', height)
+  // useEffect(() => {
+  //   window.addEventListener('scroll', function () {
+  //     let scroll = window.scrollY
+  //     console.log('scroll :>> ', scroll)
+  //     let title = document.querySelector('.title')
+  //     title.style.transform =
+  //       'translate3d(0,' +
+  //       scroll / 100 +
+  //       '%,0) scale(' +
+  //       (100 - scroll / 100) / 100 +
+  //       ')'
+  //   })
+  // }, [])
+
+  const height = useTransform(scrollY, [0, 200], [160, 0])
+  const opacity = useTransform(scrollY, [0, 100], [1, 0])
+  const opacity2 = useTransform(scrollY, [100, 200], [0, 1])
+
+  return (
     <div
       className={cn(
-        'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-        size === 'small'
-          ? 'pl-5 pr-4 pt-5 pb-3'
-          : size === 'big'
-          ? 'pl-6 pr-6 pt-8 pb-3.5'
-          : 'pl-6 pr-5 pt-6 pb-3.5'
+        'min-h-[calc(100vh+250px)] select-none px-0.5 dark:text-white text-black bg-[#f6f6f8] dark:bg-black flex flex-col gap-x-2 pb-5'
       )}
-      // onClick={toggleTheme}
+      // style={{
+      //   scrollSnapType: 'y mandatory',
+      // }}
     >
-      {onClickBack && (
-        <div
-          onClick={onClickBack}
-          className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+      <div
+        style={{ height: 250 }}
+        className="flex flex-col items-center justify-end w-full"
+      >
+        <motion.div
+          className="z-50 flex items-center justify-center overflow-hidden text-4xl"
+          // style={{ height: 100, minHeight: 100 }}
+          style={{ height, opacity, scrollSnapAlign: 'center' }}
+          // style={{
+
+          //   minHeight: height,
+          //   height,
+          //   y: 300,
+          // }}
         >
-          <ArrowBack size={size} />
-        </div>
-      )}
+          {title}
+        </motion.div>
+      </div>
       <div
         className={cn(
-          'text-left flex-1',
-          size === 'small' ? 'text-lg' : size === 'big' ? 'text-2xl' : 'text-xl'
+          'bg-[#f6f6f8] -mb-[72px] dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
+          size === 'small'
+            ? 'pl-5 pr-4 pt-5 pb-3'
+            : size === 'big'
+            ? 'pl-6 pr-6 pt-8 pb-3.5'
+            : 'pl-6 pr-5 pt-6 pb-3.5'
         )}
+        // onClick={toggleTheme}
       >
-        {title}
+        {onClickBack && (
+          <div
+            onClick={onClickBack}
+            className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+          >
+            <ArrowBack size={size} className="fill-black dark:fill-white" />
+          </div>
+        )}
+        <motion.div
+          className={cn(
+            'text-left flex-1 font-bold',
+            size === 'small'
+              ? 'text-lg'
+              : size === 'big'
+              ? 'text-2xl'
+              : 'text-xl'
+          )}
+          style={{ opacity: opacity2 }}
+        >
+          {title}
+        </motion.div>
+        {!noSearchIcon && (
+          <SearchIcon size={size} className="fill-black dark:fill-white" />
+        )}
       </div>
-      {!noSearchIcon && <SearchIcon size={size} />}
+      <div
+        className={cn(
+          'flex flex-col pt-[94px]',
+          size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
+        )}
+        style={{ scrollSnapAlign: 'start' }}
+      >
+        {children}
+      </div>
     </div>
-    {children}
-  </div>
-)
+  )
+}
 
 const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   const hack = useRecoilValue(hackAtom)
@@ -266,8 +331,8 @@ const Item = ({
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl',
-        activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
+        'relative font-semibold group first:rounded-t-3xl last:rounded-b-3xl',
+        activeTitle ? 'bg-[#2d2d2f]' : 'bg-[#fcfcfe] dark:bg-dark'
       )}
     >
       <div
@@ -314,7 +379,7 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'pointer-events-none mr-1.5',
+              'pointer-events-none mr-3',
               size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
             )}
           >
@@ -323,13 +388,13 @@ const Item = ({
         )}
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t dark:border-[#3a3a3c] border-[#e2e2e4]',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
           <div
             className={cn(
-              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+              'flex-1 pointer-events-none gap-x-2 flex-col items-start'
             )}
           >
             <div
@@ -411,6 +476,7 @@ export const WiFiPage = ({
   toggleTheme,
   setPage,
   writeOnCharacteristic,
+  className,
 }) => {
   const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
@@ -450,6 +516,7 @@ export const WiFiPage = ({
       toggleTheme={toggleTheme}
       title="Wi-Fi"
       onClickBack={() => setPage('connections')}
+      className={className}
     >
       <ItemsBlock>
         <Item
@@ -548,13 +615,14 @@ export const WiFiPage = ({
   )
 }
 
-export const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
+export const ConnectionsPage = ({ size, toggleTheme, setPage, className }) => {
   return (
     <PageWrapper
       size={size}
       toggleTheme={toggleTheme}
       title="Подключения"
       onClickBack={() => setPage('general')}
+      className={className}
     >
       <ItemsBlock>
         <Item
@@ -624,12 +692,12 @@ export const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
   )
 }
 
-export const GeneralPage = ({ size, setPage }) => {
+export const GeneralPage = ({ size, setPage, className }) => {
   const setSuit = useSetRecoilState(cardSuitAtom)
   const setMast = useSetRecoilState(cardMastAtom)
 
   return (
-    <PageWrapper size={size} title="Настройки">
+    <PageWrapper size={size} title="Настройки" className={className}>
       <ItemsBlock>
         <Item
           title="Алексей Белинский"
@@ -638,7 +706,7 @@ export const GeneralPage = ({ size, setPage }) => {
         >
           <div
             className={cn(
-              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
+              'absolute p-[1px] rounded-full border border-[#f6f6f8] dark:border-[#2c2d2f]',
               size === 'small'
                 ? 'h-[68px] w-[68px] right-5 -top-3'
                 : size === 'big'

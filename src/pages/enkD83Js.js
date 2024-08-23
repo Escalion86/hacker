@@ -43,7 +43,7 @@ const PageWrapper = ({
   children,
   onClickBack,
   activeTitle,
-  noSearchIcon,
+  noScanIcon,
 }) => (
   <div
     className={cn(
@@ -78,7 +78,9 @@ const PageWrapper = ({
       >
         {title}
       </div>
-      {!noSearchIcon && <SearchIcon size={size} />}
+      {!noScanIcon && (
+        <SearchIcon size={size} className="fill-black dark:fill-white" />
+      )}
     </div>
     {children}
   </div>

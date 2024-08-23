@@ -8,6 +8,8 @@ import ArrowBack from './icons/ArrowBack'
 import { useSetRecoilState } from 'recoil'
 import wifiSpotsAtom from './state/wifiSpotsAtom'
 import accessCodes from './accessCodes'
+import Switch from './components/Switch'
+import Button from './components/Button'
 // import logsAtom from './state/logsAtom'
 
 //Define BLE Device Specs
@@ -37,19 +39,29 @@ var sensorCharacteristicFound
 
 // Check if BLE is available in your Browser
 
-function toggleTheme() {
+function toggleTheme(theme) {
   let htmlClasses = document.querySelector('html').classList
-  if (
-    (localStorage.theme = 'dark')
-    // localStorage.AppName === 'hacker'
-  ) {
-    // localStorage.removeItem('AppName')
-    htmlClasses.remove('dark')
-    localStorage.theme = 'light'
+  if (theme) {
+    if (theme === 'dark') {
+      htmlClasses.add('dark')
+      localStorage.theme = 'dark'
+    } else {
+      htmlClasses.remove('dark')
+      localStorage.theme = 'light'
+    }
   } else {
-    // localStorage.AppName = 'hacker'
-    htmlClasses.add('dark')
-    localStorage.theme = 'dark'
+    if (
+      localStorage.theme === 'dark'
+      // localStorage.AppName === 'hacker'
+    ) {
+      // localStorage.removeItem('AppName')
+      htmlClasses.remove('dark')
+      localStorage.theme = 'light'
+    } else {
+      // localStorage.AppName = 'hacker'
+      htmlClasses.add('dark')
+      localStorage.theme = 'dark'
+    }
   }
 }
 
@@ -83,7 +95,7 @@ const PageWrapper = ({
           onClick={onClickBack}
           className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
         >
-          <ArrowBack size={size} />
+          <ArrowBack size={size} className="fill-black dark:fill-white" />
         </div>
       )}
       <div
@@ -94,7 +106,9 @@ const PageWrapper = ({
       >
         {title}
       </div>
-      {!noSearchIcon && <SearchIcon size={size} />}
+      {!noSearchIcon && (
+        <SearchIcon size={size} className="fill-black dark:fill-white" />
+      )}
     </div>
     {children}
   </div>
@@ -103,6 +117,7 @@ const PageWrapper = ({
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
   const [mode, setMode] = useState(localStorage.mode)
   const [learn, setLearn] = useState(localStorage.learn)
+  const [theme, setTheme] = useState(localStorage.theme)
   const [dot, setDot] = useState(localStorage.dot)
   const [startOnSetWiFiPage, setStartOnSetWiFiPage] = useState(
     localStorage.startOnSetWiFiPage
@@ -111,19 +126,30 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
   return (
     <PageWrapper
       size={size}
-      toggleTheme={toggleTheme}
       title="Настройка Hacker"
       onClickBack={() => {
         localStorage.startPage = 'general'
         setPage('general')
       }}
+      noSearchIcon
     >
+      <Switch
+        id="theme"
+        label="Тёмная тема"
+        checked={theme === 'dark'}
+        onChange={(e) => {
+          const newValue = !theme || theme === 'light' ? 'dark' : 'light'
+          // localStorage.theme = newValue
+          setTheme(newValue)
+          toggleTheme(newValue)
+        }}
+      />
       <div className="flex flex-wrap items-center px-5 gap-x-1">
         <label htmlFor="mode">Режим:</label>
         <select
           id="mode"
           defaultValue={mode}
-          className="px-2 py-1 text-white bg-dark"
+          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
           onChange={(e) => {
             localStorage.mode = e.target.value
             setMode(e.target.value)
@@ -131,6 +157,7 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
         >
           <option
             value="wifi"
+            // className="bg-gray-200 text-dark"
             // selected={localStorage.mode === 'wifi'}
           >
             Слово
@@ -148,7 +175,7 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           <label htmlFor="wifiname">Название точки Wi-Fi</label>
           <input
             id="wifiname"
-            className="px-2 py-1 text-white bg-dark"
+            className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
             defaultValue={localStorage.wifi || 'Hacked'}
             onChange={(e) => {
               localStorage.wifi = e.target.value
@@ -156,24 +183,20 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           />
         </div>
       )}
-      <div className="flex flex-wrap items-center px-5 gap-x-3">
-        <label htmlFor="learn">Стартовать при переходе в меню Wi-Fi</label>
-        <input
-          id="learn"
-          type="checkbox"
-          className="switch_1"
-          checked={startOnSetWiFiPage === 'true'}
-          onChange={(e) => {
-            const newValue =
-              !localStorage.startOnSetWiFiPage ||
-              localStorage.startOnSetWiFiPage === 'false'
-                ? 'true'
-                : 'false'
-            localStorage.startOnSetWiFiPage = newValue
-            setStartOnSetWiFiPage(newValue)
-          }}
-        />
-      </div>
+      <Switch
+        id="learn"
+        label="Стартовать при переходе в меню Wi-Fi"
+        checked={startOnSetWiFiPage === 'true'}
+        onChange={(e) => {
+          const newValue =
+            !localStorage.startOnSetWiFiPage ||
+            localStorage.startOnSetWiFiPage === 'false'
+              ? 'true'
+              : 'false'
+          localStorage.startOnSetWiFiPage = newValue
+          setStartOnSetWiFiPage(newValue)
+        }}
+      />
       <div className="flex flex-wrap items-center px-5 gap-x-1">
         <label htmlFor="delay">
           Задержка в секундах до старта анимации и трансляции спама
@@ -181,7 +204,7 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
         <input
           id="delay"
           type="number"
-          className="px-2 py-1 text-white bg-dark"
+          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
           defaultValue={localStorage.delay || 3}
           onChange={(e) => {
             localStorage.delay = e.target.value
@@ -195,56 +218,43 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
         <input
           id="minutesBeforeStop"
           type="number"
-          className="px-2 py-1 text-white bg-dark"
+          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
           defaultValue={localStorage.minutesBeforeStop || 3}
           onChange={(e) => {
             localStorage.minutesBeforeStop = e.target.value
           }}
         />
       </div>
-      <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label htmlFor="dot">
-          Добавить "." в начале названия точки (чтобы wi-fi точки были вверху
-          списка)
-        </label>
-        <input
-          id="dot"
-          type="checkbox"
-          className="switch_1"
-          checked={dot === 'true'}
-          onChange={(e) => {
-            const newValue =
-              !localStorage.dot || localStorage.dot === 'false'
-                ? 'true'
-                : 'false'
-            localStorage.dot = newValue
-            setDot(newValue)
-          }}
-        />
-      </div>
-      <div className="flex flex-wrap items-center px-5 gap-x-3">
-        <label htmlFor="learn">Режим обучения</label>
-        <input
-          id="learn"
-          type="checkbox"
-          className="switch_1"
-          checked={learn === 'true'}
-          onChange={(e) => {
-            const newValue =
-              !localStorage.learn || localStorage.learn === 'false'
-                ? 'true'
-                : 'false'
-            localStorage.learn = newValue
-            setLearn(newValue)
-          }}
-        />
-      </div>
-      <button
-        className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
-        onClick={() => setPage('firstStartPage')}
-      >
-        Сменить учетную запись (ввести другой код доступа)
-      </button>
+      <Switch
+        id="dot"
+        label={`Добавить "." в начале названия точки (чтобы wi-fi точки были вверху
+          списка)`}
+        checked={dot === 'true'}
+        onChange={(e) => {
+          const newValue =
+            !localStorage.dot || localStorage.dot === 'false' ? 'true' : 'false'
+          localStorage.dot = newValue
+          setDot(newValue)
+        }}
+      />
+      <Switch
+        id="learn"
+        label="Режим обучения"
+        checked={learn === 'true'}
+        onChange={(e) => {
+          const newValue =
+            !localStorage.learn || localStorage.learn === 'false'
+              ? 'true'
+              : 'false'
+          localStorage.learn = newValue
+          setLearn(newValue)
+        }}
+      />
+      <Button onClick={() => setPage('firstStartPage')}>
+        Сменить учетную запись
+        <br />
+        (ввести другой код доступа)
+      </Button>
     </PageWrapper>
   )
 }
@@ -268,8 +278,7 @@ const FirstStartPage = ({ size, setPage, setAccessCode }) => {
           }}
         />
       </div>
-      <button
-        className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
+      <Button
         onClick={() => {
           if (accessCodes[accessCodeInput]) {
             localStorage.accessCode = accessCodeInput
@@ -279,7 +288,7 @@ const FirstStartPage = ({ size, setPage, setAccessCode }) => {
         }}
       >
         Ввести код
-      </button>
+      </Button>
       {wrongCode && <div className="font-bold text-red-500">Код не верен</div>}
     </PageWrapper>
   )
@@ -705,15 +714,14 @@ function App() {
         <div className="flex px-2 py-1 bg-black">
           {/* <div> */}
 
-          <button
-            className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
+          <Button
             onClick={() => {
               if (isWebBluetoothEnabled()) connectToDevice()
               // chrome://flags/#enable-web-bluetooth-new-permissions-backend
             }}
           >
             !!! Подключить устройство hacker !!!
-          </button>
+          </Button>
 
           {/* {!isConnected && (
         <button
