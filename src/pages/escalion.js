@@ -545,7 +545,7 @@ export const WiFiPage = ({
   writeOnCharacteristic,
   className,
 }) => {
-  const wifiSpots = ['123', '456', '789'] // useRecoilValue(wifiSpotsAtom)
+  const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
   const [waitingForHack, setWaitingForHack] = useState(false)
   const mast = useRecoilValue(cardMastAtom)
@@ -629,40 +629,112 @@ export const WiFiPage = ({
           />
         ))}
         {wifiSpots?.length < 1 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={5}
+            hidden
+            level={wiFiSpotsLevels[0]}
+          />
         )}
         {wifiSpots?.length < 2 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={5}
+            hidden
+            level={wiFiSpotsLevels[1]}
+          />
         )}
         {wifiSpots?.length < 3 && (
-          <ItemWiFi title="" size={size} index={6} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={6}
+            hidden
+            level={wiFiSpotsLevels[2]}
+          />
         )}
         {wifiSpots?.length < 4 && (
-          <ItemWiFi title="" size={size} index={7} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={7}
+            hidden
+            level={wiFiSpotsLevels[3]}
+          />
         )}
         {wifiSpots?.length < 5 && (
-          <ItemWiFi title="" size={size} index={8} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={8}
+            hidden
+            level={wiFiSpotsLevels[4]}
+          />
         )}
         {wifiSpots?.length < 6 && (
-          <ItemWiFi title="" size={size} index={9} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={9}
+            hidden
+            level={wiFiSpotsLevels[5]}
+          />
         )}
         {wifiSpots?.length < 7 && (
-          <ItemWiFi title="" size={size} index={10} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={10}
+            hidden
+            level={wiFiSpotsLevels[6]}
+          />
         )}
         {wifiSpots?.length < 8 && (
-          <ItemWiFi title="" size={size} index={11} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={11}
+            hidden
+            level={wiFiSpotsLevels[7]}
+          />
         )}
         {wifiSpots?.length < 9 && (
-          <ItemWiFi title="" size={size} index={12} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={12}
+            hidden
+            level={wiFiSpotsLevels[8]}
+          />
         )}
         {wifiSpots?.length < 10 && (
-          <ItemWiFi title="" size={size} index={13} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={13}
+            hidden
+            level={wiFiSpotsLevels[9]}
+          />
         )}
         {wifiSpots?.length < 11 && (
-          <ItemWiFi title="" size={size} index={14} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={14}
+            hidden
+            level={wiFiSpotsLevels[10]}
+          />
         )}
         {wifiSpots?.length < 12 && (
-          <ItemWiFi title="1313" size={size} index={15} />
+          <ItemWiFi
+            title="1313"
+            size={size}
+            index={15}
+            hidden
+            level={wiFiSpotsLevels[11]}
+          />
         )}
         <ItemWiFiAdd size={size} />
       </ItemsBlock>
