@@ -1,40 +1,13 @@
 // import logo from './logo.svg'
 import './App.css'
 // import * as Bluetooth from 'react-bluetooth'
-import { useEffect, useRef, useState } from 'react'
-import WiFiIcon from './icons/WiFiIcon'
+import { useEffect, useState } from 'react'
 import cn from 'classnames'
-import ConnectedDevicesIcon from './icons/ConnectedDevicesIcon'
-import ScenariosIcon from './icons/ScenariosIcon'
-import SoundIcon from './icons/SoundIcon'
-import NotificationsIcon from './icons/NotificationsIcon'
-import BateryIcon from './icons/BateryIcon'
-import DisplayIcon from './icons/DisplayIcon'
 import SearchIcon from './icons/SearchIcon'
-import WallpappersIcon from './icons/WallpappersIcon'
-import ThemesIcon from './icons/ThemesIcon'
-import BlockScreenIcon from './icons/BlockScreenIcon'
-import ShildIcon from './icons/ShildIcon'
-import LocationIcon from './icons/LocationIcon'
-import ExtraIcon from './icons/ExtraIcon'
-import AccountsIcon from './icons/AccountsIcon'
-import GoogleIcon from './icons/GoogleIcon'
-import AdditionalFunctionsIcon from './icons/AdditionalFunctionsIcon'
-import ParentsControlIcon from './icons/ParentsControlIcon'
-import AppsIcon from './icons/AppsIcon'
-import SettingsIcon from './icons/SettingsIcon'
-import SpecialIcon from './icons/SpecialIcon'
-import RefreshIcon from './icons/RefreshIcon'
-import DocumentationIcon from './icons/DocumentationIcon'
-import InfoIcon from './icons/InfoIcon'
-import DevIcon from './icons/DevIcon'
-import CleanUpIcon from './icons/CleanUpIcon'
 import ArrowBack from './icons/ArrowBack'
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
-import hackAtom from './state/hackAtom'
-import cardSuitAtom from './state/cardSuitAtom'
-import cardMastAtom from './state/cardMastAtom'
+import { useSetRecoilState } from 'recoil'
 import wifiSpotsAtom from './state/wifiSpotsAtom'
+import accessCodes from './accessCodes'
 // import logsAtom from './state/logsAtom'
 
 //Define BLE Device Specs
@@ -47,25 +20,6 @@ const ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
 var bleServer
 var bleServiceFound
 var sensorCharacteristicFound
-
-const suits = [
-  'A',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  '10',
-  'J',
-  'Q',
-  'K',
-  'JOKER',
-]
-const masts = ['♠', '♥', '♣', '♦']
-const mastsEmoji = [`\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
 
 // Connect Button (search for BLE Devices only if BLE is available)
 // connectButton.addEventListener('click', (event) => {
@@ -83,30 +37,6 @@ const mastsEmoji = [`\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
 
 // Check if BLE is available in your Browser
 
-function getDateTime() {
-  var currentdate = new Date()
-  var day = ('00' + currentdate.getDate()).slice(-2) // Convert day to string and slice
-  var month = ('00' + (currentdate.getMonth() + 1)).slice(-2)
-  var year = currentdate.getFullYear()
-  var hours = ('00' + currentdate.getHours()).slice(-2)
-  var minutes = ('00' + currentdate.getMinutes()).slice(-2)
-  var seconds = ('00' + currentdate.getSeconds()).slice(-2)
-
-  var datetime =
-    day +
-    '/' +
-    month +
-    '/' +
-    year +
-    ' at ' +
-    hours +
-    ':' +
-    minutes +
-    ':' +
-    seconds
-  return datetime
-}
-
 function toggleTheme() {
   let htmlClasses = document.querySelector('html').classList
   if (
@@ -123,354 +53,13 @@ function toggleTheme() {
   }
 }
 
-const ItemsBlock = ({ title, children }) => {
-  return (
-    <div>
-      {title && (
-        <div className="font-bold text-[#999999] text-sm ml-6 mb-1.5">
-          {title}
-        </div>
-      )}
-      <div className="flex flex-col items-stretch">{children}</div>
-    </div>
-  )
-}
-
-function makeid(length) {
-  let result = ''
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ@_+-/\\&?:;%$##!`><|[]{}*^0123456789'
-  const charactersLength = characters.length
-  let counter = 0
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength))
-    counter += 1
-  }
-  return result
-}
-
-function getRandomInt(min, max) {
-  const minCeiled = Math.ceil(min)
-  const maxFloored = Math.floor(max)
-  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled) // The maximum is exclusive and the minimum is inclusive
-}
-
-const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
-  const hack = useRecoilValue(hackAtom)
-  const [titleState, setTitleState] = useState(title)
-  const [iteration, setIteration] = useState(0)
-  const mast = useRecoilValue(cardMastAtom)
-  const suit = useRecoilValue(cardSuitAtom)
-  const mode = localStorage.mode
-  const itemRef = useRef()
-  const interval = useRef()
-
-  useEffect(() => {
-    if (hack && iteration === 0) {
-      setIteration(0)
-      interval.current = setInterval(() => {
-        setIteration((state) => state + 1)
-        setTitleState(makeid(localStorage.wifi?.length || ' '))
-      }, getRandomInt(350, 650))
-    }
-    if (!hack || iteration >= index) {
-      clearInterval(interval.current)
-      if (hack) {
-        if (!mode || mode === 'wifi') {
-          setTitleState(
-            `${localStorage.dot === 'true' ? '.' : ''}${localStorage.wifi}`
-          )
-        } else if (mode === 'card') {
-          setTitleState(
-            `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
-              suit <= 12 ? mastsEmoji[mast] : ''
-            }`
-          )
-        }
-      } else setTitleState(title)
-      // setIteration(0)
-    }
-  }, [hack, iteration, mast, suit, mode])
-
-  useEffect(() => {
-    if (!hack) setIteration(0)
-  }, [hack])
-
-  useEffect(() => {
-    // let button = document.getElementById('button')
-    const touchStartEventListener = (e) => {
-      var rect = e.target.getBoundingClientRect()
-      var x = e.touches[0].clientX - rect.left //x position within the element.
-      var y = e.touches[0].clientY - rect.top
-
-      itemRef.current.style.setProperty('--mouse-x', x + 'px')
-      itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    }
-
-    itemRef.current.addEventListener('touchstart', touchStartEventListener)
-    // return () => {
-    //   itemRef.current.removeEventListener('touchstart', touchStartEventListener)
-    // }
-  }, [])
-
-  useEffect(() => {
-    const mouseDownEventListener = (e) => {
-      var rect = e.target.getBoundingClientRect()
-      var x = e.clientX - rect.left //x position within the element.
-      var y = e.clientY - rect.top
-
-      itemRef.current.style.setProperty('--mouse-x', x + 'px')
-      itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    }
-
-    itemRef.current.addEventListener('mousedown', mouseDownEventListener)
-    // return () => {
-    //   itemRef.current.removeEventListener('mousedown', mouseDownEventListener)
-    // }
-  }, [])
-
-  return (
-    <div
-      className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity',
-        hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
-      )}
-      onClick={onClick}
-    >
-      <div
-        ref={itemRef}
-        className={cn(
-          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
-          size === 'small'
-            ? 'px-4 pb-3'
-            : size === 'big'
-            ? 'px-[18px] pb-[13px]'
-            : 'px-[18px] pb-3'
-        )}
-      >
-        <div
-          className={cn(
-            'pointer-events-none mr-1.5',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <WiFiIcon />
-        </div>
-        <div
-          className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <div
-            className={cn(
-              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
-            )}
-          >
-            <div
-              className={cn(
-                'text-left -mt-0.5 text-current ',
-                size === 'small'
-                  ? 'text-base'
-                  : size === 'big'
-                  ? 'text-[19px] leading-[28px]'
-                  : 'text-lg'
-              )}
-            >
-              {titleState}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const Item = ({
-  size,
-  title,
-  Icon,
-  subItems,
-  children,
-  onClick,
-  checkbox,
-  checkboxBorder = true,
-  activeTitle,
-  hiddenSwipeElementsFunc,
-  hiddenSwipeElementsNames,
-}) => {
-  const [isChecked, setIsChecked] = useState(checkbox)
-  const itemRef = useRef()
-  useEffect(() => {
-    // let button = document.getElementById('button')
-    const touchStartEventListener = (e) => {
-      var rect = e.target.getBoundingClientRect()
-      var x = e.touches[0].clientX - rect.left //x position within the element.
-      var y = e.touches[0].clientY - rect.top
-
-      itemRef.current.style.setProperty('--mouse-x', x + 'px')
-      itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    }
-
-    itemRef.current.addEventListener('touchstart', touchStartEventListener)
-    // return () => {
-    //   itemRef.current.removeEventListener('touchstart', touchStartEventListener)
-    // }
-  }, [])
-
-  useEffect(() => {
-    const mouseDownEventListener = (e) => {
-      var rect = e.target.getBoundingClientRect()
-      var x = e.clientX - rect.left //x position within the element.
-      var y = e.clientY - rect.top
-
-      itemRef.current.style.setProperty('--mouse-x', x + 'px')
-      itemRef.current.style.setProperty('--mouse-y', y + 'px')
-    }
-
-    itemRef.current.addEventListener('mousedown', mouseDownEventListener)
-    // return () => {
-    //   itemRef.current.removeEventListener('mousedown', mouseDownEventListener)
-    // }
-  }, [])
-
-  return (
-    <div
-      className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl',
-        activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
-      )}
-    >
-      <div
-        ref={itemRef}
-        onClick={onClick}
-        className={cn(
-          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
-          size === 'small'
-            ? 'px-4 pb-3'
-            : size === 'big'
-            ? 'px-[18px] pb-[13px]'
-            : 'px-[18px] pb-3'
-        )}
-      >
-        {hiddenSwipeElementsFunc?.length > 0 && (
-          <div
-            // onClick={(e) => e.stopPropagation()}
-            // onClick={() => {
-            //   console.log('!! :>> ')
-            //   // func()
-            // }}
-            className="absolute top-0 bottom-0 left-0 right-0 z-[1] flex items-stretch"
-          >
-            {hiddenSwipeElementsFunc.map((func, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex-1',
-                  localStorage.learn === 'true'
-                    ? 'border border-gray-400 text-gray-400 text-5xl font-bold flex justify-center items-center bg-black bg-opacity-30'
-                    : 'text-transparent'
-                )}
-                onTouchStart={func}
-                // onClick={() => {
-                //   console.log('! :>> ')
-                //   func()
-                // }}
-              >
-                {hiddenSwipeElementsNames[index]}
-              </div>
-            ))}
-          </div>
-        )}
-        {Icon && (
-          <div
-            className={cn(
-              'pointer-events-none mr-1.5',
-              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-            )}
-          >
-            <Icon />
-          </div>
-        )}
-        <div
-          className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <div
-            className={cn(
-              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
-            )}
-          >
-            <div
-              className={cn(
-                'text-left -mt-0.5',
-                activeTitle ? 'text-[#578ffe] font-bold' : '',
-                size === 'small'
-                  ? 'text-base'
-                  : size === 'big'
-                  ? 'text-[19px] leading-[28px]'
-                  : 'text-lg'
-              )}
-            >
-              {title}
-            </div>
-            {subItems && (
-              <div
-                className={cn(
-                  'text-left text-secondary',
-                  size === 'small'
-                    ? 'text-xs'
-                    : size === 'big'
-                    ? 'text-[15px] leading-[20px]'
-                    : 'text-sm'
-                )}
-              >
-                {subItems.map((item, index) => (
-                  <div key={item} className="inline">
-                    <span>{item}</span>
-                    {index !== subItems.length - 1 && (
-                      <span className="mx-2 text-secondary">{`\u{2022}`}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {typeof checkbox === 'boolean' && (
-            <div
-              // onClick={(e) => e.stopPropagation()}
-              className={cn(
-                'pl-3 h-[18px]',
-                checkboxBorder ? 'border-l border-[#474749]' : ''
-              )}
-            >
-              <input
-                type="checkbox"
-                className="switch_1"
-                checked={isChecked}
-                onChange={(e) => {
-                  // e.stopPropagation()
-                  setIsChecked(!isChecked)
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="pointer-events-none">{children}</div>
-    </div>
-  )
-}
-
 const PageWrapper = ({
   title,
   size,
-  toggleTheme,
   children,
   onClickBack,
   activeTitle,
+  noSearchIcon,
 }) => (
   <div
     className={cn(
@@ -505,7 +94,7 @@ const PageWrapper = ({
       >
         {title}
       </div>
-      <SearchIcon size={size} />
+      {!noSearchIcon && <SearchIcon size={size} />}
     </div>
     {children}
   </div>
@@ -524,7 +113,10 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
       size={size}
       toggleTheme={toggleTheme}
       title="Настройка Hacker"
-      onClickBack={() => setPage('general')}
+      onClickBack={() => {
+        localStorage.startPage = 'general'
+        setPage('general')
+      }}
     >
       <div className="flex flex-wrap items-center px-5 gap-x-1">
         <label htmlFor="mode">Режим:</label>
@@ -557,7 +149,7 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           <input
             id="wifiname"
             className="px-2 py-1 text-white bg-dark"
-            defaultValue={localStorage.wifi}
+            defaultValue={localStorage.wifi || 'Hacked'}
             onChange={(e) => {
               localStorage.wifi = e.target.value
             }}
@@ -647,500 +239,72 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
           }}
         />
       </div>
+      <button
+        className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
+        onClick={() => setPage('firstStartPage')}
+      >
+        Сменить учетную запись (ввести другой код доступа)
+      </button>
     </PageWrapper>
   )
 }
 
-const WiFiPage = ({ size, toggleTheme, setPage, writeOnCharacteristic }) => {
-  const wifiSpots = useRecoilValue(wifiSpotsAtom)
-  const [hack, setHack] = useRecoilState(hackAtom)
-  const [waitingForHack, setWaitingForHack] = useState(false)
-  const mast = useRecoilValue(cardMastAtom)
-  const suit = useRecoilValue(cardSuitAtom)
-  const mode = localStorage.mode
-  const startOnSetWiFiPage = localStorage.startOnSetWiFiPage === 'true'
-
-  useEffect(() => {
-    if (startOnSetWiFiPage && !waitingForHack) {
-      if (!hack) {
-        setTimeout(() => {
-          setHack(true)
-          setWaitingForHack(false)
-          if (!mode || mode === 'wifi') {
-            writeOnCharacteristic(localStorage.wifi, true)
-          } else if (mode === 'card') {
-            writeOnCharacteristic(
-              `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
-              true
-            )
-          }
-        }, (localStorage.delay || 3) * 1000)
-        setWaitingForHack(true)
-      } else {
-        setHack(false)
-        setWaitingForHack(false)
-        writeOnCharacteristic(' ', true)
-      }
-    }
-  }, [startOnSetWiFiPage])
-
+const FirstStartPage = ({ size, setPage, setAccessCode }) => {
+  const [accessCodeInput, setAccessCodeInput] = useState(
+    localStorage.accessCode || ''
+  )
+  const [wrongCode, setWrongCode] = useState(false)
   return (
-    <PageWrapper
-      size={size}
-      toggleTheme={toggleTheme}
-      title="Wi-Fi"
-      onClickBack={() => setPage('connections')}
-    >
-      <ItemsBlock>
-        <Item
-          title="Включено"
-          activeTitle={true}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          onClick={() => {
-            if (waitingForHack) return
-            if (!hack) {
-              setWaitingForHack(true)
-              setTimeout(() => {
-                setHack(true)
-                setWaitingForHack(false)
-                if (!mode || mode === 'wifi') {
-                  writeOnCharacteristic(localStorage.wifi, true)
-                } else if (mode === 'card') {
-                  writeOnCharacteristic(
-                    `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
-                    true
-                  )
-                }
-              }, (localStorage.delay || 3) * 1000)
-            } else {
-              setHack(false)
-              setWaitingForHack(false)
-              writeOnCharacteristic(' ', true)
-            }
+    <PageWrapper size={size} title="Первый запуск" noSearchIcon>
+      <div className="flex flex-wrap items-center px-5 gap-x-1">
+        <label htmlFor="accessCode">Введите Ваш код доступа</label>
+        <input
+          id="accessCode"
+          className="px-2 py-1 text-white bg-dark"
+          defaultValue={accessCodeInput}
+          onChange={(e) => {
+            setAccessCodeInput(e.target.value)
+            if (wrongCode) setWrongCode(false)
           }}
-          checkbox
-          checkboxBorder={false}
         />
-      </ItemsBlock>
-      <ItemsBlock title="Доступные сети">
-        {wifiSpots.map((title, index) => (
-          <ItemWiFi key={title} title={title} size={size} index={index + 5} />
-        ))}
-        {wifiSpots?.length < 1 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
-        )}
-        {wifiSpots?.length < 2 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
-        )}
-        {wifiSpots?.length < 3 && (
-          <ItemWiFi title="" size={size} index={6} hidden />
-        )}
-        {wifiSpots?.length < 4 && (
-          <ItemWiFi title="" size={size} index={7} hidden />
-        )}
-        {wifiSpots?.length < 5 && (
-          <ItemWiFi title="" size={size} index={8} hidden />
-        )}
-        {wifiSpots?.length < 6 && (
-          <ItemWiFi title="" size={size} index={9} hidden />
-        )}
-        {wifiSpots?.length < 7 && (
-          <ItemWiFi title="" size={size} index={10} hidden />
-        )}
-        {wifiSpots?.length < 8 && (
-          <ItemWiFi title="" size={size} index={11} hidden />
-        )}
-        {wifiSpots?.length < 9 && (
-          <ItemWiFi title="" size={size} index={12} hidden />
-        )}
-        {wifiSpots?.length < 10 && (
-          <ItemWiFi title="" size={size} index={13} hidden />
-        )}
-        {wifiSpots?.length < 11 && (
-          <ItemWiFi title="" size={size} index={14} hidden />
-        )}
-        {wifiSpots?.length < 12 && (
-          <ItemWiFi title="" size={size} index={15} hidden />
-        )}
-        {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
-        <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
-        <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
-        <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
-        <ItemWiFi title="Telecoma-68C8" size={size} index={8} />
-        <ItemWiFi title="Wi-Fi" size={size} index={8} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={9} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={10} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden /> */}
-      </ItemsBlock>
-      {localStorage.learn === 'true' && (
-        <>
-          <div className="min-h-16" />
-          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Осталось нажать на кнопку "Включено" и дождаться старта анимации
-          </div>
-        </>
-      )}
-    </PageWrapper>
-  )
-}
-
-const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
-  return (
-    <PageWrapper
-      size={size}
-      toggleTheme={toggleTheme}
-      title="Подключения"
-      onClickBack={() => setPage('general')}
-    >
-      <ItemsBlock>
-        <Item
-          title="Wi-Fi"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          onClick={() => setPage('wifi')}
-          checkbox
-        />
-        <Item
-          title="Вызовы по Wi-Fi"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox={false}
-        />
-        <Item
-          title="Bluetooth"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox
-        />
-        <Item
-          title="NFC и бесконтактные платежи"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox
-        />
-        <Item
-          title="Сверхширокая полоса (UWB)"
-          // Icon={WiFiIcon}
-          subItems={[
-            'Определение точного местоположения устройства поблизости.',
-          ]}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox={false}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Авиарежим" size={size} checkbox={false} />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Диспетчер SIM-карт" size={size} />
-        <Item title="Мобильные сети" size={size} />
-        <Item title="Использование данных" size={size} />
-        <Item title="Мобильная точка доступа и модем" size={size} />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Другие настройки" size={size} />
-      </ItemsBlock>
-      {localStorage.learn === 'true' && (
-        <>
-          <div className="min-h-10" />
-          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Теперь перейдите в меню Wi-Fi
-          </div>
-        </>
-      )}
-    </PageWrapper>
-  )
-}
-
-const GeneralPage = ({ size, toggleTheme, setPage }) => {
-  const setSuit = useSetRecoilState(cardSuitAtom)
-  const setMast = useSetRecoilState(cardMastAtom)
-  // const mast = useRecoilValue(cardMastAtom)
-  // const suit = useRecoilValue(cardSuitAtom)
-  // console.log('suit :>> ', suit)
-  // console.log('mast :>> ', mast)
-
-  return (
-    <PageWrapper size={size} toggleTheme={toggleTheme} title="Настройки">
-      <ItemsBlock>
-        <Item
-          title="Алексей Белинский"
-          subItems={['Samsung account']}
-          size={size}
-        >
-          <div
-            className={cn(
-              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
-              size === 'small'
-                ? 'h-[68px] w-[68px] right-5 -top-3'
-                : size === 'big'
-                ? 'h-[82px] w-[82px] right-5 -top-3.5'
-                : 'h-[72px] w-[72px] right-5 -top-3.5'
-            )}
-          >
-            <img
-              className="w-full h-full rounded-full"
-              src="img/avatar.png"
-              alt="avatar"
-            />
-          </div>
-        </Item>
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Подключения"
-          Icon={WiFiIcon}
-          subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          onClick={() => {
-            setPage('connections')
-          }}
-          hiddenSwipeElementsFunc={[
-            () => {
-              setMast(0)
-            },
-            () => {
-              setMast(1)
-            },
-            () => {
-              setMast(2)
-            },
-            () => {
-              setMast(3)
-            },
-          ]}
-          hiddenSwipeElementsNames={[masts[0], masts[1], masts[2], masts[3]]}
-        />
-        <Item
-          title="Подключенные устройства"
-          Icon={ConnectedDevicesIcon}
-          subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
-          size={size}
-          hiddenSwipeElementsFunc={[
-            () => setSuit(0),
-            () => setSuit(1),
-            () => setSuit(2),
-            () => setSuit(3),
-          ]}
-          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Режимы и сценарии"
-          Icon={ScenariosIcon}
-          subItems={['Режимы', 'Сценарии']}
-          size={size}
-          hiddenSwipeElementsFunc={[
-            () => setSuit(4),
-            () => setSuit(5),
-            () => setSuit(6),
-            () => setSuit(7),
-          ]}
-          hiddenSwipeElementsNames={[suits[4], suits[5], suits[6], suits[7]]}
-        />
-        <Item
-          title="Звуки и вибрация"
-          Icon={SoundIcon}
-          subItems={['Режим звука', 'Мелодия звонка']}
-          size={size}
-          hiddenSwipeElementsFunc={[
-            () => setSuit(8),
-            () => setSuit(9),
-            () => setSuit(10),
-            () => setSuit(11),
-          ]}
-          hiddenSwipeElementsNames={[suits[8], suits[9], suits[10], suits[11]]}
-        />
-        <Item
-          title="Уведомления"
-          Icon={NotificationsIcon}
-          subItems={['Строка состояния', 'Не беспокоить']}
-          size={size}
-          hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
-          hiddenSwipeElementsNames={[suits[12], suits[13]]}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Дисплей"
-          Icon={DisplayIcon}
-          subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
-          size={size}
-        />
-        <Item
-          title="Батарея"
-          Icon={BateryIcon}
-          subItems={['Энергосбережение', 'Зарядка']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Обои и стиль"
-          Icon={WallpappersIcon}
-          subItems={['Обои', 'Палитра цветов']}
-          size={size}
-        />
-        <Item
-          title="Темы"
-          Icon={ThemesIcon}
-          subItems={['Темы', 'Обои', 'Значки']}
-          size={size}
-        />
-        <Item
-          title="Экран блокировки"
-          Icon={BlockScreenIcon}
-          subItems={['Тип блокировки экрана', 'Always On Display']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Безопасность и конфиденциальность"
-          Icon={ShildIcon}
-          subItems={['Биометрические данные', 'Диспетчер разрешений']}
-          size={size}
-        />
-        <Item
-          title="Локация"
-          Icon={LocationIcon}
-          subItems={['Запросы на доступ к местоположению']}
-          size={size}
-        />
-        <Item
-          title="Экстренные ситуации"
-          Icon={ExtraIcon}
-          subItems={['Медицинские сведения', 'Экстренные оповещения']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Учетные записи и архивация"
-          Icon={AccountsIcon}
-          subItems={['Управление учетными записями', 'Smart Switch']}
-          size={size}
-        />
-        <Item
-          title="Google"
-          Icon={GoogleIcon}
-          subItems={['Службы Google']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Дополнительные функции"
-          Icon={AdditionalFunctionsIcon}
-          subItems={['Labs', 'S Pen', 'Боковая кнопка']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Использование устройства и родительский контроль"
-          Icon={ParentsControlIcon}
-          subItems={['Время использования экрана', 'Таймеры приложений']}
-          size={size}
-        />
-        <Item
-          title="Обслуживание устройства"
-          Icon={CleanUpIcon}
-          subItems={['Хранилище', 'Память', 'Защита приложений']}
-          size={size}
-        />
-        <Item
-          title="Приложения"
-          Icon={AppsIcon}
-          subItems={['Приложения по умолчанию', 'Настройки приложений']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Общие настройки"
-          Icon={SettingsIcon}
-          subItems={['Язык и клавиатура', 'Дата и время']}
-          size={size}
-        />
-        <Item
-          title="Специальные возможности"
-          Icon={SpecialIcon}
-          subItems={['Отображение', 'Слышимость', 'Подвижность']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Обновление ПО"
-          Icon={RefreshIcon}
-          subItems={['Загрузка и установка']}
-          size={size}
-        />
-        <Item
-          title="Советы и руководство пользователя"
-          Icon={DocumentationIcon}
-          subItems={['Полезные советы', 'Новые функции']}
-          size={size}
-        />
-        <Item
-          title="Сведения о телефоне"
-          Icon={InfoIcon}
-          subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
-          size={size}
-        />
-        <Item
-          title="Параметры разработчика"
-          Icon={DevIcon}
-          subItems={['Параметры разработчика']}
-          size={size}
-          onClick={() => setPage('settings')}
-        />
-      </ItemsBlock>
-      {localStorage.learn === 'true' && (
-        <>
-          <div className="min-h-24" />
-          <div className="absolute bottom-0 left-0 right-0 z-30 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Обратите внимание, что выделены поля! Первое что нужно сделать это
-            сначала свайпнуть сверху вниз по номиналу карты, а затем нужно
-            кликнуть по масти (пункту меню "Подключения")
-          </div>
-        </>
-      )}
+      </div>
+      <button
+        className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
+        onClick={() => {
+          if (accessCodes[accessCodeInput]) {
+            localStorage.accessCode = accessCodeInput
+            setAccessCode(accessCodeInput)
+            setPage('general')
+          } else setWrongCode(true)
+        }}
+      >
+        Ввести код
+      </button>
+      {wrongCode && <div className="font-bold text-red-500">Код не верен</div>}
     </PageWrapper>
   )
 }
 
 function App() {
   const setWifiSpots = useSetRecoilState(wifiSpotsAtom)
-  const wifiSpots = useRecoilValue(wifiSpotsAtom)
+  // const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [BLEStatus, setBLEStatus] = useState('-')
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
-  const hack = useRecoilValue(hackAtom)
-  const [page, setPage] = useState('general')
+  // const hack = useRecoilValue(hackAtom)
+  const [page, setPage] = useState(localStorage.startPage ?? 'settings')
   const [size, setSize] = useState('big')
-  const [input, setInput] = useState('Escalion')
+  // const [input, setInput] = useState('K♥')
   const [isConnected, setIsConnected] = useState(false)
-  const [state, setState] = useState('Устройство отключено')
-  const [retrievedValue, setRetrievedValue] = useState('NaN')
-  const [latestValueSent, setLatestValueSent] = useState('')
-  const [timestampContainer, setTimestampContainer] = useState('')
-  const connectRef = useRef(null)
-  const effectRan = useRef(null)
+  const [accessCode, setAccessCode] = useState(localStorage.accessCode || '')
+  // const [state, setState] = useState('Устройство отключено')
+  // const [retrievedValue, setRetrievedValue] = useState('NaN')
+  // const [latestValueSent, setLatestValueSent] = useState('')
+  // const [timestampContainer, setTimestampContainer] = useState('')
+  // const connectRef = useRef(null)
+  // const effectRan = useRef(null)
   // const [logs, setLog] = useRecoilState(logsAtom)
+
+  const accessIndex = accessCodes[accessCode]?.index || 0
 
   useEffect(() => {
     if (
@@ -1157,7 +321,8 @@ function App() {
   function isWebBluetoothEnabled() {
     if (!navigator.bluetooth) {
       console.log('Web Bluetooth API is not available in this browser!')
-      setState('Web Bluetooth API is not available in this browser!')
+      setBLEStatus('Web Bluetooth API is not available in this browser!')
+      // setState('Web Bluetooth API is not available in this browser!')
       return false
     }
     console.log('Web Bluetooth API supported in this browser.')
@@ -1172,8 +337,8 @@ function App() {
     //   'Characteristic value changed: ' + newValueReceived,
     // ])
     setWifiSpots(newValueReceived.split('||'))
-    setRetrievedValue(newValueReceived)
-    setTimestampContainer(getDateTime())
+    // setRetrievedValue(newValueReceived)
+    // setTimestampContainer(getDateTime())
   }
 
   function writeOnCharacteristic(value, autostart) {
@@ -1237,7 +402,7 @@ function App() {
             setBLEStatus('Устройство отключено')
             console.log('Устройство отключено')
             // setLog((state) => [...state, 'Устройство отключено'])
-            setState('Устройство отключено')
+            // setState('Устройство отключено')
             setIsConnected(false)
           })
           .catch((error) => {
@@ -1274,6 +439,7 @@ function App() {
         console.log('Service discovered:', service.uuid)
         // setLog((state) => [...state, 'Service discovered:' + service.uuid])
         setBLEStatus('Device connected')
+        console.log('Device connected')
         setShowConnectDeviceButton(false)
         setIsConnected(true)
         if (autostartName) {
@@ -1303,7 +469,7 @@ function App() {
         console.log('Decoded value: ', decodedValue)
         // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
         setWifiSpots(decodedValue.split('||'))
-        setRetrievedValue(decodedValue)
+        // setRetrievedValue(decodedValue)
         // setIsConnected(true)
         // if (autostartName) {
         //   writeOnCharacteristic(autostartName)
@@ -1324,11 +490,12 @@ function App() {
         setShowConnectDeviceButton(false)
         for (var device of devices) {
           let abortController = new AbortController()
-          device
-            .watchAdvertisements({ signal: abortController.signal })
-            .then((w) => {
-              console.log('w :>> ', w)
-            })
+          // console.log('device :>> ', device)
+          // device
+          //   .watchAdvertisements({ signal: abortController.signal })
+          //   .then((w) => {
+          //     console.log('w :>> ', w)
+          //   })
           device.addEventListener('advertisementreceived', async (evt) => {
             // Stop the scan to conserve power on mobile devices.
             abortController.abort()
@@ -1363,7 +530,7 @@ function App() {
       .then((device) => {
         console.log('Device Selected:', device.name)
         setBLEStatus('Connected to device ' + device.name)
-        setState('Connected to device ' + device.name)
+        // setState('Connected to device ' + device.name)
         // bleStateContainer.style.color = '#24af37'
         device.addEventListener('gattservicedisconnected', onDisconnected)
         afterConnectDevice(device.gatt.connect(), autostartName)
@@ -1408,7 +575,7 @@ function App() {
   function onDisconnected(event) {
     console.log('Устройство отключено:', event.target.device.name)
     setBLEStatus('Устройство отключено')
-    setState('Устройство отключено')
+    // setState('Устройство отключено')
     setIsConnected(false)
 
     connectToDevice()
@@ -1521,6 +688,8 @@ function App() {
     }, 500)
   })
 
+  const Page = accessCodes[accessCode]?.pages[page] || null
+
   return (
     <>
       {isConnected && (
@@ -1532,9 +701,10 @@ function App() {
         ))}
       </div>
       {JSON.stringify(wifiSpots)} */}
-      <div className="flex px-2 py-1 bg-black">
-        {/* <div> */}
-        {showConnectDeviceButton && (
+      {showConnectDeviceButton && (
+        <div className="flex px-2 py-1 bg-black">
+          {/* <div> */}
+
           <button
             className="w-full px-2 py-1 font-bold text-white border border-gray-400 rounded"
             onClick={() => {
@@ -1544,9 +714,8 @@ function App() {
           >
             !!! Подключить устройство hacker !!!
           </button>
-        )}
 
-        {/* {!isConnected && (
+          {/* {!isConnected && (
         <button
           ref={connectRef}
           onClick={(event) => {
@@ -1559,112 +728,129 @@ function App() {
         </button>
       )}
     </div> */}
-        {/* <div className="text-white bg-black">{BLEStatus}</div> */}
-      </div>
-
-      {!page || page === 'general' ? (
-        <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
-      ) : page === 'connections' ? (
-        <ConnectionsPage
-          size={size}
-          toggleTheme={toggleTheme}
-          setPage={setPage}
-        />
-      ) : page === 'wifi' ? (
-        <WiFiPage
-          size={size}
-          toggleTheme={toggleTheme}
-          setPage={setPage}
-          writeOnCharacteristic={writeOnCharacteristic}
-        />
-      ) : page === 'settings' ? (
-        <SettingsPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
-      ) : null}
-    </>
-  )
-
-  return (
-    <>
-      <h1>ESP32 Web BLE App</h1>
-      <button
-        onClick={(event) => {
-          if (isWebBluetoothEnabled()) {
-            connectToDevice()
-          }
-        }}
-      >
-        Connect to BLE Device
-      </button>
-      <button onClick={disconnectDevice}>Отключить устройство</button>
-      <p>
-        Статус:{' '}
-        <strong>
-          <span
-            id="bleState"
-            style={{
-              color: state === 'Устройство отключено' ? '#d13a30' : '#24af37',
-            }}
-          >
-            {state}
-          </span>
-        </strong>
-      </p>
-      {/* <h2>Считанные данные</h2>
-      <p>
-        <span id="valueContainer">{retrievedValue}</span>
-      </p> */}
-      <p>
-        Последнее чтение: <span id="timestamp">{timestampContainer}</span>
-      </p>
-      <h2>Конторль</h2>
-      {/* <button onClick={() => writeOnCharacteristic(1)}>LED ON</button>
-      <button onClick={() => writeOnCharacteristic(0)}>LED OFF</button> */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginTop: 10,
-          // justifyItems: 'center',
-          // alignItems: 'center',
-          // width: '100%',
-          // flexDirection: 'row',
-        }}
-      >
-        <div
-          style={{
-            // display: 'flex',
-            // flexDirection: 'column',
-            // maxWidth: 200,
-            width: 200,
-          }}
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <div>
-            <button
-              disabled={!input}
-              onClick={() => writeOnCharacteristic(input)}
-            >
-              ПУСК
-            </button>{' '}
-            <button
-              // disabled={!input}
-              onClick={() => writeOnCharacteristic(0)}
-            >
-              СТОП
-            </button>
-          </div>
+          {/* <div className="text-white bg-black">{BLEStatus}</div> */}
         </div>
-      </div>
-      <p>
-        Последнее отправленное значение:{' '}
-        <span id="valueSent">{latestValueSent}</span>
-      </p>
+      )}
+
+      {
+        !accessIndex || page === 'firstStartPage' ? (
+          <FirstStartPage setPage={setPage} setAccessCode={setAccessCode} />
+        ) : !page || page === 'settings' ? (
+          <SettingsPage
+            size={size}
+            toggleTheme={toggleTheme}
+            setPage={setPage}
+          />
+        ) : (
+          <Page
+            size={size}
+            toggleTheme={toggleTheme}
+            setPage={setPage}
+            writeOnCharacteristic={writeOnCharacteristic}
+          />
+        )
+        // page === 'general' ? (
+        //   <GeneralPage size={size} toggleTheme={toggleTheme} setPage={setPage} />
+        // ) : page === 'connections' ? (
+        //   <ConnectionsPage
+        //     size={size}
+        //     toggleTheme={toggleTheme}
+        //     setPage={setPage}
+        //   />
+        // ) : page === 'wifi' ? (
+        //   <WiFiPage
+        //     size={size}
+        //     toggleTheme={toggleTheme}
+        //     setPage={setPage}
+        //     writeOnCharacteristic={writeOnCharacteristic}
+        //   />
+        // ) : null
+      }
     </>
   )
+
+  // return (
+  //   <>
+  //     <h1>ESP32 Web BLE App</h1>
+  //     <button
+  //       onClick={(event) => {
+  //         if (isWebBluetoothEnabled()) {
+  //           connectToDevice()
+  //         }
+  //       }}
+  //     >
+  //       Connect to BLE Device
+  //     </button>
+  //     <button onClick={disconnectDevice}>Отключить устройство</button>
+  //     <p>
+  //       Статус:{' '}
+  //       <strong>
+  //         <span
+  //           id="bleState"
+  //           style={{
+  //             color: state === 'Устройство отключено' ? '#d13a30' : '#24af37',
+  //           }}
+  //         >
+  //           {state}
+  //         </span>
+  //       </strong>
+  //     </p>
+  //     {/* <h2>Считанные данные</h2>
+  //     <p>
+  //       <span id="valueContainer">{retrievedValue}</span>
+  //     </p> */}
+  //     <p>
+  //       Последнее чтение: <span id="timestamp">{timestampContainer}</span>
+  //     </p>
+  //     <h2>Конторль</h2>
+  //     {/* <button onClick={() => writeOnCharacteristic(1)}>LED ON</button>
+  //     <button onClick={() => writeOnCharacteristic(0)}>LED OFF</button> */}
+  //     <div
+  //       style={{
+  //         display: 'flex',
+  //         justifyContent: 'center',
+  //         marginTop: 10,
+  //         // justifyItems: 'center',
+  //         // alignItems: 'center',
+  //         // width: '100%',
+  //         // flexDirection: 'row',
+  //       }}
+  //     >
+  //       <div
+  //         style={{
+  //           // display: 'flex',
+  //           // flexDirection: 'column',
+  //           // maxWidth: 200,
+  //           width: 200,
+  //         }}
+  //       >
+  //         <input
+  //           type="text"
+  //           value={input}
+  //           onChange={(e) => setInput(e.target.value)}
+  //         />
+  //         <div>
+  //           <button
+  //             disabled={!input}
+  //             onClick={() => writeOnCharacteristic(input)}
+  //           >
+  //             ПУСК
+  //           </button>{' '}
+  //           <button
+  //             // disabled={!input}
+  //             onClick={() => writeOnCharacteristic(0)}
+  //           >
+  //             СТОП
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //     <p>
+  //       Последнее отправленное значение:{' '}
+  //       <span id="valueSent">{latestValueSent}</span>
+  //     </p>
+  //   </>
+  // )
 }
 
 export default App
