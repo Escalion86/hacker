@@ -38,10 +38,6 @@ import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
-function useParallax(value, distance) {
-  return useTransform(value, [0, 1], [-distance, distance])
-}
-
 const PageWrapper = ({
   title,
   size,
@@ -69,9 +65,9 @@ const PageWrapper = ({
   //   })
   // }, [])
 
-  const height = useTransform(scrollY, [0, 200], [160, 0])
+  const height = useTransform(scrollY, [0, 190], [160, 0])
   const opacity = useTransform(scrollY, [0, 100], [1, 0])
-  const opacity2 = useTransform(scrollY, [100, 200], [0, 1])
+  const opacity2 = useTransform(scrollY, [100, 190], [0, 1])
 
   return (
     <div
@@ -83,7 +79,7 @@ const PageWrapper = ({
       // }}
     >
       <div
-        style={{ height: 250 }}
+        style={{ height: 230 }}
         className="flex flex-col items-center justify-end w-full"
       >
         <motion.div
