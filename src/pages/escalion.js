@@ -12,6 +12,7 @@ import LocationIcon from '../icons/LocationIcon'
 import ExtraIcon from '../icons/ExtraIcon'
 import AccountsIcon from '../icons/AccountsIcon'
 import GoogleIcon from '../icons/GoogleIcon'
+import PlusIcon from '../icons/PlusIcon'
 import AdditionalFunctionsIcon from '../icons/AdditionalFunctionsIcon'
 import ParentsControlIcon from '../icons/ParentsControlIcon'
 import AppsIcon from '../icons/AppsIcon'
@@ -37,14 +38,16 @@ import ArrowBack from '../icons/ArrowBack'
 import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
 import { motion, useScroll, useTransform } from 'framer-motion'
+import WiFiSpot from '../icons/WiFiSpot'
+import QRCodeIcon from '../icons/QRCodeIcon'
+import VerticalDots from '../icons/VerticalDots'
 
 const PageWrapper = ({
   title,
   size,
   children,
   onClickBack,
-  activeTitle,
-  noSearchIcon,
+  icons = [],
   collapsedTitle = false,
 }) => {
   const { scrollY } = useScroll()
@@ -99,11 +102,12 @@ const PageWrapper = ({
       <div
         className={cn(
           'bg-[#f6f6f8] -mb-[72px] dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-          size === 'small'
-            ? 'pl-5 pr-4 pt-5 pb-3'
-            : size === 'big'
-            ? 'pl-6 pr-6 pt-8 pb-3.5'
-            : 'pl-6 pr-5 pt-6 pb-3.5'
+          // size === 'small'
+          //   ? 'pl-5 pr-4 pt-5 pb-3'
+          //   : size === 'big'
+          //   ? 'pl-6 pr-6 pt-8 pb-3.5'
+          //   : 'pl-6 pr-5 pt-6 pb-3.5'
+          'pl-4 pr-3 pt-6 pb-3.5'
         )}
         // onClick={toggleTheme}
       >
@@ -128,13 +132,18 @@ const PageWrapper = ({
         >
           {title}
         </motion.div>
-        {!noSearchIcon && (
-          <SearchIcon size={size} className="fill-black dark:fill-white" />
-        )}
+        {icons.length > 0
+          ? icons.map((Icon) => (
+              <Icon
+                size={size}
+                className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white"
+              />
+            ))
+          : null}
       </div>
       <div
         className={cn(
-          'flex flex-col pt-[94px]',
+          'flex flex-col pt-[78px]',
           size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
         )}
         style={{ scrollSnapAlign: 'start' }}
@@ -145,7 +154,7 @@ const PageWrapper = ({
   )
 }
 
-const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
+const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
   const hack = useRecoilValue(hackAtom)
   const [titleState, setTitleState] = useState(title)
   const [iteration, setIteration] = useState(0)
@@ -222,7 +231,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity',
+        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity bg-white dark:bg-[#171719]',
         hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
       )}
       onClick={onClick}
@@ -244,11 +253,11 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
-          <WiFiIcon />
+          <WiFiSpot level={level} />
         </div>
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
@@ -259,7 +268,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
           >
             <div
               className={cn(
-                'text-left -mt-0.5 text-current ',
+                'text-left -mt-0.5 text-current',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -268,6 +277,57 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
               )}
             >
               {titleState}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const ItemWiFiAdd = ({ size }) => {
+  return (
+    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl">
+      <div
+        className={cn(
+          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl bg-white dark:bg-[#171719]',
+          size === 'small'
+            ? 'px-4 pb-3'
+            : size === 'big'
+            ? 'px-[18px] pb-[13px]'
+            : 'px-[18px] pb-3'
+        )}
+      >
+        <div
+          className={cn(
+            'pointer-events-none',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <PlusIcon stroke="#25b35d" />
+        </div>
+        <div
+          className={cn(
+            'flex gap-x-3 items-center justify-between flex-1',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <div
+            className={cn(
+              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+            )}
+          >
+            <div
+              className={cn(
+                'text-left -mt-0.5 text-current',
+                size === 'small'
+                  ? 'text-base'
+                  : size === 'big'
+                  ? 'text-[19px] leading-[28px]'
+                  : 'text-lg'
+              )}
+            >
+              Добавить сеть
             </div>
           </div>
         </div>
@@ -288,6 +348,8 @@ const Item = ({
   activeTitle,
   hiddenSwipeElementsFunc,
   hiddenSwipeElementsNames,
+  boldTitle,
+  className,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -328,7 +390,10 @@ const Item = ({
     <div
       className={cn(
         'relative group first:rounded-t-3xl last:rounded-b-3xl',
-        activeTitle ? 'bg-[#2d2d2f]' : 'bg-[#fcfcfe] dark:bg-dark'
+        activeTitle
+          ? 'bg-[#eeeef0] dark:bg-[#2d2d2f]'
+          : 'bg-[#fcfcfe] dark:bg-dark',
+        className
         //font-semibold
       )}
     >
@@ -398,6 +463,7 @@ const Item = ({
               className={cn(
                 'text-left -mt-0.5',
                 activeTitle ? 'text-[#578ffe] font-bold' : '',
+                boldTitle ? 'font-semibold' : '',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -468,6 +534,10 @@ const ItemsBlock = ({ title, children }) => {
   )
 }
 
+const wiFiSpotsLevels = [
+  4, 3, 3, 4, 2, 4, 3, 1, 2, 4, 3, 4, 4, 1, 3, 2, 4, 3, 1, 1, 2, 3,
+]
+
 export const WiFiPage = ({
   size,
   toggleTheme,
@@ -475,7 +545,7 @@ export const WiFiPage = ({
   writeOnCharacteristic,
   className,
 }) => {
-  const wifiSpots = useRecoilValue(wifiSpotsAtom)
+  const wifiSpots = ['123', '456', '789'] // useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
   const [waitingForHack, setWaitingForHack] = useState(false)
   const mast = useRecoilValue(cardMastAtom)
@@ -514,6 +584,7 @@ export const WiFiPage = ({
       title="Wi-Fi"
       onClickBack={() => setPage('connections')}
       className={className}
+      icons={[QRCodeIcon, VerticalDots]}
     >
       <ItemsBlock>
         <Item
@@ -549,7 +620,13 @@ export const WiFiPage = ({
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
         {wifiSpots.map((title, index) => (
-          <ItemWiFi key={title} title={title} size={size} index={index + 5} />
+          <ItemWiFi
+            key={title}
+            title={title}
+            size={size}
+            index={index + 5}
+            level={wiFiSpotsLevels[index] ?? 4}
+          />
         ))}
         {wifiSpots?.length < 1 && (
           <ItemWiFi title="" size={size} index={5} hidden />
@@ -585,20 +662,9 @@ export const WiFiPage = ({
           <ItemWiFi title="" size={size} index={14} hidden />
         )}
         {wifiSpots?.length < 12 && (
-          <ItemWiFi title="" size={size} index={15} hidden />
+          <ItemWiFi title="1313" size={size} index={15} />
         )}
-        {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
-        <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
-        <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
-        <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
-        <ItemWiFi title="Telecoma-68C8" size={size} index={8} />
-        <ItemWiFi title="Wi-Fi" size={size} index={8} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={9} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={10} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden /> */}
+        <ItemWiFiAdd size={size} />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -620,6 +686,7 @@ export const ConnectionsPage = ({ size, toggleTheme, setPage, className }) => {
       title="Подключения"
       onClickBack={() => setPage('general')}
       className={className}
+      icons={[SearchIcon]}
     >
       <ItemsBlock>
         <Item
@@ -694,12 +761,19 @@ export const GeneralPage = ({ size, setPage, className }) => {
   const setMast = useSetRecoilState(cardMastAtom)
 
   return (
-    <PageWrapper size={size} title="Настройки" className={className}>
+    <PageWrapper
+      size={size}
+      title="Настройки"
+      className={className}
+      icons={[SearchIcon]}
+    >
       <ItemsBlock>
         <Item
           title="Алексей Белинский"
           subItems={['Samsung account']}
           size={size}
+          boldTitle
+          className="mt-4"
         >
           <div
             className={cn(
