@@ -12,6 +12,7 @@ import LocationIcon from '../icons/LocationIcon'
 import ExtraIcon from '../icons/ExtraIcon'
 import AccountsIcon from '../icons/AccountsIcon'
 import GoogleIcon from '../icons/GoogleIcon'
+import PlusIcon from '../icons/PlusIcon'
 import AdditionalFunctionsIcon from '../icons/AdditionalFunctionsIcon'
 import ParentsControlIcon from '../icons/ParentsControlIcon'
 import AppsIcon from '../icons/AppsIcon'
@@ -36,57 +37,124 @@ import SearchIcon from '../icons/SearchIcon'
 import ArrowBack from '../icons/ArrowBack'
 import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import WiFiSpot from '../icons/WiFiSpot'
+import QRCodeIcon from '../icons/QRCodeIcon'
+import VerticalDots from '../icons/VerticalDots'
 
 const PageWrapper = ({
   title,
   size,
   children,
   onClickBack,
-  activeTitle,
-  noSearchIcon,
-}) => (
-  <div
-    className={cn(
-      'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll pb-5',
-      size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
-    )}
-  >
+  icons = [],
+  collapsedTitle = false,
+}) => {
+  const { scrollY } = useScroll()
+
+  // const height = useTransform(scrollYProgress, [0, 100], [100, 60])
+  // console.log('height :>> ', height)
+  // useEffect(() => {
+  //   window.addEventListener('scroll', function () {
+  //     let scroll = window.scrollY
+  //     console.log('scroll :>> ', scroll)
+  //     let title = document.querySelector('.title')
+  //     title.style.transform =
+  //       'translate3d(0,' +
+  //       scroll / 100 +
+  //       '%,0) scale(' +
+  //       (100 - scroll / 100) / 100 +
+  //       ')'
+  //   })
+  // }, [])
+
+  const height = useTransform(scrollY, [0, 190], [160, 0])
+  const opacity = useTransform(scrollY, [0, 100], [1, 0])
+  const opacity2 = useTransform(scrollY, [100, 190], [0, 1])
+
+  return (
     <div
       className={cn(
-        'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-        size === 'small'
-          ? 'pl-5 pr-4 pt-5 pb-3'
-          : size === 'big'
-          ? 'pl-6 pr-6 pt-8 pb-3.5'
-          : 'pl-6 pr-5 pt-6 pb-3.5'
+        'min-h-[calc(100vh+250px)] select-none px-0.5 dark:text-white text-black bg-[#f6f6f8] dark:bg-black flex flex-col gap-x-2 pb-5'
       )}
-      // onClick={toggleTheme}
+      // style={{
+      //   scrollSnapType: 'y mandatory',
+      // }}
     >
-      {onClickBack && (
-        <div
-          onClick={onClickBack}
-          className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+      <div
+        style={{ height: 230 }}
+        className="flex flex-col items-center justify-end w-full"
+      >
+        <motion.div
+          className="z-50 flex items-center justify-center overflow-hidden text-4xl"
+          // style={{ height: 100, minHeight: 100 }}
+          style={{ height, opacity, scrollSnapAlign: 'center' }}
+          // style={{
+
+          //   minHeight: height,
+          //   height,
+          //   y: 300,
+          // }}
         >
-          <ArrowBack size={size} />
-        </div>
-      )}
+          {title}
+        </motion.div>
+      </div>
       <div
         className={cn(
-          'text-left flex-1',
-          size === 'small' ? 'text-lg' : size === 'big' ? 'text-2xl' : 'text-xl'
+          'bg-[#f6f6f8] -mb-[72px] dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
+          // size === 'small'
+          //   ? 'pl-5 pr-4 pt-5 pb-3'
+          //   : size === 'big'
+          //   ? 'pl-6 pr-6 pt-8 pb-3.5'
+          //   : 'pl-6 pr-5 pt-6 pb-3.5'
+          'pl-4 pr-3 pt-6 pb-3.5'
         )}
+        // onClick={toggleTheme}
       >
-        {title}
+        {onClickBack && (
+          <div
+            onClick={onClickBack}
+            className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+          >
+            <ArrowBack size={size} className="fill-black dark:fill-white" />
+          </div>
+        )}
+        <motion.div
+          className={cn(
+            'text-left flex-1 font-bold',
+            size === 'small'
+              ? 'text-lg'
+              : size === 'big'
+              ? 'text-2xl'
+              : 'text-xl'
+          )}
+          style={{ opacity: opacity2 }}
+        >
+          {title}
+        </motion.div>
+        {icons.length > 0
+          ? icons.map((Icon) => (
+              <Icon
+                size={size}
+                className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white"
+              />
+            ))
+          : null}
       </div>
-      {!noSearchIcon && (
-        <SearchIcon size={size} className="fill-black dark:fill-white" />
-      )}
+      <div
+        className={cn(
+          'flex flex-col pt-[78px]',
+          size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
+        )}
+        style={{ scrollSnapAlign: 'start' }}
+      >
+        {children}
+      </div>
     </div>
-    {children}
-  </div>
-)
+  )
+}
 
-const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
+const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
   const hack = useRecoilValue(hackAtom)
   const [titleState, setTitleState] = useState(title)
   const [iteration, setIteration] = useState(0)
@@ -163,7 +231,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity',
+        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity bg-white dark:bg-[#171719]',
         hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
       )}
       onClick={onClick}
@@ -185,11 +253,11 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
-          <WiFiIcon />
+          <WiFiSpot level={level} />
         </div>
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
@@ -200,7 +268,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
           >
             <div
               className={cn(
-                'text-left -mt-0.5 text-current ',
+                'text-left -mt-0.5 text-current',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -209,6 +277,57 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
               )}
             >
               {titleState}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const ItemWiFiAdd = ({ size }) => {
+  return (
+    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl">
+      <div
+        className={cn(
+          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl bg-white dark:bg-[#171719]',
+          size === 'small'
+            ? 'px-4 pb-3'
+            : size === 'big'
+            ? 'px-[18px] pb-[13px]'
+            : 'px-[18px] pb-3'
+        )}
+      >
+        <div
+          className={cn(
+            'pointer-events-none',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <PlusIcon stroke="#25b35d" />
+        </div>
+        <div
+          className={cn(
+            'flex gap-x-3 items-center justify-between flex-1',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <div
+            className={cn(
+              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+            )}
+          >
+            <div
+              className={cn(
+                'text-left -mt-0.5 text-current',
+                size === 'small'
+                  ? 'text-base'
+                  : size === 'big'
+                  ? 'text-[19px] leading-[28px]'
+                  : 'text-lg'
+              )}
+            >
+              Добавить сеть
             </div>
           </div>
         </div>
@@ -229,6 +348,8 @@ const Item = ({
   activeTitle,
   hiddenSwipeElementsFunc,
   hiddenSwipeElementsNames,
+  boldTitle,
+  className,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -269,7 +390,11 @@ const Item = ({
     <div
       className={cn(
         'relative group first:rounded-t-3xl last:rounded-b-3xl',
-        activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
+        activeTitle
+          ? 'bg-[#eeeef0] dark:bg-[#2d2d2f]'
+          : 'bg-[#fcfcfe] dark:bg-dark',
+        className
+        //font-semibold
       )}
     >
       <div
@@ -316,7 +441,7 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'pointer-events-none mr-1.5',
+              'pointer-events-none mr-3',
               size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
             )}
           >
@@ -325,19 +450,20 @@ const Item = ({
         )}
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t dark:border-[#3a3a3c] border-[#e2e2e4]',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
           <div
             className={cn(
-              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+              'flex-1 pointer-events-none gap-x-2 flex-col items-start'
             )}
           >
             <div
               className={cn(
                 'text-left -mt-0.5',
                 activeTitle ? 'text-[#578ffe] font-bold' : '',
+                boldTitle ? 'font-semibold' : '',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -408,11 +534,16 @@ const ItemsBlock = ({ title, children }) => {
   )
 }
 
+const wiFiSpotsLevels = [
+  4, 3, 3, 4, 2, 4, 3, 1, 2, 4, 3, 4, 4, 1, 3, 2, 4, 3, 1, 1, 2, 3,
+]
+
 export const WiFiPage = ({
   size,
   toggleTheme,
   setPage,
   writeOnCharacteristic,
+  className,
 }) => {
   const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
@@ -452,6 +583,8 @@ export const WiFiPage = ({
       toggleTheme={toggleTheme}
       title="Wi-Fi"
       onClickBack={() => setPage('connections')}
+      className={className}
+      icons={[QRCodeIcon, VerticalDots]}
     >
       <ItemsBlock>
         <Item
@@ -487,56 +620,123 @@ export const WiFiPage = ({
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
         {wifiSpots.map((title, index) => (
-          <ItemWiFi key={title} title={title} size={size} index={index + 5} />
+          <ItemWiFi
+            key={title}
+            title={title}
+            size={size}
+            index={index + 5}
+            level={wiFiSpotsLevels[index] ?? 4}
+          />
         ))}
         {wifiSpots?.length < 1 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={5}
+            hidden
+            level={wiFiSpotsLevels[0]}
+          />
         )}
         {wifiSpots?.length < 2 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={5}
+            hidden
+            level={wiFiSpotsLevels[1]}
+          />
         )}
         {wifiSpots?.length < 3 && (
-          <ItemWiFi title="" size={size} index={6} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={6}
+            hidden
+            level={wiFiSpotsLevels[2]}
+          />
         )}
         {wifiSpots?.length < 4 && (
-          <ItemWiFi title="" size={size} index={7} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={7}
+            hidden
+            level={wiFiSpotsLevels[3]}
+          />
         )}
         {wifiSpots?.length < 5 && (
-          <ItemWiFi title="" size={size} index={8} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={8}
+            hidden
+            level={wiFiSpotsLevels[4]}
+          />
         )}
         {wifiSpots?.length < 6 && (
-          <ItemWiFi title="" size={size} index={9} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={9}
+            hidden
+            level={wiFiSpotsLevels[5]}
+          />
         )}
         {wifiSpots?.length < 7 && (
-          <ItemWiFi title="" size={size} index={10} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={10}
+            hidden
+            level={wiFiSpotsLevels[6]}
+          />
         )}
         {wifiSpots?.length < 8 && (
-          <ItemWiFi title="" size={size} index={11} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={11}
+            hidden
+            level={wiFiSpotsLevels[7]}
+          />
         )}
         {wifiSpots?.length < 9 && (
-          <ItemWiFi title="" size={size} index={12} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={12}
+            hidden
+            level={wiFiSpotsLevels[8]}
+          />
         )}
         {wifiSpots?.length < 10 && (
-          <ItemWiFi title="" size={size} index={13} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={13}
+            hidden
+            level={wiFiSpotsLevels[9]}
+          />
         )}
         {wifiSpots?.length < 11 && (
-          <ItemWiFi title="" size={size} index={14} hidden />
+          <ItemWiFi
+            title=""
+            size={size}
+            index={14}
+            hidden
+            level={wiFiSpotsLevels[10]}
+          />
         )}
         {wifiSpots?.length < 12 && (
-          <ItemWiFi title="" size={size} index={15} hidden />
+          <ItemWiFi
+            title="1313"
+            size={size}
+            index={15}
+            hidden
+            level={wiFiSpotsLevels[11]}
+          />
         )}
-        {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
-        <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
-        <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
-        <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
-        <ItemWiFi title="Telecoma-68C8" size={size} index={8} />
-        <ItemWiFi title="Wi-Fi" size={size} index={8} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={9} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={10} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden /> */}
+        <ItemWiFiAdd size={size} />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -550,13 +750,15 @@ export const WiFiPage = ({
   )
 }
 
-export const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
+export const ConnectionsPage = ({ size, toggleTheme, setPage, className }) => {
   return (
     <PageWrapper
       size={size}
       toggleTheme={toggleTheme}
       title="Подключения"
       onClickBack={() => setPage('general')}
+      className={className}
+      icons={[SearchIcon]}
     >
       <ItemsBlock>
         <Item
@@ -626,17 +828,28 @@ export const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
   )
 }
 
-export const GeneralPage = ({ size, setPage }) => {
+export const GeneralPage = ({ size, setPage, className }) => {
   const setSuit = useSetRecoilState(cardSuitAtom)
   const setMast = useSetRecoilState(cardMastAtom)
 
   return (
-    <PageWrapper size={size} title="Настройки">
+    <PageWrapper
+      size={size}
+      title="Настройки"
+      className={className}
+      icons={[SearchIcon]}
+    >
       <ItemsBlock>
-        <Item title="Денис Паршиков" subItems={['Samsung account']} size={size}>
+        <Item
+          title="Денис Паршиков"
+          subItems={['Samsung account']}
+          size={size}
+          boldTitle
+          className="mt-4"
+        >
           <div
             className={cn(
-              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
+              'absolute p-[1px] rounded-full border border-[#f6f6f8] dark:border-[#2c2d2f]',
               size === 'small'
                 ? 'h-[68px] w-[68px] right-5 -top-3'
                 : size === 'big'
