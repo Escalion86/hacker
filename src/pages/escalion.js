@@ -327,8 +327,9 @@ const Item = ({
   return (
     <div
       className={cn(
-        'relative font-semibold group first:rounded-t-3xl last:rounded-b-3xl',
+        'relative group first:rounded-t-3xl last:rounded-b-3xl',
         activeTitle ? 'bg-[#2d2d2f]' : 'bg-[#fcfcfe] dark:bg-dark'
+        //font-semibold
       )}
     >
       <div
