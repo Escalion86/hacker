@@ -15,7 +15,7 @@ const VerticalDots = ({ className }) => (
       x2="12"
       y2="6"
       stroke-linecap="round"
-      stroke-width="2"
+      stroke-width="2.5"
     ></line>
     <line
       x1="11.99"
@@ -23,7 +23,7 @@ const VerticalDots = ({ className }) => (
       x2="12"
       y2="12"
       stroke-linecap="round"
-      stroke-width="2"
+      stroke-width="2.5"
     ></line>
     <line
       x1="11.99"
@@ -31,7 +31,7 @@ const VerticalDots = ({ className }) => (
       x2="12"
       y2="18"
       stroke-linecap="round"
-      stroke-width="2"
+      stroke-width="2.5"
     ></line>
   </svg>
 )
