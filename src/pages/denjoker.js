@@ -41,6 +41,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import WiFiSpot from '../icons/WiFiSpot'
 import QRCodeIcon from '../icons/QRCodeIcon'
 import VerticalDots from '../icons/VerticalDots'
+import BulbIcon from '../icons/BulbIcon'
 
 const PageWrapper = ({
   title,
@@ -350,6 +351,8 @@ const Item = ({
   hiddenSwipeElementsNames,
   boldTitle,
   className,
+  iconColor,
+  iconClassName,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -445,7 +448,7 @@ const Item = ({
               size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
             )}
           >
-            <Icon />
+            <Icon color={iconColor} className={iconClassName} />
           </div>
         )}
         <div
@@ -867,6 +870,15 @@ export const GeneralPage = ({ size, setPage, className }) => {
       </ItemsBlock>
       <ItemsBlock>
         <Item
+          title="Быстрый и безопасный вход"
+          Icon={BulbIcon}
+          iconClassName="fill-dark dark:fill-white mx-1"
+          subItems={['Ещё 2 предложения']}
+          size={size}
+        />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item
           title="Подключения"
           Icon={WiFiIcon}
           subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
@@ -934,6 +946,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         <Item
           title="Уведомления"
           Icon={NotificationsIcon}
+          iconColor="#2f71df"
           subItems={['Строка состояния', 'Не беспокоить']}
           size={size}
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
@@ -944,6 +957,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         <Item
           title="Дисплей"
           Icon={DisplayIcon}
+          iconColor="#2e6ff1"
           subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
           size={size}
         />
