@@ -452,13 +452,13 @@ const Item = ({
               className={cn(
                 'text-left -mt-0.5',
                 activeTitle ? 'text-[#578ffe] font-bold' : 'font-semibold',
-                'text-[16px] leading-[24px]'
+                'text-[14px] leading-[20px]'
               )}
             >
               {title}
             </div>
             {subItems && (
-              <div className="text-left text-secondary text-[13px] leading-[15px]">
+              <div className="text-left text-secondary text-[11px] leading-[13px]">
                 {subItems.map((item, index) => (
                   <div key={item} className="inline">
                     <span>{item}</span>
