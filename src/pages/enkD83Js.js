@@ -12,6 +12,7 @@ import LocationIcon from '../icons/LocationIcon'
 import ExtraIcon from '../icons/ExtraIcon'
 import AccountsIcon from '../icons/AccountsIcon'
 import GoogleIcon from '../icons/GoogleIcon'
+import PlusIcon from '../icons/PlusIcon'
 import AdditionalFunctionsIcon from '../icons/AdditionalFunctionsIcon'
 import ParentsControlIcon from '../icons/ParentsControlIcon'
 import AppsIcon from '../icons/AppsIcon'
@@ -36,57 +37,116 @@ import SearchIcon from '../icons/SearchIcon'
 import ArrowBack from '../icons/ArrowBack'
 import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import WiFiSpot from '../icons/WiFiSpot'
+import QRCodeIcon from '../icons/QRCodeIcon'
+import VerticalDots from '../icons/VerticalDots'
+import UserIcon from '../icons/UserIcon'
 
 const PageWrapper = ({
   title,
   size,
   children,
   onClickBack,
-  activeTitle,
-  noScanIcon,
-}) => (
-  <div
-    className={cn(
-      'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll pb-5',
-      size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
-    )}
-  >
+  icons = [],
+  collapsedTitle = false,
+}) => {
+  const { scrollY } = useScroll()
+
+  // const height = useTransform(scrollYProgress, [0, 100], [100, 60])
+  // console.log('height :>> ', height)
+  // useEffect(() => {
+  //   window.addEventListener('scroll', function () {
+  //     let scroll = window.scrollY
+  //     console.log('scroll :>> ', scroll)
+  //     let title = document.querySelector('.title')
+  //     title.style.transform =
+  //       'translate3d(0,' +
+  //       scroll / 100 +
+  //       '%,0) scale(' +
+  //       (100 - scroll / 100) / 100 +
+  //       ')'
+  //   })
+  // }, [])
+
+  const height = useTransform(scrollY, [0, 70], [100, 35])
+  const scale = useTransform(scrollY, [0, 70], [1, 0.7])
+  const marginLeft = useTransform(scrollY, [0, 70], [0, -16])
+  const marginTop = useTransform(scrollY, [0, 70], [-90, -40])
+  // const opacity = useTransform(scrollY, [0, 100], [1, 0])
+  // const opacity2 = useTransform(scrollY, [100, 190], [0, 1])
+
+  return (
     <div
       className={cn(
-        'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-        size === 'small'
-          ? 'pl-5 pr-4 pt-5 pb-3'
-          : size === 'big'
-          ? 'pl-6 pr-6 pt-8 pb-3.5'
-          : 'pl-6 pr-5 pt-6 pb-3.5'
+        'relative min-h-[calc(100vh+250px)] select-none px-[18px] dark:text-white text-black bg-[#f6f6f8] dark:bg-black flex flex-col gap-x-2 pb-5'
       )}
-      // onClick={toggleTheme}
+      // style={{
+      //   scrollSnapType: 'y mandatory',
+      // }}
     >
-      {onClickBack && (
-        <div
-          onClick={onClickBack}
-          className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+      <div className="" style={{ height: 100 }} />
+      <motion.div
+        className={cn(
+          'bg-[#f6f6f8] dark:bg-black z-10 sticky top-0 flex justify-between items-center',
+          // size === 'small'
+          //   ? 'pl-5 pr-4 pt-5 pb-3'
+          //   : size === 'big'
+          //   ? 'pl-6 pr-6 pt-8 pb-3.5'
+          //   : 'pl-6 pr-5 pt-6 pb-3.5'
+          'pl-4 pr-3 pt-6 pb-3.5'
+        )}
+        style={{ marginTop }}
+        // onClick={toggleTheme}
+      >
+        {onClickBack && (
+          <div
+            onClick={onClickBack}
+            className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+          >
+            <ArrowBack className="fill-dark dark:fill-white" />
+          </div>
+        )}
+        <motion.div
+          className="flex items-center justify-start overflow-visible"
+          style={{ marginLeft }}
         >
-          <ArrowBack size={size} />
+          <motion.div
+            className="z-50 flex items-center w-full overflow-visible text-4xl"
+            // style={{ height: 100, minHeight: 100 }}
+            style={{ height, scrollSnapAlign: 'center', scale }}
+            // style={{
+
+            //   minHeight: height,
+            //   height,
+            //   y: 300,
+            // }}
+          >
+            {title}
+          </motion.div>
+        </motion.div>
+        <div className="absolute bottom-3 right-3">
+          {icons.length > 0
+            ? icons.map((Icon) => (
+                <Icon className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white" />
+              ))
+            : null}
         </div>
-      )}
+      </motion.div>
       <div
         className={cn(
-          'text-left flex-1',
-          size === 'small' ? 'text-lg' : size === 'big' ? 'text-2xl' : 'text-xl'
+          'flex flex-col pb-5',
+          size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
         )}
+        style={{ scrollSnapAlign: 'start' }}
       >
-        {title}
+        {children}
       </div>
-      {!noScanIcon && (
-        <SearchIcon size={size} className="fill-black dark:fill-white" />
-      )}
     </div>
-    {children}
-  </div>
-)
+  )
+}
 
-const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
+const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
   const hack = useRecoilValue(hackAtom)
   const [titleState, setTitleState] = useState(title)
   const [iteration, setIteration] = useState(0)
@@ -163,7 +223,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity',
+        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity bg-white dark:bg-[#171719]',
         hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
       )}
       onClick={onClick}
@@ -185,11 +245,11 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
-          <WiFiIcon />
+          <WiFiSpot level={level} />
         </div>
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
+            'flex gap-x-3 items-center justify-between flex-1',
             size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
           )}
         >
@@ -200,7 +260,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
           >
             <div
               className={cn(
-                'text-left -mt-0.5 text-current ',
+                'text-left -mt-0.5 text-current',
                 size === 'small'
                   ? 'text-base'
                   : size === 'big'
@@ -217,8 +277,58 @@ const ItemWiFi = ({ size, title, onClick, index, hidden }) => {
   )
 }
 
+const ItemWiFiAdd = ({ size }) => {
+  return (
+    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl">
+      <div
+        className={cn(
+          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl bg-white dark:bg-[#171719]',
+          size === 'small'
+            ? 'px-4 pb-3'
+            : size === 'big'
+            ? 'px-[18px] pb-[13px]'
+            : 'px-[18px] pb-3'
+        )}
+      >
+        <div
+          className={cn(
+            'pointer-events-none',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <PlusIcon stroke="#25b35d" />
+        </div>
+        <div
+          className={cn(
+            'flex gap-x-3 items-center justify-between flex-1',
+            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+          )}
+        >
+          <div
+            className={cn(
+              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+            )}
+          >
+            <div
+              className={cn(
+                'text-left -mt-0.5 text-current',
+                size === 'small'
+                  ? 'text-base'
+                  : size === 'big'
+                  ? 'text-[19px] leading-[28px]'
+                  : 'text-lg'
+              )}
+            >
+              Добавить сеть
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Item = ({
-  size,
   title,
   Icon,
   subItems,
@@ -229,6 +339,9 @@ const Item = ({
   activeTitle,
   hiddenSwipeElementsFunc,
   hiddenSwipeElementsNames,
+  className,
+  arrow = true,
+  textRight,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -269,7 +382,11 @@ const Item = ({
     <div
       className={cn(
         'relative group first:rounded-t-3xl last:rounded-b-3xl',
-        activeTitle ? 'bg-[#2d2d2f]' : 'bg-dark'
+        activeTitle
+          ? 'bg-[#eeeef0] dark:bg-[#2d2d2f]'
+          : 'bg-[#fcfcfe] dark:bg-dark',
+        className
+        //font-semibold
       )}
     >
       <div
@@ -277,11 +394,7 @@ const Item = ({
         onClick={onClick}
         className={cn(
           'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
-          size === 'small'
-            ? 'px-4 pb-3'
-            : size === 'big'
-            ? 'px-[18px] pb-[13px]'
-            : 'px-[18px] pb-3'
+          'px-[18px] pb-[13px]'
         )}
       >
         {hiddenSwipeElementsFunc?.length > 0 && (
@@ -316,8 +429,8 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'pointer-events-none mr-1.5',
-              size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+              'pointer-events-none mr-4 min-w-[36px] min-h-[49px] flex justify-center items-center',
+              'pt-[13px]'
             )}
           >
             <Icon />
@@ -325,39 +438,26 @@ const Item = ({
         )}
         <div
           className={cn(
-            'flex gap-x-3 items-center justify-between flex-1 group-first:border-none border-t border-[#3a3a3c]',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+            'flex gap-x-3 items-center justify-between flex-1',
+            'pt-[13px]'
           )}
         >
           <div
             className={cn(
-              'ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
+              'flex-1 pointer-events-none gap-x-2 flex-col items-start'
             )}
           >
             <div
               className={cn(
                 'text-left -mt-0.5',
-                activeTitle ? 'text-[#578ffe] font-bold' : '',
-                size === 'small'
-                  ? 'text-base'
-                  : size === 'big'
-                  ? 'text-[19px] leading-[28px]'
-                  : 'text-lg'
+                activeTitle ? 'text-[#578ffe] font-bold' : 'font-semibold',
+                'text-[18px] leading-[26px]'
               )}
             >
               {title}
             </div>
             {subItems && (
-              <div
-                className={cn(
-                  'text-left text-secondary',
-                  size === 'small'
-                    ? 'text-xs'
-                    : size === 'big'
-                    ? 'text-[15px] leading-[20px]'
-                    : 'text-sm'
-                )}
-              >
+              <div className="mt-1 text-left text-secondary text-[14px] leading-[16px]">
                 {subItems.map((item, index) => (
                   <div key={item} className="inline">
                     <span>{item}</span>
@@ -388,6 +488,18 @@ const Item = ({
               />
             </div>
           )}
+          {textRight && (
+            <div className="text-sm text-secondary">{textRight}</div>
+          )}
+          {arrow && (
+            <div className="rotate-180">
+              <ArrowBack
+                width={18}
+                height={18}
+                className="fill-[#c1c1c1] dark:fill-white"
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="pointer-events-none">{children}</div>
@@ -408,11 +520,16 @@ const ItemsBlock = ({ title, children }) => {
   )
 }
 
+const wiFiSpotsLevels = [
+  4, 3, 3, 4, 2, 4, 3, 1, 2, 4, 3, 4, 4, 1, 3, 2, 4, 3, 1, 1, 2, 3,
+]
+
 export const WiFiPage = ({
   size,
   toggleTheme,
   setPage,
   writeOnCharacteristic,
+  className,
 }) => {
   const wifiSpots = useRecoilValue(wifiSpotsAtom)
   const [hack, setHack] = useRecoilState(hackAtom)
@@ -448,17 +565,17 @@ export const WiFiPage = ({
 
   return (
     <PageWrapper
-      size={size}
       toggleTheme={toggleTheme}
       title="Wi-Fi"
-      onClickBack={() => setPage('connections')}
+      onClickBack={() => setPage('general')}
+      className={className}
+      icons={[QRCodeIcon, VerticalDots]}
     >
       <ItemsBlock>
         <Item
           title="Включено"
           activeTitle={true}
           // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
           onClick={() => {
             if (waitingForHack) return
             if (!hack) {
@@ -487,56 +604,55 @@ export const WiFiPage = ({
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
         {wifiSpots.map((title, index) => (
-          <ItemWiFi key={title} title={title} size={size} index={index + 5} />
+          <ItemWiFi
+            key={title}
+            title={title}
+            index={index + 5}
+            level={wiFiSpotsLevels[index] ?? 4}
+          />
         ))}
         {wifiSpots?.length < 1 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi title="" index={5} hidden level={wiFiSpotsLevels[0]} />
         )}
         {wifiSpots?.length < 2 && (
-          <ItemWiFi title="" size={size} index={5} hidden />
+          <ItemWiFi title="" index={5} hidden level={wiFiSpotsLevels[1]} />
         )}
         {wifiSpots?.length < 3 && (
-          <ItemWiFi title="" size={size} index={6} hidden />
+          <ItemWiFi title="" index={6} hidden level={wiFiSpotsLevels[2]} />
         )}
         {wifiSpots?.length < 4 && (
-          <ItemWiFi title="" size={size} index={7} hidden />
+          <ItemWiFi title="" index={7} hidden level={wiFiSpotsLevels[3]} />
         )}
         {wifiSpots?.length < 5 && (
-          <ItemWiFi title="" size={size} index={8} hidden />
+          <ItemWiFi title="" index={8} hidden level={wiFiSpotsLevels[4]} />
         )}
         {wifiSpots?.length < 6 && (
-          <ItemWiFi title="" size={size} index={9} hidden />
+          <ItemWiFi title="" index={9} hidden level={wiFiSpotsLevels[5]} />
         )}
         {wifiSpots?.length < 7 && (
-          <ItemWiFi title="" size={size} index={10} hidden />
+          <ItemWiFi title="" index={10} hidden level={wiFiSpotsLevels[6]} />
         )}
         {wifiSpots?.length < 8 && (
-          <ItemWiFi title="" size={size} index={11} hidden />
+          <ItemWiFi title="" index={11} hidden level={wiFiSpotsLevels[7]} />
         )}
         {wifiSpots?.length < 9 && (
-          <ItemWiFi title="" size={size} index={12} hidden />
+          <ItemWiFi title="" index={12} hidden level={wiFiSpotsLevels[8]} />
         )}
         {wifiSpots?.length < 10 && (
-          <ItemWiFi title="" size={size} index={13} hidden />
+          <ItemWiFi title="" index={13} hidden level={wiFiSpotsLevels[9]} />
         )}
         {wifiSpots?.length < 11 && (
-          <ItemWiFi title="" size={size} index={14} hidden />
+          <ItemWiFi title="" index={14} hidden level={wiFiSpotsLevels[10]} />
         )}
         {wifiSpots?.length < 12 && (
-          <ItemWiFi title="" size={size} index={15} hidden />
+          <ItemWiFi
+            title="1313"
+            index={15}
+            hidden
+            level={wiFiSpotsLevels[11]}
+          />
         )}
-        {/* <ItemWiFi title="MagBelinskiy_TP-Link" size={size} index={5} />
-        <ItemWiFi title="RT-5GPON-2122" size={size} index={5} />
-        <ItemWiFi title="RT-GPON-2122" size={size} index={6} />
-        <ItemWiFi title="RT-GPON-36BD" size={size} index={7} />
-        <ItemWiFi title="Telecoma-68C8" size={size} index={8} />
-        <ItemWiFi title="Wi-Fi" size={size} index={8} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={9} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={10} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={11} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={12} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={13} hidden />
-        <ItemWiFi title="Wi-Fi" size={size} index={14} hidden /> */}
+        <ItemWiFiAdd />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -550,120 +666,44 @@ export const WiFiPage = ({
   )
 }
 
-export const ConnectionsPage = ({ size, toggleTheme, setPage }) => {
-  return (
-    <PageWrapper
-      size={size}
-      toggleTheme={toggleTheme}
-      title="Подключения"
-      onClickBack={() => setPage('general')}
-    >
-      <ItemsBlock>
-        <Item
-          title="Wi-Fi"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          onClick={() => setPage('wifi')}
-          checkbox
-        />
-        <Item
-          title="Вызовы по Wi-Fi"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox={false}
-        />
-        <Item
-          title="Bluetooth"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox
-        />
-        <Item
-          title="NFC и бесконтактные платежи"
-          // Icon={WiFiIcon}
-          // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox
-        />
-        <Item
-          title="Сверхширокая полоса (UWB)"
-          // Icon={WiFiIcon}
-          subItems={[
-            'Определение точного местоположения устройства поблизости.',
-          ]}
-          size={size}
-          // onClick={() => setPage('connections')}
-          checkbox={false}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Авиарежим" size={size} checkbox={false} />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Диспетчер SIM-карт" size={size} />
-        <Item title="Мобильные сети" size={size} />
-        <Item title="Использование данных" size={size} />
-        <Item title="Мобильная точка доступа и модем" size={size} />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item title="Другие настройки" size={size} />
-      </ItemsBlock>
-      {localStorage.learn === 'true' && (
-        <>
-          <div className="min-h-10" />
-          <div className="absolute bottom-0 left-0 right-0 w-full p-1 text-white bg-gray-800 border-t border-gray-400">
-            Теперь перейдите в меню Wi-Fi
-          </div>
-        </>
-      )}
-    </PageWrapper>
-  )
-}
-
-export const GeneralPage = ({ size, setPage }) => {
+export const GeneralPage = ({ size, setPage, className }) => {
   const setSuit = useSetRecoilState(cardSuitAtom)
   const setMast = useSetRecoilState(cardMastAtom)
 
   return (
-    <PageWrapper size={size} title="Настройки">
+    <PageWrapper title="Настройки" className={className} icons={[SearchIcon]}>
       <ItemsBlock>
         <Item
-          title="Алексей Белинский"
-          subItems={['Samsung account']}
-          size={size}
-        >
-          <div
-            className={cn(
-              'absolute p-[1px] rounded-full border border-[#2c2d2f]',
-              size === 'small'
-                ? 'h-[68px] w-[68px] right-5 -top-3'
-                : size === 'big'
-                ? 'h-[82px] w-[82px] right-5 -top-3.5'
-                : 'h-[72px] w-[72px] right-5 -top-3.5'
-            )}
-          >
-            <img
-              className="w-full h-full rounded-full"
-              src="img/avatar.png"
-              alt="avatar"
-            />
-          </div>
-        </Item>
+          title="Войти в TECNO ID"
+          Icon={UserIcon}
+          subItems={[
+            'Просмотр TECNO ID, использование электронного гарантийного талона и управление синхронизацией устро...',
+          ]}
+          // className="mt-4"
+        />
+        <Item
+          title="Мой телефон"
+          Icon={UserIcon}
+          textRight="TECNO POVA Neo 2"
+        />
       </ItemsBlock>
       <ItemsBlock>
         <Item
-          title="Подключения"
+          title="Настройка SIM карты и сети"
           Icon={WiFiIcon}
-          subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
-          size={size}
+          hiddenSwipeElementsFunc={[
+            () => setSuit(0),
+            () => setSuit(1),
+            () => setSuit(2),
+            () => setSuit(3),
+          ]}
+          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
+        />
+        <Item
+          title="Wi-Fi"
+          Icon={ConnectedDevicesIcon}
           onClick={() => {
-            setPage('connections')
+            setPage('wifi')
           }}
           hiddenSwipeElementsFunc={[
             () => {
@@ -682,25 +722,8 @@ export const GeneralPage = ({ size, setPage }) => {
           hiddenSwipeElementsNames={[masts[0], masts[1], masts[2], masts[3]]}
         />
         <Item
-          title="Подключенные устройства"
-          Icon={ConnectedDevicesIcon}
-          subItems={['Быстрая отправка', 'Samsung DeX', 'Android Auto']}
-          size={size}
-          hiddenSwipeElementsFunc={[
-            () => setSuit(0),
-            () => setSuit(1),
-            () => setSuit(2),
-            () => setSuit(3),
-          ]}
-          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Режимы и сценарии"
+          title="Точка доступа и модем"
           Icon={ScenariosIcon}
-          subItems={['Режимы', 'Сценарии']}
-          size={size}
           hiddenSwipeElementsFunc={[
             () => setSuit(4),
             () => setSuit(5),
@@ -710,10 +733,9 @@ export const GeneralPage = ({ size, setPage }) => {
           hiddenSwipeElementsNames={[suits[4], suits[5], suits[6], suits[7]]}
         />
         <Item
-          title="Звуки и вибрация"
+          title="Другие подключения"
           Icon={SoundIcon}
-          subItems={['Режим звука', 'Мелодия звонка']}
-          size={size}
+          textRight="Android Auto"
           hiddenSwipeElementsFunc={[
             () => setSuit(8),
             () => setSuit(9),
@@ -722,149 +744,43 @@ export const GeneralPage = ({ size, setPage }) => {
           ]}
           hiddenSwipeElementsNames={[suits[8], suits[9], suits[10], suits[11]]}
         />
+      </ItemsBlock>
+      <ItemsBlock>
         <Item
-          title="Уведомления"
+          title="Персонализация"
           Icon={NotificationsIcon}
-          subItems={['Строка состояния', 'Не беспокоить']}
-          size={size}
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
           hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
+        <Item title="Экран и яркость" Icon={DisplayIcon} />
+        <Item title="Звук и Вибрация" Icon={BateryIcon} />
+        <Item title="Центр уведомлений" Icon={BateryIcon} />
       </ItemsBlock>
       <ItemsBlock>
-        <Item
-          title="Дисплей"
-          Icon={DisplayIcon}
-          subItems={['Яркость', 'Комфорт для глаз', 'Навигационная панель']}
-          size={size}
-        />
-        <Item
-          title="Батарея"
-          Icon={BateryIcon}
-          subItems={['Энергосбережение', 'Зарядка']}
-          size={size}
-        />
+        <Item title="Безопасность" Icon={WallpappersIcon} />
+        <Item title="Конфиденциальность" Icon={ThemesIcon} />
+        <Item title="Память" Icon={BlockScreenIcon} />
+        <Item title="Управление приложениями" Icon={BlockScreenIcon} />
+        <Item title="Местоположение" Icon={BlockScreenIcon} />
       </ItemsBlock>
       <ItemsBlock>
+        <Item title="Помощник AI" Icon={ShildIcon} />
+        <Item title="Лаборатория батареи" Icon={LocationIcon} />
         <Item
-          title="Обои и стиль"
-          Icon={WallpappersIcon}
-          subItems={['Обои', 'Палитра цветов']}
-          size={size}
-        />
-        <Item
-          title="Темы"
-          Icon={ThemesIcon}
-          subItems={['Темы', 'Обои', 'Значки']}
-          size={size}
-        />
-        <Item
-          title="Экран блокировки"
-          Icon={BlockScreenIcon}
-          subItems={['Тип блокировки экрана', 'Always On Display']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Безопасность и конфиденциальность"
-          Icon={ShildIcon}
-          subItems={['Биометрические данные', 'Диспетчер разрешений']}
-          size={size}
-        />
-        <Item
-          title="Локация"
-          Icon={LocationIcon}
-          subItems={['Запросы на доступ к местоположению']}
-          size={size}
-        />
-        <Item
-          title="Экстренные ситуации"
+          title="Цифровое благополучие и родительский контроль"
           Icon={ExtraIcon}
-          subItems={['Медицинские сведения', 'Экстренные оповещения']}
-          size={size}
         />
+        <Item title="Специальные функции" Icon={ExtraIcon} />
+      </ItemsBlock>
+      <ItemsBlock>
+        <Item title="Пароли и аккаунты" Icon={AccountsIcon} />
+        <Item title="Безопасность и экстренные случаи" Icon={AccountsIcon} />
+        <Item title="Google" Icon={GoogleIcon} />
       </ItemsBlock>
       <ItemsBlock>
         <Item
-          title="Учетные записи и архивация"
-          Icon={AccountsIcon}
-          subItems={['Управление учетными записями', 'Smart Switch']}
-          size={size}
-        />
-        <Item
-          title="Google"
-          Icon={GoogleIcon}
-          subItems={['Службы Google']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Дополнительные функции"
+          title="Система"
           Icon={AdditionalFunctionsIcon}
-          subItems={['Labs', 'S Pen', 'Боковая кнопка']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Использование устройства и родительский контроль"
-          Icon={ParentsControlIcon}
-          subItems={['Время использования экрана', 'Таймеры приложений']}
-          size={size}
-        />
-        <Item
-          title="Обслуживание устройства"
-          Icon={CleanUpIcon}
-          subItems={['Хранилище', 'Память', 'Защита приложений']}
-          size={size}
-        />
-        <Item
-          title="Приложения"
-          Icon={AppsIcon}
-          subItems={['Приложения по умолчанию', 'Настройки приложений']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Общие настройки"
-          Icon={SettingsIcon}
-          subItems={['Язык и клавиатура', 'Дата и время']}
-          size={size}
-        />
-        <Item
-          title="Специальные возможности"
-          Icon={SpecialIcon}
-          subItems={['Отображение', 'Слышимость', 'Подвижность']}
-          size={size}
-        />
-      </ItemsBlock>
-      <ItemsBlock>
-        <Item
-          title="Обновление ПО"
-          Icon={RefreshIcon}
-          subItems={['Загрузка и установка']}
-          size={size}
-        />
-        <Item
-          title="Советы и руководство пользователя"
-          Icon={DocumentationIcon}
-          subItems={['Полезные советы', 'Новые функции']}
-          size={size}
-        />
-        <Item
-          title="Сведения о телефоне"
-          Icon={InfoIcon}
-          subItems={['Состояние', 'Юридическая информация', 'Имя телефона']}
-          size={size}
-        />
-        <Item
-          title="Параметры разработчика"
-          Icon={DevIcon}
-          subItems={['Параметры разработчика']}
-          size={size}
           onClick={() => setPage('settings')}
         />
       </ItemsBlock>

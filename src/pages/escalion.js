@@ -116,7 +116,7 @@ const PageWrapper = ({
             onClick={onClickBack}
             className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
           >
-            <ArrowBack size={size} className="fill-black dark:fill-white" />
+            <ArrowBack size={size} className="fill-dark dark:fill-white" />
           </div>
         )}
         <motion.div

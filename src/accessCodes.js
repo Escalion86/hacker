@@ -9,7 +9,6 @@ import {
   WiFiPage as WiFiPage2,
 } from './pages/denjoker'
 import {
-  ConnectionsPage as ConnectionsPage3,
   GeneralPage as GeneralPage3,
   WiFiPage as WiFiPage3,
 } from './pages/enkD83Js'
@@ -38,7 +37,6 @@ const accessCodes = {
     index: 3,
     pages: {
       general: GeneralPage3,
-      connections: ConnectionsPage3,
       wifi: WiFiPage3,
     },
   },
