@@ -42,6 +42,7 @@ import WiFiSpot from '../icons/WiFiSpot'
 import QRCodeIcon from '../icons/QRCodeIcon'
 import VerticalDots from '../icons/VerticalDots'
 import UserIcon from '../icons/UserIcon'
+import PhoneIcon from '../icons/enkD83Js/PhoneIcon'
 
 const PageWrapper = ({
   title,
@@ -112,7 +113,7 @@ const PageWrapper = ({
           style={{ marginLeft }}
         >
           <motion.div
-            className="z-50 flex items-center w-full overflow-visible text-4xl"
+            className="z-50 flex items-center w-full overflow-visible text-[34px] leading-[38px]"
             // style={{ height: 100, minHeight: 100 }}
             style={{ height, scrollSnapAlign: 'center', scale }}
             // style={{
@@ -451,13 +452,13 @@ const Item = ({
               className={cn(
                 'text-left -mt-0.5',
                 activeTitle ? 'text-[#578ffe] font-bold' : 'font-semibold',
-                'text-[18px] leading-[26px]'
+                'text-[16px] leading-[24px]'
               )}
             >
               {title}
             </div>
             {subItems && (
-              <div className="mt-1 text-left text-secondary text-[14px] leading-[16px]">
+              <div className="text-left text-secondary text-[13px] leading-[15px]">
                 {subItems.map((item, index) => (
                   <div key={item} className="inline">
                     <span>{item}</span>
@@ -489,13 +490,15 @@ const Item = ({
             </div>
           )}
           {textRight && (
-            <div className="text-sm text-secondary">{textRight}</div>
+            <div className="text-[13px] leading-[15px] text-secondary">
+              {textRight}
+            </div>
           )}
           {arrow && (
             <div className="rotate-180">
               <ArrowBack
-                width={18}
-                height={18}
+                width={16}
+                height={16}
                 className="fill-[#c1c1c1] dark:fill-white"
               />
             </div>
@@ -683,7 +686,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         />
         <Item
           title="Мой телефон"
-          Icon={UserIcon}
+          Icon={PhoneIcon}
           textRight="TECNO POVA Neo 2"
         />
       </ItemsBlock>
