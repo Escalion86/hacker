@@ -32,7 +32,6 @@ import cardSuitAtom from '../state/cardSuitAtom'
 import { useEffect } from 'react'
 import { masts, mastsEmoji, suits } from '../constants'
 import cn from 'classnames'
-import WiFiIcon from '../icons/WiFiIcon'
 import SearchIcon from '../icons/SearchIcon'
 import ArrowBack from '../icons/ArrowBack'
 import makeId from '../helpers/makeId'
@@ -43,6 +42,8 @@ import QRCodeIcon from '../icons/QRCodeIcon'
 import VerticalDots from '../icons/VerticalDots'
 import UserIcon from '../icons/UserIcon'
 import PhoneIcon from '../icons/enkD83Js/PhoneIcon'
+import SimIcon from '../icons/enkD83Js/SimIcon'
+import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
 
 const PageWrapper = ({
   title,
@@ -693,7 +694,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
       <ItemsBlock>
         <Item
           title="Настройка SIM карты и сети"
-          Icon={WiFiIcon}
+          Icon={SimIcon}
           hiddenSwipeElementsFunc={[
             () => setSuit(0),
             () => setSuit(1),
@@ -704,7 +705,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         />
         <Item
           title="Wi-Fi"
-          Icon={ConnectedDevicesIcon}
+          Icon={WiFiIcon}
           onClick={() => {
             setPage('wifi')
           }}
