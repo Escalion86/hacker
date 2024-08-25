@@ -431,7 +431,7 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'pointer-events-none mr-4 min-w-[36px] min-h-[49px] flex justify-center items-center',
+              'pointer-events-none mr-3 min-w-[36px] min-h-[49px] flex justify-center items-center',
               'pt-[13px]'
             )}
           >
@@ -451,7 +451,7 @@ const Item = ({
           >
             <div
               className={cn(
-                'text-left -mt-0.5 font-semibold',
+                'text-left -mt-0.5', //font-semibold
                 activeTitle ? 'text-[#578ffe]' : '',
                 'text-[15px] leading-[20px]'
               )}
