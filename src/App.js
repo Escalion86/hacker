@@ -702,7 +702,7 @@ function App() {
   return (
     <>
       {isConnected && (
-        <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-500" />
+        <div className="absolute left-0 top-0 h-[2px] w-[2px] bg-gray-600 dark:bg-gray-500" />
       )}
       {/* <div className="p-1 absolute z-50 left-0 bottom-0 max-h-[100px] h-[100px] right-0 bg-white text-black text-xs">
         {logs.map((log, index) => (

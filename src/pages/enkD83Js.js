@@ -250,8 +250,8 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
         <div className={cn('pointer-events-none mr-1.5', 'pt-[18px]')}>
           <WiFiSpot
             level={level}
-            activeColor="#cecece"
-            inactiveColor="#6c6c6c"
+            inactiveColor="#cecece"
+            activeColor="#6c6c6c"
           />
         </div>
         <div
