@@ -44,6 +44,8 @@ import UserIcon from '../icons/UserIcon'
 import PhoneIcon from '../icons/enkD83Js/PhoneIcon'
 import SimIcon from '../icons/enkD83Js/SimIcon'
 import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
+import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
+import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
 
 const PageWrapper = ({
   title,
@@ -225,7 +227,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl duration-1000 transition-opacity bg-white dark:bg-[#171719]',
+        'relative group first:rounded-t-2xl last:rounded-b-2xl duration-1000 transition-opacity bg-white dark:bg-[#171719]',
         hidden && iteration < index ? 'h-0 opacity-0' : 'opacity-100'
       )}
       onClick={onClick}
@@ -233,7 +235,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
       <div
         ref={itemRef}
         className={cn(
-          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
+          'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
@@ -281,10 +283,10 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
 
 const ItemWiFiAdd = ({ size }) => {
   return (
-    <div className="relative group first:rounded-t-3xl last:rounded-b-3xl">
+    <div className="relative group first:rounded-t-2xl last:rounded-b-2xl">
       <div
         className={cn(
-          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl bg-white dark:bg-[#171719]',
+          'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl bg-white dark:bg-[#171719]',
           size === 'small'
             ? 'px-4 pb-3'
             : size === 'big'
@@ -383,7 +385,7 @@ const Item = ({
   return (
     <div
       className={cn(
-        'relative group first:rounded-t-3xl last:rounded-b-3xl',
+        'relative group first:rounded-t-2xl last:rounded-b-2xl',
         activeTitle
           ? 'bg-[#eeeef0] dark:bg-[#2d2d2f]'
           : 'bg-[#fcfcfe] dark:bg-dark',
@@ -395,8 +397,8 @@ const Item = ({
         ref={itemRef}
         onClick={onClick}
         className={cn(
-          'button flex items-center group-first:rounded-t-3xl group-last:rounded-b-3xl',
-          'px-[18px] pb-[13px]'
+          'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
+          'px-[12px] pb-[13px]'
         )}
       >
         {hiddenSwipeElementsFunc?.length > 0 && (
@@ -491,7 +493,7 @@ const Item = ({
             </div>
           )}
           {textRight && (
-            <div className="text-[13px] leading-[15px] text-secondary">
+            <div className="text-[12px] leading-[15px] text-secondary">
               {textRight}
             </div>
           )}
@@ -675,7 +677,11 @@ export const GeneralPage = ({ size, setPage, className }) => {
   const setMast = useSetRecoilState(cardMastAtom)
 
   return (
-    <PageWrapper title="Настройки" className={className} icons={[SearchIcon]}>
+    <PageWrapper title="Настройки" className={className}>
+      <div className="mb-2 rounded-2xl bg-[#f1f1f1] text-[#b5b5b5] flex px-[12px] py-[13px] items-center gap-x-3">
+        <SearchIcon className="fill-[#b5b5b5]" />
+        Поиск настроек
+      </div>
       <ItemsBlock>
         <Item
           title="Войти в TECNO ID"
@@ -727,7 +733,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         />
         <Item
           title="Точка доступа и модем"
-          Icon={ScenariosIcon}
+          Icon={HotSpotIcon}
           hiddenSwipeElementsFunc={[
             () => setSuit(4),
             () => setSuit(5),
@@ -738,7 +744,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
         />
         <Item
           title="Другие подключения"
-          Icon={SoundIcon}
+          Icon={OtherDevicesIcon}
           textRight="Android Auto"
           hiddenSwipeElementsFunc={[
             () => setSuit(8),
