@@ -46,6 +46,7 @@ import SimIcon from '../icons/enkD83Js/SimIcon'
 import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
 import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
 import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
+import PaintBrushIcon from '../icons/enkD83Js/PaintBrushIcon'
 
 const PageWrapper = ({
   title,
@@ -758,7 +759,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
       <ItemsBlock>
         <Item
           title="Персонализация"
-          Icon={NotificationsIcon}
+          Icon={PaintBrushIcon}
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
           hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
