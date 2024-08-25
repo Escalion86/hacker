@@ -47,6 +47,7 @@ import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
 import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
 import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
 import PaintBrushIcon from '../icons/enkD83Js/PaintBrushIcon'
+import SunIcon from '../icons/enkD83Js/SunIcon'
 
 const PageWrapper = ({
   title,
@@ -763,7 +764,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
           hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
-        <Item title="Экран и яркость" Icon={DisplayIcon} />
+        <Item title="Экран и яркость" Icon={SunIcon} />
         <Item title="Звук и Вибрация" Icon={BateryIcon} />
         <Item title="Центр уведомлений" Icon={BateryIcon} />
       </ItemsBlock>
