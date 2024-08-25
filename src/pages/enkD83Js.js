@@ -48,6 +48,8 @@ import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
 import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
 import PaintBrushIcon from '../icons/enkD83Js/PaintBrushIcon'
 import SunIcon from '../icons/enkD83Js/SunIcon'
+import QRScanerIcon from '../icons/enkD83Js/QRScanerIcon'
+import ArrowLeftIcon from '../icons/enkD83Js/ArrowLeftIcon'
 
 const PageWrapper = ({
   title,
@@ -91,7 +93,7 @@ const PageWrapper = ({
       //   scrollSnapType: 'y mandatory',
       // }}
     >
-      <div className="" style={{ height: 100 }} />
+      <div className="" style={{ height: collapsedTitle ? 40 : 100 }} />
       <motion.div
         className={cn(
           'bg-[#f6f6f8] dark:bg-black z-10 sticky top-0 flex justify-between items-center',
@@ -102,25 +104,29 @@ const PageWrapper = ({
           //   : 'pl-6 pr-5 pt-6 pb-3.5'
           'pl-4 pr-3 pt-6 pb-3.5'
         )}
-        style={{ marginTop }}
+        style={{ marginTop: collapsedTitle ? -40 : marginTop }}
         // onClick={toggleTheme}
       >
-        {onClickBack && (
-          <div
-            onClick={onClickBack}
-            className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
-          >
-            <ArrowBack className="fill-dark dark:fill-white" />
-          </div>
-        )}
         <motion.div
           className="flex items-center justify-start overflow-visible"
-          style={{ marginLeft }}
+          style={{ marginLeft: collapsedTitle ? -16 : marginLeft }}
         >
+          {onClickBack && (
+            <div
+              onClick={onClickBack}
+              className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+            >
+              <ArrowLeftIcon className="fill-[#1a1a1a] dark:fill-white" />
+            </div>
+          )}
           <motion.div
             className="z-50 flex items-center w-full overflow-visible text-[34px] leading-[38px]"
             // style={{ height: 100, minHeight: 100 }}
-            style={{ height, scrollSnapAlign: 'center', scale }}
+            style={{
+              height: collapsedTitle ? 35 : height,
+              scrollSnapAlign: 'center',
+              scale: collapsedTitle ? 0.7 : scale,
+            }}
             // style={{
 
             //   minHeight: height,
@@ -131,7 +137,7 @@ const PageWrapper = ({
             {title}
           </motion.div>
         </motion.div>
-        <div className="absolute bottom-3 right-3">
+        <div className="absolute bottom-4 right-3">
           {icons.length > 0
             ? icons.map((Icon) => (
                 <Icon className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white" />
@@ -238,25 +244,20 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
         ref={itemRef}
         className={cn(
           'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
-          size === 'small'
-            ? 'px-4 pb-3'
-            : size === 'big'
-            ? 'px-[18px] pb-[13px]'
-            : 'px-[18px] pb-3'
+          'px-[13px] pb-[18px]'
         )}
       >
-        <div
-          className={cn(
-            'pointer-events-none mr-1.5',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <WiFiSpot level={level} />
+        <div className={cn('pointer-events-none mr-1.5', 'pt-[18px]')}>
+          <WiFiSpot
+            level={level}
+            activeColor="#cecece"
+            inactiveColor="#6c6c6c"
+          />
         </div>
         <div
           className={cn(
             'flex gap-x-3 items-center justify-between flex-1',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
+            'pt-[18px]'
           )}
         >
           <div
@@ -278,56 +279,12 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-const ItemWiFiAdd = ({ size }) => {
-  return (
-    <div className="relative group first:rounded-t-2xl last:rounded-b-2xl">
-      <div
-        className={cn(
-          'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl bg-white dark:bg-[#171719]',
-          size === 'small'
-            ? 'px-4 pb-3'
-            : size === 'big'
-            ? 'px-[18px] pb-[13px]'
-            : 'px-[18px] pb-3'
-        )}
-      >
-        <div
-          className={cn(
-            'pointer-events-none',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <PlusIcon stroke="#25b35d" />
-        </div>
-        <div
-          className={cn(
-            'flex gap-x-3 items-center justify-between flex-1',
-            size === 'small' ? 'pt-3' : size === 'big' ? 'pt-[13px]' : 'pt-3'
-          )}
-        >
-          <div
-            className={cn(
-              'relative ml-2 flex-1 pointer-events-none gap-x-2 flex-col items-start'
-            )}
-          >
-            <div
-              className={cn(
-                'text-left -mt-0.5 text-current',
-                size === 'small'
-                  ? 'text-base'
-                  : size === 'big'
-                  ? 'text-[19px] leading-[28px]'
-                  : 'text-lg'
-              )}
-            >
-              Добавить сеть
-            </div>
-          </div>
+        <div className="rotate-180 mt-[18px]">
+          <ArrowBack
+            width={16}
+            height={16}
+            className="fill-[#c1c1c1] dark:fill-white"
+          />
         </div>
       </div>
     </div>
@@ -348,6 +305,7 @@ const Item = ({
   className,
   arrow = true,
   textRight,
+  big,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -400,7 +358,8 @@ const Item = ({
         onClick={onClick}
         className={cn(
           'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
-          'px-[12px] pb-[13px]'
+          big ? 'pb-[18px]' : 'pb-[13px]',
+          'px-[12px]'
         )}
       >
         {hiddenSwipeElementsFunc?.length > 0 && (
@@ -436,7 +395,7 @@ const Item = ({
           <div
             className={cn(
               'pointer-events-none mr-3 min-w-[36px] min-h-[49px] flex justify-center items-center',
-              'pt-[13px]'
+              big ? 'pt-[18px]' : 'pt-[13px]'
             )}
           >
             <Icon />
@@ -445,7 +404,7 @@ const Item = ({
         <div
           className={cn(
             'flex gap-x-3 items-center justify-between flex-1',
-            'pt-[13px]'
+            big ? 'pt-[18px]' : 'pt-[13px]'
           )}
         >
           <div
@@ -457,7 +416,7 @@ const Item = ({
               className={cn(
                 'text-left -mt-0.5', //font-semibold
                 activeTitle ? 'text-[#578ffe]' : '',
-                'text-[15px] leading-[20px]'
+                'text-[15px] leading-[18px]'
               )}
             >
               {title}
@@ -515,9 +474,9 @@ const Item = ({
   )
 }
 
-const ItemsBlock = ({ title, children }) => {
+const ItemsBlock = ({ title, children, className }) => {
   return (
-    <div>
+    <div className={className}>
       {title && (
         <div className="font-bold text-[#999999] text-sm ml-6 mb-1.5">
           {title}
@@ -533,7 +492,6 @@ const wiFiSpotsLevels = [
 ]
 
 export const WiFiPage = ({
-  size,
   toggleTheme,
   setPage,
   writeOnCharacteristic,
@@ -577,12 +535,17 @@ export const WiFiPage = ({
       title="Wi-Fi"
       onClickBack={() => setPage('general')}
       className={className}
-      icons={[QRCodeIcon, VerticalDots]}
+      icons={[
+        () => QRScanerIcon({ className: 'fill-[#1a1a1a] dark:fill-white' }),
+      ]}
+      collapsedTitle
     >
-      <ItemsBlock>
+      <ItemsBlock className="mt-2">
         <Item
-          title="Включено"
-          activeTitle={true}
+          title="Wi-Fi"
+          arrow={false}
+          big
+          // activeTitle={true}
           // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
           onClick={() => {
             if (waitingForHack) return
@@ -610,7 +573,7 @@ export const WiFiPage = ({
           checkboxBorder={false}
         />
       </ItemsBlock>
-      <ItemsBlock title="Доступные сети">
+      <ItemsBlock title="Сети Wi-Fi">
         {wifiSpots.map((title, index) => (
           <ItemWiFi
             key={title}
@@ -620,7 +583,7 @@ export const WiFiPage = ({
           />
         ))}
         {wifiSpots?.length < 1 && (
-          <ItemWiFi title="" index={5} hidden level={wiFiSpotsLevels[0]} />
+          <ItemWiFi title="1234" index={5} level={wiFiSpotsLevels[0]} />
         )}
         {wifiSpots?.length < 2 && (
           <ItemWiFi title="" index={5} hidden level={wiFiSpotsLevels[1]} />
@@ -653,14 +616,12 @@ export const WiFiPage = ({
           <ItemWiFi title="" index={14} hidden level={wiFiSpotsLevels[10]} />
         )}
         {wifiSpots?.length < 12 && (
-          <ItemWiFi
-            title="1313"
-            index={15}
-            hidden
-            level={wiFiSpotsLevels[11]}
-          />
+          <ItemWiFi title="" index={15} hidden level={wiFiSpotsLevels[11]} />
         )}
-        <ItemWiFiAdd />
+      </ItemsBlock>
+      <ItemsBlock className="mt-2">
+        <Item title="Настройки Wi-Fi" big />
+        <Item title="Расширенные настройки" big />
       </ItemsBlock>
       {localStorage.learn === 'true' && (
         <>
@@ -680,8 +641,8 @@ export const GeneralPage = ({ size, setPage, className }) => {
 
   return (
     <PageWrapper title="Настройки" className={className}>
-      <div className="mb-2 rounded-2xl bg-[#f1f1f1] text-[#b5b5b5] flex px-[12px] py-[13px] items-center gap-x-3">
-        <SearchIcon className="fill-[#b5b5b5]" />
+      <div className="mb-2 rounded-2xl bg-[#f1f1f1] text-[#b5b5b5] flex px-[12px] py-[11px] items-center gap-x-3">
+        <SearchIcon className="fill-[#b5b5b5]" size="small" />
         Поиск настроек
       </div>
       <ItemsBlock>

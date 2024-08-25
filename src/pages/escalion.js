@@ -729,7 +729,7 @@ export const WiFiPage = ({
         )}
         {wifiSpots?.length < 12 && (
           <ItemWiFi
-            title="1313"
+            title=""
             size={size}
             index={15}
             hidden
