@@ -622,11 +622,11 @@ function App() {
         for (var device of devices) {
           let abortController = new AbortController()
           // console.log('device :>> ', device)
-          // device
-          //   .watchAdvertisements({ signal: abortController.signal })
-          //   .then((w) => {
-          //     console.log('w :>> ', w)
-          //   })
+          device
+            .watchAdvertisements({ signal: abortController.signal })
+            .then((w) => {
+              console.log('w :>> ', w)
+            })
           device.addEventListener('advertisementreceived', async (evt) => {
             // Stop the scan to conserve power on mobile devices.
             abortController.abort()
