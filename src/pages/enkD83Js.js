@@ -641,11 +641,11 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
 
   return (
     <PageWrapper title="Настройки" className={className}>
-      {BLEStatus && (
+      {/* {BLEStatus && (
         <div className="bg-gray-600 dark:bg-gray-500 text-dark dark:text-white">
           {BLEStatus}
         </div>
-      )}
+      )} */}
       <div className="mb-2 rounded-2xl bg-[#f1f1f1] text-[#b5b5b5] flex px-[12px] py-[11px] items-center gap-x-3">
         <SearchIcon className="fill-[#b5b5b5]" size="small" />
         Поиск настроек
