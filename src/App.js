@@ -335,6 +335,7 @@ function App() {
       return false
     }
     console.log('Web Bluetooth API supported in this browser.')
+    setBLEStatus('Web Bluetooth API supported in this browser.')
     return true
   }
 
@@ -691,7 +692,9 @@ function App() {
     setTimeout(() => {
       try {
         if (isWebBluetoothEnabled()) autoConnectDevice()
+        else setBLEStatus('WebBluetooth Disabled!')
       } catch (error) {
+        setBLEStatus('ERROR')
         console.log('error :>> ', error)
       }
     }, 500)
