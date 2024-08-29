@@ -613,7 +613,7 @@ function App() {
   const autoConnectDevice = useCallback(() => {
     navigator.bluetooth.getDevices().then((devices) => {
       console.log('devices :>> ', devices)
-      setBLEStatus('Devices found: ', devices?.length)
+      setBLEStatus('Devices found: ' + devices?.length)
       // devices[0].watchAdvertisements().then((e) => {
       //   console.log('e :>> ', e)
       // })
