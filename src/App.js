@@ -699,7 +699,7 @@ function App() {
         console.log('error :>> ', error)
       }
     }, 500)
-  })
+  }, [setBLEStatus, autoConnectDevice])
 
   const Page = accessCodes[accessCode]?.pages[page] || null
 
