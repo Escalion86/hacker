@@ -14,5 +14,5 @@ export const suits = [
   'K',
   'JOKER',
 ]
-export const masts = ['♠', '♥', '♣', '♦'] // ❤
+export const masts = ['♠️', '❤', '♣️', '♦️'] // ❤   ♥️♣️♠️♦️ ♠️♦️
 export const mastsEmoji = [`\u{2660}`, `\u{2764}`, `\u{2663}`, `\u{2666}`]
