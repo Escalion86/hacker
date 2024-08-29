@@ -434,61 +434,64 @@ function App() {
     }
   }
 
-  const afterConnectDevice = (promise, autostartName = false) =>
-    promise
-      .then((gattServer) => {
-        bleServer = gattServer
-        setBLEStatus('Connected to GATT Server')
-        console.log('Connected to GATT Server')
-        // setLog((state) => [...state, 'Connected to GATT Server'])
-        return bleServer.getPrimaryService(bleService)
-      })
-      .then((service) => {
-        bleServiceFound = service
-        // setBLEStatus('Service discovered:', service.uuid)
-        console.log('Service discovered:', service.uuid)
-        // setLog((state) => [...state, 'Service discovered:' + service.uuid])
-        setBLEStatus('Device connected')
-        console.log('Device connected')
-        setShowConnectDeviceButton(false)
-        setIsConnected(true)
-        if (autostartName) {
-          writeOnCharacteristic(autostartName)
-        }
-        return service.getCharacteristic(sensorCharacteristic)
-      })
-      .then((characteristic) => {
-        setBLEStatus('Characteristic discovered:', characteristic.uuid)
-        console.log('Characteristic discovered:', characteristic.uuid)
-        sensorCharacteristicFound = characteristic
-        characteristic.addEventListener(
-          'characteristicvaluechanged',
-          handleCharacteristicChange
-        )
-        characteristic.startNotifications()
-        console.log('Notifications Started.')
-        // setLog((state) => [...state, 'Notifications Started.'])
-        return characteristic.readValue()
-      })
-      .then((value) => {
-        // setBLEStatus('Read value: ', value)
-        // console.log('Read value: ', value)
-        // setLog((state) => [...state, 'Read value: ' + value])
-        const decodedValue = new TextDecoder().decode(value)
-        setBLEStatus('Decoded value: ', decodedValue)
-        console.log('Decoded value: ', decodedValue)
-        // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
-        setWifiSpots(decodedValue.split('||'))
-        // setRetrievedValue(decodedValue)
-        // setIsConnected(true)
-        // if (autostartName) {
-        //   writeOnCharacteristic(autostartName)
-        // }
-      })
-      .catch((error) => {
-        // setBLEStatus('Error: ', error)
-        console.log('Error: ', error)
-      })
+  const afterConnectDevice = useCallback(
+    (promise, autostartName = false) =>
+      promise
+        .then((gattServer) => {
+          bleServer = gattServer
+          setBLEStatus('Connected to GATT Server')
+          console.log('Connected to GATT Server')
+          // setLog((state) => [...state, 'Connected to GATT Server'])
+          return bleServer.getPrimaryService(bleService)
+        })
+        .then((service) => {
+          bleServiceFound = service
+          // setBLEStatus('Service discovered:', service.uuid)
+          console.log('Service discovered:', service.uuid)
+          // setLog((state) => [...state, 'Service discovered:' + service.uuid])
+          setBLEStatus('Device connected')
+          console.log('Device connected')
+          setShowConnectDeviceButton(false)
+          setIsConnected(true)
+          if (autostartName) {
+            writeOnCharacteristic(autostartName)
+          }
+          return service.getCharacteristic(sensorCharacteristic)
+        })
+        .then((characteristic) => {
+          setBLEStatus('Characteristic discovered:', characteristic.uuid)
+          console.log('Characteristic discovered:', characteristic.uuid)
+          sensorCharacteristicFound = characteristic
+          characteristic.addEventListener(
+            'characteristicvaluechanged',
+            handleCharacteristicChange
+          )
+          characteristic.startNotifications()
+          console.log('Notifications Started.')
+          // setLog((state) => [...state, 'Notifications Started.'])
+          return characteristic.readValue()
+        })
+        .then((value) => {
+          // setBLEStatus('Read value: ', value)
+          // console.log('Read value: ', value)
+          // setLog((state) => [...state, 'Read value: ' + value])
+          const decodedValue = new TextDecoder().decode(value)
+          setBLEStatus('Decoded value: ', decodedValue)
+          console.log('Decoded value: ', decodedValue)
+          // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
+          setWifiSpots(decodedValue.split('||'))
+          // setRetrievedValue(decodedValue)
+          // setIsConnected(true)
+          // if (autostartName) {
+          //   writeOnCharacteristic(autostartName)
+          // }
+        })
+        .catch((error) => {
+          // setBLEStatus('Error: ', error)
+          console.log('Error: ', error)
+        }),
+    [handleCharacteristicChange, setWifiSpots, writeOnCharacteristic]
+  )
 
   const autoConnectDevice = useCallback(() => {
     navigator.bluetooth.getDevices().then((devices) => {
