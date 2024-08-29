@@ -1,7 +1,7 @@
 // import logo from './logo.svg'
 import './App.css'
 // import * as Bluetooth from 'react-bluetooth'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import cn from 'classnames'
 import SearchIcon from './icons/SearchIcon'
 import ArrowBack from './icons/ArrowBack'
@@ -490,7 +490,7 @@ function App() {
         console.log('Error: ', error)
       })
 
-  function autoConnectDevice() {
+  const autoConnectDevice = useCallback(() => {
     navigator.bluetooth.getDevices().then((devices) => {
       console.log('devices :>> ', devices)
       setBLEStatus('Devices found: ', devices?.length)
@@ -527,7 +527,7 @@ function App() {
     })
     // const test2 = navigator.bluetooth.watchAdvertisements()
     // watchAdvertisements(options)
-  }
+  }, [afterConnectDevice])
 
   // Connect to BLE Device and Enable Notifications
   function connectToDevice(autostartName) {
