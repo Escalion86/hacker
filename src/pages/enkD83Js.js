@@ -120,7 +120,7 @@ const PageWrapper = ({
             </div>
           )}
           <motion.div
-            className="z-50 flex items-center w-full overflow-visible text-[34px] leading-[38px]"
+            className="z-50 flex items-center w-full overflow-visible text-[32px] leading-[36px]"
             // style={{ height: 100, minHeight: 100 }}
             style={{
               height: collapsedTitle ? 35 : height,
@@ -147,7 +147,7 @@ const PageWrapper = ({
       </motion.div>
       <div
         className={cn(
-          'flex flex-col pb-5',
+          'flex flex-col pb-4',
           size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
         )}
         style={{ scrollSnapAlign: 'start' }}
