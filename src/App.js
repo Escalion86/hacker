@@ -327,7 +327,7 @@ function App() {
     }
   }, [])
 
-  function isWebBluetoothEnabled() {
+  const isWebBluetoothEnabled = useCallback(() => {
     if (!navigator.bluetooth) {
       console.log('Web Bluetooth API is not available in this browser!')
       setBLEStatus('Web Bluetooth API is not available in this browser!')
@@ -337,65 +337,71 @@ function App() {
     console.log('Web Bluetooth API supported in this browser.')
     setBLEStatus('Web Bluetooth API supported in this browser.')
     return true
-  }
+  }, [])
 
-  function handleCharacteristicChange(event) {
-    const newValueReceived = new TextDecoder().decode(event.target.value)
-    console.log('Characteristic value changed: ', newValueReceived)
-    // setLog((state) => [
-    //   ...state,
-    //   'Characteristic value changed: ' + newValueReceived,
-    // ])
-    setWifiSpots(newValueReceived.split('||'))
-    // setRetrievedValue(newValueReceived)
-    // setTimestampContainer(getDateTime())
-  }
+  const handleCharacteristicChange = useCallback(
+    (event) => {
+      const newValueReceived = new TextDecoder().decode(event.target.value)
+      console.log('Characteristic value changed: ', newValueReceived)
+      // setLog((state) => [
+      //   ...state,
+      //   'Characteristic value changed: ' + newValueReceived,
+      // ])
+      setWifiSpots(newValueReceived.split('||'))
+      // setRetrievedValue(newValueReceived)
+      // setTimestampContainer(getDateTime())
+    },
+    [setWifiSpots]
+  )
 
-  function writeOnCharacteristic(value, autostart) {
-    if (bleServer && bleServer.connected) {
-      bleServiceFound
-        .getCharacteristic(ledCharacteristic)
-        .then((characteristic) => {
-          console.log('Found the LED characteristic: ', characteristic.uuid)
-          // console.log('test :>> ', value.split(''))
-          // const data = new Uint8Array(value.split(''))
+  const writeOnCharacteristic = useCallback(
+    (value, autostart) => {
+      if (bleServer && bleServer.connected) {
+        bleServiceFound
+          .getCharacteristic(ledCharacteristic)
+          .then((characteristic) => {
+            console.log('Found the LED characteristic: ', characteristic.uuid)
+            // console.log('test :>> ', value.split(''))
+            // const data = new Uint8Array(value.split(''))
 
-          // const data =
-          //   typeof value === 'number'
-          //     ? new Uint32Array([value])
-          //     : Uint32Array.from(value.split('').map((x) => x.charCodeAt()))
-          // // // console.log('data :>> ', data)
-          // return characteristic.writeValue(data)
-          return characteristic.writeValue(
-            new TextEncoder().encode(
-              !value || value === ' '
-                ? ' '
-                : (localStorage.minutesBeforeStop || '3') +
-                    (localStorage.dot === 'true' ? '.' : '') +
-                    value
+            // const data =
+            //   typeof value === 'number'
+            //     ? new Uint32Array([value])
+            //     : Uint32Array.from(value.split('').map((x) => x.charCodeAt()))
+            // // // console.log('data :>> ', data)
+            // return characteristic.writeValue(data)
+            return characteristic.writeValue(
+              new TextEncoder().encode(
+                !value || value === ' '
+                  ? ' '
+                  : (localStorage.minutesBeforeStop || '3') +
+                      (localStorage.dot === 'true' ? '.' : '') +
+                      value
+              )
             )
-          )
-        })
-        .then(() => {
-          // setLatestValueSent(value)
-          console.log('Value written to LEDcharacteristic:', value)
-        })
-        .catch((error) => {
-          console.error('Error writing to the LED characteristic: ', error)
-        })
-    } else {
-      connectToDevice(value)
+          })
+          .then(() => {
+            // setLatestValueSent(value)
+            console.log('Value written to LEDcharacteristic:', value)
+          })
+          .catch((error) => {
+            console.error('Error writing to the LED characteristic: ', error)
+          })
+      } else {
+        connectToDevice(value)
 
-      // console.error(
-      //   'Bluetooth is not connected. Cannot write to characteristic.'
-      // )
-      // window.alert(
-      //   'Bluetooth is not connected. Cannot write to characteristic. \n Connect to BLE first!'
-      // )
-    }
-  }
+        // console.error(
+        //   'Bluetooth is not connected. Cannot write to characteristic.'
+        // )
+        // window.alert(
+        //   'Bluetooth is not connected. Cannot write to characteristic. \n Connect to BLE first!'
+        // )
+      }
+    },
+    [connectToDevice]
+  )
 
-  function disconnectDevice() {
+  const disconnectDevice = useCallback(() => {
     setBLEStatus('Disconnect Device.')
     console.log('Disconnect Device.')
     if (bleServer && bleServer.connected) {
@@ -432,7 +438,7 @@ function App() {
       window.alert('Bluetooth is not connected.')
       // setLog((state) => [...state, 'Bluetooth is not connected.'])
     }
-  }
+  }, [])
 
   const afterConnectDevice = useCallback(
     (promise, autostartName = false) =>
