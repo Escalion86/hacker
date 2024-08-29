@@ -711,7 +711,7 @@ function App() {
       </div>
       {JSON.stringify(wifiSpots)} */}
       {showConnectDeviceButton && (
-        <div className="flex px-2 py-1 bg-black">
+        <div className="flex px-2 py-1">
           {/* <div> */}
 
           <Button
@@ -755,6 +755,7 @@ function App() {
             toggleTheme={toggleTheme}
             setPage={setPage}
             writeOnCharacteristic={writeOnCharacteristic}
+            BLEStatus={BLEStatus}
           />
         )
         // page === 'general' ? (
