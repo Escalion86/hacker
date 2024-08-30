@@ -566,7 +566,7 @@ export const WiFiPage = ({
             writeOnCharacteristic(localStorage.wifi || 'Hacked', true)
           } else if (mode === 'card') {
             writeOnCharacteristic(
-              `${suits[suit]}${suit <= 13 ? masts[mast] : ''}`,
+              `${suits[suit]}${suit <= 12 ? masts[mast] : ''}`,
               true
             )
           }
