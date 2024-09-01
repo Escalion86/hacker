@@ -2,19 +2,19 @@ let cacheData = 'Hacker'
 this.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(cacheData).then((cache) => {
-      cache.addAll()
-      //   [
-      //   'static/js/bundle.js',
-      //   '/index.html',
-      //   '/',
-      //   '/manifest.json',
-      //   '/favicon.ico',
-      //   '/static/js/',
-      //   '/logo192.png',
-      //   'static/js/main.js',
-      //   'static/css/main.css',
-      //   // './',
-      // ]
+      console.log('cache.keys()', cache.keys())
+      cache.addAll([
+        'static/js/bundle.js',
+        '/index.html',
+        '/',
+        '/manifest.json',
+        '/favicon.ico',
+        '/static/js/',
+        '/logo192.png',
+        'static/js/main.js',
+        'static/css/main.css',
+        // './',
+      ])
     })
   )
 })
