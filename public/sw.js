@@ -1,9 +1,9 @@
 let cacheData = 'Hacker'
 this.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(cacheData).then((cache) => {
-      console.log('cache.keys()', cache.keys())
-      cache.addAll([
+    caches.open(cacheData).then(async (cache) => {
+      console.log('cache.keys()', await cache.keys())
+      return await cache.addAll([
         'static/js/bundle.js',
         '/index.html',
         '/',
