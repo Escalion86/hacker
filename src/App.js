@@ -612,7 +612,7 @@ function App() {
 
   const autoConnectDevice = useCallback(() => {
     navigator.bluetooth.getDevices().then((devices) => {
-      console.log('devices :>> ', devices)
+      // console.log('devices :>> ', devices)
       setBLEStatus('Devices found: ' + devices?.length)
       // devices[0].watchAdvertisements().then((e) => {
       //   console.log('e :>> ', e)
@@ -622,20 +622,28 @@ function App() {
         for (var device of devices) {
           let abortController = new AbortController()
           // console.log('device :>> ', device)
-          device
-            .watchAdvertisements({ signal: abortController.signal })
-            .then((w) => {
-              console.log('w :>> ', w)
-            })
-          device.addEventListener('advertisementreceived', async (evt) => {
-            // Stop the scan to conserve power on mobile devices.
-            abortController.abort()
-            console.log('evt :>> ', evt)
+          try {
+            device?.watchAdvertisements({ signal: abortController.signal })
+            // .then((w) => {
+            //   console.log('w :>> ', w)
+            // })
+            device?.addEventListener('advertisementreceived', async (event) => {
+              // Stop the scan to conserve power on mobile devices.
+              abortController.abort()
+              console.log('Advertisement received.')
+              console.log('  Device Name: ' + event.device.name)
+              console.log('  Device ID: ' + event.device.id)
+              console.log('  RSSI: ' + event.rssi)
+              console.log('  TX Power: ' + event.txPower)
+              console.log('  UUIDs: ' + event.uuids)
 
-            // At this point, we know that the device is in range, and we can attempt
-            // to connect to it.
-            afterConnectDevice(evt.device.gatt.connect())
-          })
+              // At this point, we know that the device is in range, and we can attempt
+              // to connect to it.
+              afterConnectDevice(event.device.gatt.connect())
+            })
+          } catch (e) {
+            console.log('e :>> ', e)
+          }
         }
       } else {
         setBLEStatus('No devices paired')
