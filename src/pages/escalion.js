@@ -169,15 +169,17 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
       setIteration(0)
       interval.current = setInterval(() => {
         setIteration((state) => state + 1)
-        setTitleState(makeId(localStorage.wifi?.length || ' '))
+        setTitleState(makeId(localStorage.wifi?.length || 6))
       }, getRandomInt(350, 650))
     }
     if (!hack || iteration >= index) {
       clearInterval(interval.current)
       if (hack) {
-        if (!mode || mode === 'wifi') {
+        if (!mode || mode === 'word') {
           setTitleState(
-            `${localStorage.dot === 'true' ? '.' : ''}${localStorage.wifi}`
+            `${localStorage.dot === 'true' ? '.' : ''}${
+              localStorage.wifi || 'Hacked'
+            }`
           )
         } else if (mode === 'card') {
           setTitleState(
@@ -559,7 +561,7 @@ export const WiFiPage = ({
         setTimeout(() => {
           setHack(true)
           setWaitingForHack(false)
-          if (!mode || mode === 'wifi') {
+          if (!mode || mode === 'word') {
             writeOnCharacteristic(localStorage.wifi || 'Hacked', true)
           } else if (mode === 'card') {
             writeOnCharacteristic(
@@ -599,7 +601,7 @@ export const WiFiPage = ({
               setTimeout(() => {
                 setHack(true)
                 setWaitingForHack(false)
-                if (!mode || mode === 'wifi') {
+                if (!mode || mode === 'word') {
                   writeOnCharacteristic(localStorage.wifi || 'Hacked', true)
                 } else if (mode === 'card') {
                   writeOnCharacteristic(

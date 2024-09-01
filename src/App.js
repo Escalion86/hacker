@@ -115,9 +115,9 @@ const PageWrapper = ({
 )
 
 const SettingsPage = ({ size, toggleTheme, setPage }) => {
-  const [mode, setMode] = useState(localStorage.mode)
+  const [mode, setMode] = useState(localStorage.mode || 'word')
   const [learn, setLearn] = useState(localStorage.learn)
-  const [theme, setTheme] = useState(localStorage.theme)
+  const [theme, setTheme] = useState(localStorage.theme || 'light')
   const [dot, setDot] = useState(localStorage.dot)
   const [startOnSetWiFiPage, setStartOnSetWiFiPage] = useState(
     localStorage.startOnSetWiFiPage
@@ -155,22 +155,11 @@ const SettingsPage = ({ size, toggleTheme, setPage }) => {
             setMode(e.target.value)
           }}
         >
-          <option
-            value="wifi"
-            // className="bg-gray-200 text-dark"
-            // selected={localStorage.mode === 'wifi'}
-          >
-            Слово
-          </option>
-          <option
-            value="card"
-            // selected={localStorage.mode === 'card'}
-          >
-            Карта
-          </option>
+          <option value="word">Слово</option>
+          <option value="card">Карта</option>
         </select>
       </div>
-      {mode === 'wifi' && (
+      {mode === 'word' && (
         <div className="flex flex-wrap items-center px-5 gap-x-1">
           <label htmlFor="wifiname">Название точки Wi-Fi</label>
           <input
