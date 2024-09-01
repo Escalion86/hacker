@@ -9,6 +9,9 @@ this.addEventListener('install', (event) => {
         '/manifest.json',
         '/favicon.ico',
         '/static/js/',
+        '/logo192.png',
+        'static/js/main.js',
+        'static/css/main.css',
         // './',
       ])
     })
