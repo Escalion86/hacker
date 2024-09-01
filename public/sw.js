@@ -15,7 +15,8 @@ this.addEventListener('install', async (event) => {
       'static/js/main.js',
       'static/css/main.css',
       'static/css/main.5b10659c.css',
-      'escalion/png',
+      '/img/escalion.png',
+      '/img/denjoker.png',
       // './',
     ])
   )
