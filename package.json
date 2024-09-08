@@ -9,7 +9,6 @@
     "classnames": "^2.5.1",
     "framer-motion": "^11.3.30",
     "react": "^18.2.0",
-    "react-bluetooth": "^0.0.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "recoil": "^0.7.7",
