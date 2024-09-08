@@ -10,7 +10,6 @@ import SettingsPage from './pages/SettingsPage'
 import FirstStartPage from './pages/FirstStartPage'
 import hackAtom from './state/hackAtom'
 import cn from 'classnames'
-// import logsAtom from './state/logsAtom'
 
 //Define BLE Device Specs
 const deviceName = 'Hacker'
