@@ -5,15 +5,15 @@ const QRCodeIcon = ({ className }) => (
     height="24px"
     viewBox="0 0 24.00 24.00"
     xmlns="http://www.w3.org/2000/svg"
-    stroke-width="0.00024000000000000003"
+    strokeWidth="0.00024000000000000003"
   >
-    <g id="SVGRepo_bgCarrier" stroke-width="0" />
+    <g id="SVGRepo_bgCarrier" strokeWidth="0" />
 
     <g
       id="SVGRepo_tracerCarrier"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      stroke-width="0.096"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="0.096"
     />
 
     <g id="SVGRepo_iconCarrier">
