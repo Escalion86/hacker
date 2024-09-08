@@ -133,9 +133,8 @@ const PageWrapper = ({
           {title}
         </motion.div>
         {icons.length > 0
-          ? icons.map((Icon, index) => (
+          ? icons.map((Icon) => (
               <Icon
-                key={'icon' + index}
                 size={size}
                 className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white"
               />
@@ -622,18 +621,15 @@ export const WiFiPage = ({
         />
       </ItemsBlock>
       <ItemsBlock title="Доступные сети">
-        {wifiSpots.map((title, index) => {
-          if (title.trim() === '') return null
-          return (
-            <ItemWiFi
-              key={title}
-              title={title}
-              size={size}
-              index={index + 5}
-              level={wiFiSpotsLevels[index] ?? 4}
-            />
-          )
-        })}
+        {wifiSpots.map((title, index) => (
+          <ItemWiFi
+            key={title}
+            title={title}
+            size={size}
+            index={index + 5}
+            level={wiFiSpotsLevels[index] ?? 4}
+          />
+        ))}
         {wifiSpots?.length < 1 && (
           <ItemWiFi
             title=""
