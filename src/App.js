@@ -812,7 +812,7 @@ function App() {
     </div> */}
           </div>
         )}
-      {/* <div className="text-white bg-black">{deviceStatus}</div> */}
+      <div className="text-white bg-black">{deviceStatus}</div>
       {/* <button onClick={disconnectDevice}>Отключить устройство</button> */}
       {
         !accessIndex || page === 'firstStartPage' ? (
