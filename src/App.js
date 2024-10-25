@@ -776,6 +776,12 @@ function App() {
           )}
         />
       )}
+      <div
+        className={cn(
+          'absolute z-50 left-1 top-0 h-[3px] w-[3px]',
+          'bg-Blue-700'
+        )}
+      />
       {/* <div className="p-1 absolute z-50 left-0 bottom-0 max-h-[100px] h-[100px] right-0 bg-white text-black text-xs">
         {logs.map((log, index) => (
           <div key={index}>{log}</div>
