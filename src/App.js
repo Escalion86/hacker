@@ -98,6 +98,7 @@ function App() {
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hackStatus = useRecoilValue(hackAtom)
   hack = hackStatus
+  const [showLogs, setShowLogs] = useState(false)
   const [log, setLog] = useState([])
   const [page, setPage] = useState(localStorage.startPage ?? 'settings')
   const [size, setSize] = useState('big')
@@ -117,6 +118,8 @@ function App() {
     setBLEStatus(newLog)
     setLog((state) => [...state, newLog])
   }
+
+  const toggleShowLogs = () => setShowLogs((state) => !state)
 
   const accessIndex = accessCodes[accessCode]?.index || 0
 
@@ -800,10 +803,18 @@ function App() {
     </div> */}
           </div>
         )}
-      <div className="text-white bg-black">{BLEStatus}</div>
+      <div className="text-blue-300 bg-black" onClick={toggleShowLogs}>
+        {BLEStatus}
+      </div>
       {/* <button onClick={disconnectDevice}>Отключить устройство</button> */}
       {
-        !accessIndex || page === 'firstStartPage' ? (
+        showLogs ? (
+          <div className="text-white bg-black">
+            {log.map((log, index) => (
+              <div key={index}>{log}</div>
+            ))}
+          </div>
+        ) : !accessIndex || page === 'firstStartPage' ? (
           <FirstStartPage setPage={setPage} setAccessCode={setAccessCode} />
         ) : !page || page === 'settings' ? (
           <SettingsPage
