@@ -98,6 +98,7 @@ function App() {
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hackStatus = useRecoilValue(hackAtom)
   hack = hackStatus
+  const [log, setLog] = useState([])
   const [page, setPage] = useState(localStorage.startPage ?? 'settings')
   const [size, setSize] = useState('big')
   // const [input, setInput] = useState('K♥')
@@ -111,6 +112,11 @@ function App() {
   // const connectRef = useRef(null)
   // const effectRan = useRef(null)
   // const [logs, setLog] = useRecoilState(logsAtom)
+  const addLog = (newLog) => {
+    console.log(newLog)
+    setBLEStatus(newLog)
+    setLog((state) => [...state, newLog])
+  }
 
   const accessIndex = accessCodes[accessCode]?.index || 0
 
@@ -128,13 +134,11 @@ function App() {
 
   const isWebBluetoothEnabled = useCallback(() => {
     if (!navigator.bluetooth) {
-      console.log('Web Bluetooth API is not available in this browser!')
-      setBLEStatus('Web Bluetooth API is not available in this browser!')
+      addLog('Web Bluetooth API is not available in this browser!')
       // setState('Web Bluetooth API is not available in this browser!')
       return false
     }
-    console.log('Web Bluetooth API supported in this browser.')
-    setBLEStatus('Web Bluetooth API supported in this browser.')
+    addLog('Web Bluetooth API supported in this browser.')
     return true
   }, [])
 
@@ -170,8 +174,7 @@ function App() {
   )
 
   const disconnectDevice = useCallback(async () => {
-    setBLEStatus('Disconnect Device.')
-    console.log('Disconnect Device.')
+    addLog('Disconnect Device.')
     if (deviceStatusInterval) clearInterval(deviceStatusInterval)
     // if (interval) clearInterval(interval)
     setDeviceStatus('Отключено')
@@ -202,20 +205,17 @@ function App() {
         wifiSpotsListCharacteristicFound
           .stopNotifications()
           .then(() => {
-            setBLEStatus('Notifications "Wifi Spots List" Stopped')
-            console.log('Notifications "Wifi Spots List" Stopped')
+            addLog('Notifications "Wifi Spots List" Stopped')
             // setLog((state) => [...state, 'Notifications Stopped'])
             return bleServer.disconnect()
           })
           .then(() => {
-            setBLEStatus('Устройство отключено')
-            console.log('Устройство отключено')
+            addLog('Устройство отключено')
             // setLog((state) => [...state, 'Устройство отключено'])
             // setState('Устройство отключено')
           })
           .catch((error) => {
-            setBLEStatus('An error occurred:', error)
-            console.log('An error occurred:', error)
+            addLog('An error occurred:', error)
             // setLog((state) => [...state, 'An error occurred:' + error])
           })
       }
@@ -228,27 +228,23 @@ function App() {
         deviceStatusCharacteristicFound
           .stopNotifications()
           .then(() => {
-            setBLEStatus('Notifications "Device Status" Stopped')
-            console.log('Notifications "Device Status" Stopped')
+            addLog('Notifications "Device Status" Stopped')
             // setLog((state) => [...state, 'Notifications Stopped'])
             return bleServer.disconnect()
           })
           .then(() => {
-            setBLEStatus('Устройство отключено')
-            console.log('Устройство отключено')
+            addLog('Устройство отключено')
             // setLog((state) => [...state, 'Устройство отключено'])
             // setState('Устройство отключено')
           })
           .catch((error) => {
-            setBLEStatus('An error occurred:', error)
-            console.log('An error occurred:', error)
+            addLog('An error occurred:', error)
             // setLog((state) => [...state, 'An error occurred:' + error])
           })
       }
     } else {
       // Throw an error if Bluetooth is not connected
-      setBLEStatus('Bluetooth is not connected.')
-      console.error('Bluetooth is not connected.')
+      addLog('Bluetooth is not connected.')
       window.alert('Bluetooth is not connected.')
       // setLog((state) => [...state, 'Bluetooth is not connected.'])
     }
@@ -259,18 +255,16 @@ function App() {
       promise
         .then((gattServer) => {
           bleServer = gattServer
-          setBLEStatus('Connected to GATT Server')
-          console.log('Connected to GATT Server')
+          addLog('Connected to GATT Server')
           // setLog((state) => [...state, 'Connected to GATT Server'])
           return bleServer.getPrimaryService(bleService)
         })
         .then(async (service) => {
           bleServiceFound = service
           // setBLEStatus('Service discovered:', service.uuid)
-          console.log('Service discovered:', service.uuid)
+          addLog('Service discovered: ' + service.uuid)
           // setLog((state) => [...state, 'Service discovered:' + service.uuid])
-          setBLEStatus('Device connected')
-          console.log('Device connected')
+          addLog('Device connected')
           setShowConnectDeviceButton(false)
           setIsConnected(true)
           if (onConnected) onConnected(service)
@@ -280,13 +274,9 @@ function App() {
           const wifiSpotsListCharacteristicFromService =
             await service.getCharacteristic(wifiSpotsListCharacteristic)
           if (wifiSpotsListCharacteristicFromService) {
-            setBLEStatus(
+            addLog(
               'Characteristic discovered: ' +
                 wifiSpotsListCharacteristicFromService.uuid
-            )
-            console.log(
-              'Characteristic discovered:',
-              wifiSpotsListCharacteristicFromService.uuid
             )
 
             wifiSpotsListCharacteristicFound =
@@ -311,13 +301,9 @@ function App() {
           const deviceStatusCharacteristicFromService =
             await service.getCharacteristic(deviceStatusCharacteristic)
           if (deviceStatusCharacteristicFromService) {
-            setBLEStatus(
+            addLog(
               'Characteristic discovered: ' +
                 deviceStatusCharacteristicFromService.uuid
-            )
-            console.log(
-              'Characteristic discovered:',
-              deviceStatusCharacteristicFromService.uuid
             )
             wifiSpotsListCharacteristicFound =
               deviceStatusCharacteristicFromService
@@ -326,7 +312,7 @@ function App() {
               handleDeviceStatusCharacteristicChange
             )
             deviceStatusCharacteristicFromService.startNotifications()
-            console.log('Notifications Started.')
+            addLog('Notifications Started.')
             // const value =
             await deviceStatusCharacteristicFromService.readValue()
 
@@ -383,8 +369,7 @@ function App() {
         //   // }
         // })
         .catch(async (error) => {
-          // setBLEStatus('Error: ', error)
-          console.log('Error: ', error)
+          addLog('Error: ' + error)
           await disconnectDevice()
           await autoConnectDevice()
         }),
@@ -426,24 +411,21 @@ function App() {
   // Connect to BLE Device and Enable Notifications
   const connectToDevice = useCallback(
     (autostartName) => {
-      setBLEStatus('Initializing Bluetooth...')
-      console.log('Initializing Bluetooth...')
+      addLog('Initializing Bluetooth...')
       navigator.bluetooth
         .requestDevice({
           filters: [{ name: deviceName }],
           optionalServices: [bleService],
         })
         .then((device) => {
-          console.log('Device Selected:', device.name)
-          setBLEStatus('Connected to device ' + device.name)
+          addLog('Connected to device ' + device.name)
           bleDevice = device
           // setState('Connected to device ' + device.name)
           // bleStateContainer.style.color = '#24af37'
           bleDevice.addEventListener(
             'gattservicedisconnected',
             async (event) => {
-              console.log('Устройство отключено:', event.target.device.name)
-              setBLEStatus('Устройство отключено: ' + event.target.device.name)
+              addLog('Устройство отключено: ' + event.target.device.name)
               // setState('Устройство отключено')
               setIsConnected(false)
               await connect()
@@ -584,8 +566,8 @@ function App() {
     // console.log('interval seted')
     // interval = setInterval(() => {
     navigator.bluetooth.getDevices().then((devices) => {
-      console.log('devices :>> ', devices)
-      setBLEStatus('Devices found: ' + devices?.length)
+      // console.log('devices :>> ', devices)
+      addLog('Devices found: ' + devices?.length)
       // devices[0].watchAdvertisements().then((e) => {
       //   console.log('e :>> ', e)
       // })
@@ -642,7 +624,7 @@ function App() {
         }
       } else {
         // if (interval) clearInterval(interval)
-        setBLEStatus('No devices paired')
+        addLog('No devices paired')
         setShowConnectDeviceButton(true)
       }
       // devices[0].gatt
@@ -754,10 +736,10 @@ function App() {
     setTimeout(async () => {
       try {
         if (isWebBluetoothEnabled()) await autoConnectDevice()
-        else setBLEStatus('WebBluetooth Disabled!')
+        else addLog('WebBluetooth Disabled!')
       } catch (error) {
-        setBLEStatus('ERROR')
-        console.log('error :>> ', error)
+        addLog('ERROR: ' + error)
+        // console.log('error :>> ', error)
       }
     }, 500)
   }, [setBLEStatus, autoConnectDevice, isWebBluetoothEnabled])
@@ -769,7 +751,7 @@ function App() {
       {isConnected && (
         <div
           className={cn(
-            'absolute z-50 left-0 top-0 h-[3px] w-[3px]',
+            'absolute z-50 left-0 top-0 h-[20px] w-[20px]',
             deviceStatus.substring(0, 15) === 'Идет трансляция'
               ? 'bg-green-700'
               : 'bg-gray-600 dark:bg-gray-500'
@@ -778,7 +760,7 @@ function App() {
       )}
       <div
         className={cn(
-          'absolute z-50 left-1 top-0 h-[3px] w-[3px]',
+          'absolute z-50 left-10 top-0 h-[20px] w-[20px]',
           'bg-Blue-700'
         )}
       />
