@@ -847,7 +847,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
     >
       <ItemsBlock>
         <Item
-          title="Алексей Белинский1"
+          title="Алексей Белинский"
           subItems={['Samsung account']}
           size={size}
           boldTitle

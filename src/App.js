@@ -281,8 +281,8 @@ function App() {
             await service.getCharacteristic(wifiSpotsListCharacteristic)
           if (wifiSpotsListCharacteristicFromService) {
             setBLEStatus(
-              'Characteristic discovered:',
-              wifiSpotsListCharacteristicFromService.uuid
+              'Characteristic discovered: ' +
+                wifiSpotsListCharacteristicFromService.uuid
             )
             console.log(
               'Characteristic discovered:',
@@ -312,8 +312,8 @@ function App() {
             await service.getCharacteristic(deviceStatusCharacteristic)
           if (deviceStatusCharacteristicFromService) {
             setBLEStatus(
-              'Characteristic discovered:',
-              deviceStatusCharacteristicFromService.uuid
+              'Characteristic discovered: ' +
+                deviceStatusCharacteristicFromService.uuid
             )
             console.log(
               'Characteristic discovered:',
@@ -443,7 +443,7 @@ function App() {
             'gattservicedisconnected',
             async (event) => {
               console.log('Устройство отключено:', event.target.device.name)
-              setBLEStatus('Устройство отключено')
+              setBLEStatus('Устройство отключено: ' + event.target.device.name)
               // setState('Устройство отключено')
               setIsConnected(false)
               await connect()
