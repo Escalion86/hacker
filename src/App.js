@@ -612,6 +612,17 @@ function App() {
             // device.gatt.connect().then((r) => console.log('r :>> ', r))
 
             device?.addEventListener(
+              'gattservicedisconnected',
+              async (event) => {
+                addLog('Устройство отключено: ' + event.target.device.name)
+                // setState('Устройство отключено')
+                setIsConnected(false)
+                await connect()
+                // connectToDevice()
+              }
+            )
+
+            device?.addEventListener(
               'advertisementreceived',
               async (event) => {
                 // Stop the scan to conserve power on mobile devices.
@@ -624,17 +635,6 @@ function App() {
                 console.log('  UUIDs: ' + event.uuids)
                 // clearInterval(interval)
                 // console.log('interval cleared')
-
-                event.device.addEventListener(
-                  'gattservicedisconnected',
-                  async (event) => {
-                    addLog('Устройство отключено: ' + event.target.device.name)
-                    // setState('Устройство отключено')
-                    setIsConnected(false)
-                    await connect()
-                    // connectToDevice()
-                  }
-                )
 
                 // At this point, we know that the device is in range, and we can attempt
                 // to connect to it.
