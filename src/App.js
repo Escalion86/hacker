@@ -262,7 +262,7 @@ function App() {
           // setLog((state) => [...state, 'Connected to GATT Server'])
           return bleServer.getPrimaryService(bleService)
         })
-        .then(async (service) => {
+        .then((service) => {
           bleServiceFound = service
           // setBLEStatus('Service discovered:', service.uuid)
           addLog('Service discovered: ' + service.uuid)
@@ -274,8 +274,11 @@ function App() {
           // if (autostartName) {
           //   writeOnCharacteristic(autostartName)
           // }
-          const wifiSpotsListCharacteristicFromService =
-            await service.getCharacteristic(wifiSpotsListCharacteristic)
+          return service.getCharacteristic(wifiSpotsListCharacteristic)
+          // const wifiSpotsListCharacteristicFromService =
+          //   await service.getCharacteristic(wifiSpotsListCharacteristic)
+        })
+        .then((wifiSpotsListCharacteristicFromService) => {
           if (wifiSpotsListCharacteristicFromService) {
             addLog(
               'Characteristic discovered: ' +
@@ -292,7 +295,7 @@ function App() {
             wifiSpotsListCharacteristicFromService.startNotifications()
             addLog('Notifications Started.')
             // const value =
-            await wifiSpotsListCharacteristicFromService.readValue()
+            return wifiSpotsListCharacteristicFromService.readValue()
             // if (value) {
             //   const decodedValue = new TextDecoder().decode(value)
             //   setBLEStatus('Decoded value: ', decodedValue)
