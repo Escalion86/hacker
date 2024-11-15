@@ -98,7 +98,7 @@ function App() {
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hackStatus = useRecoilValue(hackAtom)
   hack = hackStatus
-  const [showLogs, setShowLogs] = useState(false)
+  const [showLogs, setShowLogs] = useState(true)
   const [log, setLog] = useState([])
   const [page, setPage] = useState(localStorage.startPage ?? 'settings')
   const [size, setSize] = useState('big')
@@ -267,7 +267,7 @@ function App() {
           // setBLEStatus('Service discovered:', service.uuid)
           addLog('Service discovered: ' + service.uuid)
           // setLog((state) => [...state, 'Service discovered:' + service.uuid])
-          addLog('Device connected')
+          // addLog('Device connected')
           setShowConnectDeviceButton(false)
           setIsConnected(true)
           if (onConnected) onConnected(service)
@@ -615,9 +615,13 @@ function App() {
               { once: true }
             )
 
-            console.log('Watching advertisements from "' + device.name + '"...')
+            // console.log('Watching advertisements from "' + device.name + '"...')
+            addLog('Watching advertisements from "' + device.name + '"...')
             device
               .watchAdvertisements({ signal: abortController.signal })
+              .then((w) => {
+                addLog('w :>> ' + w)
+              })
               .catch((error) => {
                 console.log('Argh watchAdvertisements! ' + error)
               })
