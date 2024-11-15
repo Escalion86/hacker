@@ -98,7 +98,7 @@ function App() {
   const [showConnectDeviceButton, setShowConnectDeviceButton] = useState(false)
   const hackStatus = useRecoilValue(hackAtom)
   hack = hackStatus
-  const [showLogs, setShowLogs] = useState(true)
+  const [showLogs, setShowLogs] = useState(false)
   const [log, setLog] = useState([])
   const [page, setPage] = useState(localStorage.startPage ?? 'settings')
   const [size, setSize] = useState('big')
