@@ -278,11 +278,14 @@ function App() {
           // if (characteristic) {
           addLog('Characteristic discovered: ' + characteristic.uuid)
           wifiSpotsListCharacteristicFound = characteristic
+          addLog('0')
           characteristic.addEventListener(
             'characteristicvaluechanged',
             handleWiFiSpotsListCharacteristicChange
           )
+          addLog('1')
           characteristic.startNotifications()
+          addLog('2')
           // addLog('Notifications Started.')
           // const value =
           return characteristic.readValue()
