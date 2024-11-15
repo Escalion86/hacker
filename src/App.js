@@ -624,9 +624,9 @@ function App() {
             addLog('Watching advertisements from "' + device.name + '"...')
             device
               .watchAdvertisements({ signal: abortController.signal })
-              .then((w) => {
-                addLog('w :>> ' + w)
-              })
+              // .then((w) => {
+              //   addLog('w :>> ' + w)
+              // })
               .catch((error) => {
                 console.log('Argh watchAdvertisements! ' + error)
               })
