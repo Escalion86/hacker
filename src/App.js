@@ -321,10 +321,15 @@ function App() {
             )
             deviceStatusCharacteristicFromService.startNotifications()
             addLog('Notifications Started.')
-            // const value =
-            await deviceStatusCharacteristicFromService.readValue()
+
+            // await deviceStatusCharacteristicFromService.readValue()
+
+            // addLog('Readed value')
 
             if (deviceStatusInterval) clearInterval(deviceStatusInterval)
+
+            addLog('Start interval')
+
             deviceStatusInterval = setInterval(async () => {
               try {
                 if (!hack) {
