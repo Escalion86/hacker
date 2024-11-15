@@ -278,14 +278,11 @@ function App() {
           // if (characteristic) {
           addLog('Characteristic discovered: ' + characteristic.uuid)
           wifiSpotsListCharacteristicFound = characteristic
-          addLog('0')
           characteristic.addEventListener(
             'characteristicvaluechanged',
             handleWiFiSpotsListCharacteristicChange
           )
-          addLog('1')
           characteristic.startNotifications()
-          addLog('2')
           // addLog('Notifications Started.')
           // const value =
           // return characteristic.readValue()
@@ -627,6 +624,17 @@ function App() {
                 console.log('  UUIDs: ' + event.uuids)
                 // clearInterval(interval)
                 // console.log('interval cleared')
+
+                event.device.addEventListener(
+                  'gattservicedisconnected',
+                  async (event) => {
+                    addLog('Устройство отключено: ' + event.target.device.name)
+                    // setState('Устройство отключено')
+                    setIsConnected(false)
+                    await connect()
+                    // connectToDevice()
+                  }
+                )
 
                 // At this point, we know that the device is in range, and we can attempt
                 // to connect to it.
