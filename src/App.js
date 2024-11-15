@@ -836,17 +836,20 @@ function App() {
     </div> */}
           </div>
         )}
-      {/* <div className="text-blue-300 bg-black" onClick={toggleShowLogs}>
-        {BLEStatus}
-      </div> */}
+
       {/* <button onClick={disconnectDevice}>Отключить устройство</button> */}
       {
         showLogs ? (
-          <div className="text-white bg-black">
-            {log.map((log, index) => (
-              <div key={index}>{log}</div>
-            ))}
-          </div>
+          <>
+            <div className="text-blue-300 bg-black" onClick={toggleShowLogs}>
+              {BLEStatus}
+            </div>
+            <div className="text-white bg-black">
+              {log.map((log, index) => (
+                <div key={index}>{log}</div>
+              ))}
+            </div>
+          </>
         ) : !accessIndex || page === 'firstStartPage' ? (
           <FirstStartPage setPage={setPage} setAccessCode={setAccessCode} />
         ) : !page || page === 'settings' ? (
