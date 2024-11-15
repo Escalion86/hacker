@@ -326,24 +326,24 @@ function App() {
 
             // addLog('Readed value')
 
-            // if (deviceStatusInterval) clearInterval(deviceStatusInterval)
+            if (deviceStatusInterval) clearInterval(deviceStatusInterval)
 
-            // addLog('Start interval')
+            addLog('Start interval')
 
-            // deviceStatusInterval = setInterval(async () => {
-            //   try {
-            //     if (!hack) {
-            //       console.log('Check device status')
-            //       await deviceStatusCharacteristicFromService.readValue()
-            //     }
-            //   } catch (eee) {
-            //     console.log('eee :>> ', eee)
-            //     await disconnectDevice()
-            //     await autoConnectDevice()
-            //     // if (deviceStatusInterval) clearInterval(deviceStatusInterval)
-            //     // if (interval) clearInterval(interval)
-            //   }
-            // }, 5000)
+            deviceStatusInterval = setInterval(async () => {
+              try {
+                if (!hack) {
+                  console.log('Check device status')
+                  await deviceStatusCharacteristicFromService.readValue()
+                }
+              } catch (eee) {
+                console.log('eee :>> ', eee)
+                await disconnectDevice()
+                await autoConnectDevice()
+                // if (deviceStatusInterval) clearInterval(deviceStatusInterval)
+                // if (interval) clearInterval(interval)
+              }
+            }, 5000)
 
             // if (value) {
             //   const decodedValue = new TextDecoder().decode(value)
