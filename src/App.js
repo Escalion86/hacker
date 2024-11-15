@@ -787,7 +787,7 @@ function App() {
       {isConnected && (
         <div
           className={cn(
-            'absolute z-50 left-0 top-0 h-[2px] w-[2px]',
+            'fixed z-50 left-0 top-0 h-[2px] w-[2px]',
             deviceStatus.substring(0, 15) === 'Идет трансляция'
               ? 'bg-green-700'
               : 'bg-gray-600 dark:bg-gray-500'
