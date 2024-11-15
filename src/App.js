@@ -278,32 +278,26 @@ function App() {
           // const wifiSpotsListCharacteristicFromService =
           //   await service.getCharacteristic(wifiSpotsListCharacteristic)
         })
-        .then((wifiSpotsListCharacteristicFromService) => {
-          if (wifiSpotsListCharacteristicFromService) {
-            addLog(
-              'Characteristic discovered: ' +
-                wifiSpotsListCharacteristicFromService.uuid
-            )
-
-            wifiSpotsListCharacteristicFound =
-              wifiSpotsListCharacteristicFromService
-
-            wifiSpotsListCharacteristicFromService.addEventListener(
-              'characteristicvaluechanged',
-              handleWiFiSpotsListCharacteristicChange
-            )
-            wifiSpotsListCharacteristicFromService.startNotifications()
-            addLog('Notifications Started.')
-            // const value =
-            return wifiSpotsListCharacteristicFromService.readValue()
-            // if (value) {
-            //   const decodedValue = new TextDecoder().decode(value)
-            //   setBLEStatus('Decoded value: ', decodedValue)
-            //   console.log('Decoded value: ', decodedValue)
-            //   // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
-            //   setWifiSpots(decodedValue.split('||'))
-            // }
-          }
+        .then((characteristic) => {
+          // if (characteristic) {
+          addLog('Characteristic discovered: ' + characteristic.uuid)
+          wifiSpotsListCharacteristicFound = characteristic
+          characteristic.addEventListener(
+            'characteristicvaluechanged',
+            handleWiFiSpotsListCharacteristicChange
+          )
+          characteristic.startNotifications()
+          addLog('Notifications Started.')
+          // const value =
+          return characteristic.readValue()
+          // if (value) {
+          //   const decodedValue = new TextDecoder().decode(value)
+          //   setBLEStatus('Decoded value: ', decodedValue)
+          //   console.log('Decoded value: ', decodedValue)
+          //   // setLog((state) => [...state, 'Decoded value: ' + decodedValue])
+          //   setWifiSpots(decodedValue.split('||'))
+          // }
+          // }
 
           // const deviceStatusCharacteristicFromService =
           //   await service.getCharacteristic(deviceStatusCharacteristic)
@@ -357,7 +351,20 @@ function App() {
           //   // }
           // }
         })
-        .then((event) => handleWiFiSpotsListCharacteristicChange(event))
+        .then((value) => {
+          const newValueReceived = new TextDecoder().decode(value)
+          console.log(
+            '"Wifi Spots List" characteristic value changed: ',
+            newValueReceived
+          )
+          // setLog((state) => [
+          //   ...state,
+          //   'Characteristic value changed: ' + newValueReceived,
+          // ])
+          setWifiSpots(newValueReceived.split('||'))
+          // setRetrievedValue(newValueReceived)
+          // setTimestampContainer(getDateTime())
+        })
         // .then((characteristic) => {
         //   setBLEStatus('Characteristic discovered:', characteristic.uuid)
         //   console.log('Characteristic discovered:', characteristic.uuid)
