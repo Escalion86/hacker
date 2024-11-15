@@ -443,16 +443,16 @@ function App() {
           bleDevice = device
           // setState('Connected to device ' + device.name)
           // bleStateContainer.style.color = '#24af37'
-          bleDevice.addEventListener(
-            'gattservicedisconnected',
-            async (event) => {
-              addLog('Устройство отключено: ' + event.target.device.name)
-              // setState('Устройство отключено')
-              setIsConnected(false)
-              await connect()
-              // connectToDevice()
-            }
-          )
+          // bleDevice.addEventListener(
+          //   'gattservicedisconnected',
+          //   async (event) => {
+          //     addLog('Устройство отключено: ' + event.target.device.name)
+          //     // setState('Устройство отключено')
+          //     setIsConnected(false)
+          //     await connect()
+          //     // connectToDevice()
+          //   }
+          // )
 
           afterConnectDevice(device.gatt.connect(), () => {
             const value = autostartName
@@ -611,16 +611,16 @@ function App() {
             //   })
             // device.gatt.connect().then((r) => console.log('r :>> ', r))
 
-            device?.addEventListener(
-              'gattservicedisconnected',
-              async (event) => {
-                addLog('Устройство отключено: ' + event.target.device.name)
-                // setState('Устройство отключено')
-                setIsConnected(false)
-                await connect()
-                // connectToDevice()
-              }
-            )
+            // device?.addEventListener(
+            //   'gattservicedisconnected',
+            //   async (event) => {
+            //     addLog('Устройство отключено: ' + event.target.device.name)
+            //     // setState('Устройство отключено')
+            //     setIsConnected(false)
+            //     await connect()
+            //     // connectToDevice()
+            //   }
+            // )
 
             device?.addEventListener(
               'advertisementreceived',
@@ -787,7 +787,7 @@ function App() {
       {isConnected && (
         <div
           className={cn(
-            'absolute z-50 left-0 top-0 h-[20px] w-[20px]',
+            'absolute z-50 left-0 top-0 h-[2px] w-[2px]',
             deviceStatus.substring(0, 15) === 'Идет трансляция'
               ? 'bg-green-700'
               : 'bg-gray-600 dark:bg-gray-500'
@@ -836,9 +836,9 @@ function App() {
     </div> */}
           </div>
         )}
-      <div className="text-blue-300 bg-black" onClick={toggleShowLogs}>
+      {/* <div className="text-blue-300 bg-black" onClick={toggleShowLogs}>
         {BLEStatus}
-      </div>
+      </div> */}
       {/* <button onClick={disconnectDevice}>Отключить устройство</button> */}
       {
         showLogs ? (
@@ -857,6 +857,8 @@ function App() {
             connectToDevice={connectToDevice}
             disconnectDevice={disconnectDevice}
             isConnected={isConnected}
+            showLogs={showLogs}
+            setShowLogs={setShowLogs}
           />
         ) : (
           <Page

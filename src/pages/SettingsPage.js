@@ -11,6 +11,8 @@ const SettingsPage = ({
   connectToDevice,
   disconnectDevice,
   isConnected,
+  showLogs,
+  setShowLogs,
 }) => {
   const [mode, setMode] = useState(localStorage.mode || 'word')
   const [learn, setLearn] = useState(localStorage.learn)
@@ -154,6 +156,12 @@ const SettingsPage = ({
           localStorage.learn = newValue
           setLearn(newValue)
         }}
+      />
+      <Switch
+        id="logs"
+        label="Показывать логи"
+        checked={showLogs}
+        onChange={setShowLogs((state) => !state)}
       />
       <Button onClick={() => setPage('firstStartPage')}>
         Сменить учетную запись
