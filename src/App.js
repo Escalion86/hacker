@@ -290,7 +290,7 @@ function App() {
               handleWiFiSpotsListCharacteristicChange
             )
             wifiSpotsListCharacteristicFromService.startNotifications()
-            console.log('Notifications Started.')
+            addLog('Notifications Started.')
             // const value =
             await wifiSpotsListCharacteristicFromService.readValue()
             // if (value) {
@@ -301,8 +301,13 @@ function App() {
             //   setWifiSpots(decodedValue.split('||'))
             // }
           }
+
           const deviceStatusCharacteristicFromService =
             await service.getCharacteristic(deviceStatusCharacteristic)
+          addLog(
+            'deviceStatusCharacteristicFromService = ' +
+              deviceStatusCharacteristicFromService
+          )
           if (deviceStatusCharacteristicFromService) {
             addLog(
               'Characteristic discovered: ' +
