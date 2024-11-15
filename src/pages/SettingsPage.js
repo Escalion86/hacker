@@ -161,7 +161,7 @@ const SettingsPage = ({
         id="logs"
         label="Показывать логи"
         checked={showLogs}
-        onChange={setShowLogs((state) => !state)}
+        onChange={() => setShowLogs((state) => !state)}
       />
       <Button onClick={() => setPage('firstStartPage')}>
         Сменить учетную запись
