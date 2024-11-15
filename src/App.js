@@ -158,23 +158,19 @@ function App() {
     [setDeviceStatus]
   )
 
-  const handleWiFiSpotsListCharacteristicChange = useCallback(
-    (event) => {
-      const newValueReceived = new TextDecoder().decode(event.target.value)
-      console.log(
-        '"Wifi Spots List" characteristic value changed: ',
-        newValueReceived
-      )
-      // setLog((state) => [
-      //   ...state,
-      //   'Characteristic value changed: ' + newValueReceived,
-      // ])
-      setWifiSpots(newValueReceived.split('||'))
-      // setRetrievedValue(newValueReceived)
-      // setTimestampContainer(getDateTime())
-    },
-    [setWifiSpots]
-  )
+  function handleWiFiSpotsListCharacteristicChange(event) {
+    const newValueReceived = new TextDecoder().decode(event.target.value)
+    addLog(
+      '"Wifi Spots List" characteristic value changed: ' + newValueReceived
+    )
+    // setLog((state) => [
+    //   ...state,
+    //   'Characteristic value changed: ' + newValueReceived,
+    // ])
+    setWifiSpots(newValueReceived.split('||'))
+    // setRetrievedValue(newValueReceived)
+    // setTimestampContainer(getDateTime())
+  }
 
   const disconnectDevice = useCallback(async () => {
     addLog('Disconnect Device.')
@@ -281,12 +277,12 @@ function App() {
         .then((characteristic) => {
           // if (characteristic) {
           addLog('Characteristic discovered: ' + characteristic.uuid)
-          // wifiSpotsListCharacteristicFound = characteristic
-          // characteristic.addEventListener(
-          //   'characteristicvaluechanged',
-          //   handleWiFiSpotsListCharacteristicChange
-          // )
-          // characteristic.startNotifications()
+          wifiSpotsListCharacteristicFound = characteristic
+          characteristic.addEventListener(
+            'characteristicvaluechanged',
+            handleWiFiSpotsListCharacteristicChange
+          )
+          characteristic.startNotifications()
           // addLog('Notifications Started.')
           // const value =
           return characteristic.readValue()
