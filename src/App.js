@@ -395,7 +395,7 @@ function App() {
           await autoConnectDevice()
         }),
     [
-      handleWiFiSpotsListCharacteristicChange,
+      // handleWiFiSpotsListCharacteristicChange,
       handleDeviceStatusCharacteristicChange,
     ]
   )
