@@ -353,9 +353,9 @@ function App() {
         })
         .then((value) => {
           const newValueReceived = new TextDecoder().decode(value)
-          console.log(
-            '"Wifi Spots List" characteristic value changed: ',
-            newValueReceived
+          addLog(
+            '"Wifi Spots List" characteristic value changed: ' +
+              newValueReceived
           )
           // setLog((state) => [
           //   ...state,
