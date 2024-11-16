@@ -43,13 +43,18 @@ import VerticalDots from '../icons/VerticalDots'
 import UserIcon from '../icons/UserIcon'
 import PhoneIcon from '../icons/enkD83Js/PhoneIcon'
 import SimIcon from '../icons/enkD83Js/SimIcon'
-import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
+// import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
 import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
 import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
 import PaintBrushIcon from '../icons/enkD83Js/PaintBrushIcon'
 import SunIcon from '../icons/enkD83Js/SunIcon'
 import QRScanerIcon from '../icons/enkD83Js/QRScanerIcon'
 import ArrowLeftIcon from '../icons/enkD83Js/ArrowLeftIcon'
+import WiFiIcon from '../icons/vladFert/WiFiIcon'
+import NetworkIcon from '../icons/vladFert/NetworkIcon'
+import AccountIcon from '../icons/vladFert/AccountIcon'
+import BTIcon from '../icons/vladFert/BTIcon'
+import ConnectionsIcon from '../icons/vladFert/ConnectionsIcon'
 
 const PageWrapper = ({
   title,
@@ -308,6 +313,7 @@ const Item = ({
   arrow = true,
   textRight,
   big,
+  alterColor = false,
 }) => {
   const [isChecked, setIsChecked] = useState(checkbox)
   const itemRef = useRef()
@@ -396,11 +402,14 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'bg-[#009994] rounded-full mt-3.5 aspect-square pointer-events-none mr-4 min-w-[36px] min-h-[36px] flex justify-center items-center',
-              big ? 'pt-[18px]' : 'pt-[13px]'
+              'rounded-full mt-3.5 aspect-square pointer-events-none mr-4 flex justify-center items-center',
+              big
+                ? 'max-w-[40px] max-h-[40px] min-w-[40px] min-h-[40px]'
+                : 'max-w-[36px] max-h-[36px] min-w-[36px] min-h-[36px]',
+              alterColor ? 'bg-[#c9dae4]' : 'bg-[#009994]'
             )}
           >
-            {/* <Icon /> */}
+            <Icon />
           </div>
         )}
         <div
@@ -658,9 +667,11 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
       <ItemsBlock>
         <Item
           title="Magfert"
-          Icon={UserIcon}
+          Icon={AccountIcon}
           subItems={['Enjoy exclusive benefits and services designed for you!']}
-          className="py-4"
+          // className="py-4"
+          alterColor
+          big
         />
         {/* <Item
           title="Мой телефон"
@@ -671,7 +682,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
       <ItemsBlock>
         <Item
           title="Wi-Fi"
-          Icon={SimIcon}
+          Icon={WiFiIcon}
           hiddenSwipeElementsFunc={[
             () => setSuit(0),
             () => setSuit(1),
@@ -682,7 +693,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
         />
         <Item
           title="Мобильная сеть"
-          Icon={WiFiIcon}
+          Icon={NetworkIcon}
           onClick={() => {
             setPage('wifi')
           }}
@@ -704,7 +715,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
         />
         <Item
           title="Bluetooth"
-          Icon={HotSpotIcon}
+          Icon={BTIcon}
           hiddenSwipeElementsFunc={[
             () => setSuit(4),
             () => setSuit(5),
@@ -716,7 +727,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
         />
         <Item
           title="Подключение и общий доступ"
-          Icon={OtherDevicesIcon}
+          Icon={ConnectionsIcon}
           hiddenSwipeElementsFunc={[
             () => setSuit(8),
             () => setSuit(9),
@@ -729,38 +740,38 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
       <ItemsBlock>
         <Item
           title="Обои и стили"
-          Icon={PaintBrushIcon}
+          Icon={NetworkIcon}
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
           hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
-        <Item title="Главный экран и экран блокировки" Icon={SunIcon} />
-        <Item title="Экран и Яркость" Icon={BateryIcon} />
-        <Item title="Звуки и вибрация" Icon={BateryIcon} />
-        <Item title="Уведомления и строка состояния" Icon={BateryIcon} />
+        <Item title="Главный экран и экран блокировки" Icon={NetworkIcon} />
+        <Item title="Экран и Яркость" Icon={NetworkIcon} />
+        <Item title="Звуки и вибрация" Icon={NetworkIcon} />
+        <Item title="Уведомления и строка состояния" Icon={NetworkIcon} />
       </ItemsBlock>
       <ItemsBlock>
-        <Item title="Приложения" Icon={WallpappersIcon} />
-        <Item title="Защита и конфиденциальность" Icon={ThemesIcon} />
-        <Item title="Местоположение" Icon={BlockScreenIcon} />
-        <Item title="Безопасность и экстренные случаи" Icon={BlockScreenIcon} />
-        <Item title="Батарея" Icon={BlockScreenIcon} />
+        <Item title="Приложения" Icon={NetworkIcon} />
+        <Item title="Защита и конфиденциальность" Icon={NetworkIcon} />
+        <Item title="Местоположение" Icon={NetworkIcon} />
+        <Item title="Безопасность и экстренные случаи" Icon={NetworkIcon} />
+        <Item title="Батарея" Icon={NetworkIcon} />
       </ItemsBlock>
       <ItemsBlock>
-        <Item title="Специальные функции" Icon={ShildIcon} />
+        <Item title="Специальные функции" Icon={NetworkIcon} />
         <Item
           title="Цифровое благополучие и родительский контроль"
-          Icon={LocationIcon}
+          Icon={NetworkIcon}
         />
-        <Item title="Дополнительные настройки" Icon={ExtraIcon} />
+        <Item title="Дополнительные настройки" Icon={NetworkIcon} />
         {/* <Item title="Специальные функции" Icon={ExtraIcon} /> */}
       </ItemsBlock>
       <ItemsBlock>
-        <Item title="Об устройстве" Icon={AccountsIcon} />
-        <Item title="Пользователи и аккаунты" Icon={AccountsIcon} />
-        <Item title="Google" Icon={GoogleIcon} />
+        <Item title="Об устройстве" Icon={NetworkIcon} />
+        <Item title="Пользователи и аккаунты" Icon={NetworkIcon} />
+        <Item title="Google" Icon={NetworkIcon} />
         <Item
           title="Справка и отзывы"
-          Icon={GoogleIcon}
+          Icon={NetworkIcon}
           onClick={() => setPage('settings')}
         />
       </ItemsBlock>
