@@ -1,7 +1,7 @@
 const SearchIcon = ({ size, className }) => (
   <svg
-    width={size === 'small' ? '20' : '24'}
-    height={size === 'small' ? '20' : '24'}
+    width={size === 'small' ? '20' : size === 'md' ? '22' : '24'}
+    height={size === 'small' ? '20' : size === 'md' ? '22' : '24'}
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

@@ -82,10 +82,10 @@ const PageWrapper = ({
   //   })
   // }, [])
 
-  const height = useTransform(scrollY, [0, 70], [100, 35])
-  const scale = useTransform(scrollY, [0, 70], [1, 0.7])
-  const marginLeft = useTransform(scrollY, [0, 70], [0, -16])
-  const marginTop = useTransform(scrollY, [0, 70], [-90, -40])
+  const height = useTransform(scrollY, [0, 70], [100, 45])
+  const scale = useTransform(scrollY, [0, 70], [1, 0.5])
+  const marginLeft = useTransform(scrollY, [0, 70], [0, -44])
+  const marginTop = useTransform(scrollY, [0, 70], [-90, -30])
   // const opacity = useTransform(scrollY, [0, 100], [1, 0])
   // const opacity2 = useTransform(scrollY, [100, 190], [0, 1])
 
@@ -107,7 +107,7 @@ const PageWrapper = ({
           //   : size === 'big'
           //   ? 'pl-6 pr-6 pt-8 pb-3.5'
           //   : 'pl-6 pr-5 pt-6 pb-3.5'
-          'pl-4 pr-3 pt-6 pb-3.5'
+          'pr-3 pt-6'
         )}
         style={{ marginTop: collapsedTitle ? -40 : marginTop }}
         // onClick={toggleTheme}
@@ -119,18 +119,18 @@ const PageWrapper = ({
           {onClickBack && (
             <div
               onClick={onClickBack}
-              className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
+              className="button cursor-pointer ml-4 -mb-3.5 -mt-3.5 rounded-full"
             >
               <ArrowLeftIcon className="fill-[#1a1a1a] dark:fill-white" />
             </div>
           )}
           <motion.div
-            className="z-50 flex items-center w-full overflow-visible text-[32px] leading-[36px]"
+            className="z-50 flex items-center w-full overflow-visible font-semibold text-[36px] leading-[40px]"
             // style={{ height: 100, minHeight: 100 }}
             style={{
-              height: collapsedTitle ? 35 : height,
+              height: collapsedTitle ? 45 : height,
               scrollSnapAlign: 'center',
-              scale: collapsedTitle ? 0.7 : scale,
+              scale: collapsedTitle ? 0.5 : scale,
             }}
             // style={{
 
@@ -142,7 +142,7 @@ const PageWrapper = ({
             {title}
           </motion.div>
         </motion.div>
-        <div className="absolute bottom-4 right-3">
+        <div className="absolute right-0 flex items-center bottom-2">
           {icons.length > 0
             ? icons.map((Icon) => (
                 <Icon className="ml-2 fill-dark dark:fill-white stroke-dark dark:stroke-white" />
@@ -153,7 +153,11 @@ const PageWrapper = ({
       <div
         className={cn(
           'flex flex-col pb-4',
-          size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
+          size === 'small'
+            ? 'gap-y-4'
+            : size === 'big'
+            ? 'gap-y-5'
+            : 'gap-y-[18px]'
         )}
         style={{ scrollSnapAlign: 'start' }}
       >
@@ -163,7 +167,15 @@ const PageWrapper = ({
   )
 }
 
-const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
+const ItemWiFi = ({
+  size,
+  title,
+  onClick,
+  index,
+  hidden,
+  level,
+  dontChange,
+}) => {
   const hack = useRecoilValue(hackAtom)
   const [titleState, setTitleState] = useState(title)
   const [iteration, setIteration] = useState(0)
@@ -174,37 +186,39 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
   const interval = useRef()
 
   useEffect(() => {
-    if (hack && iteration === 0) {
-      setIteration(0)
-      interval.current = setInterval(() => {
-        setIteration((state) => state + 1)
-        setTitleState(makeId(localStorage.wifi?.length || 6))
-      }, getRandomInt(350, 650))
+    if (!dontChange) {
+      if (hack && iteration === 0) {
+        setIteration(0)
+        interval.current = setInterval(() => {
+          setIteration((state) => state + 1)
+          setTitleState(makeId(localStorage.wifi?.length || 6))
+        }, getRandomInt(350, 650))
+      }
+      if (!hack || iteration >= index) {
+        clearInterval(interval.current)
+        if (hack) {
+          if (!mode || mode === 'word') {
+            setTitleState(
+              `${localStorage.dot === 'true' ? '.' : ''}${
+                localStorage.wifi || 'Hacked'
+              }`
+            )
+          } else if (mode === 'card') {
+            setTitleState(
+              `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
+                suit <= 12 ? mastsEmoji[mast] : ''
+              }`
+            )
+          }
+        } else setTitleState(title)
+        // setIteration(0)
+      }
     }
-    if (!hack || iteration >= index) {
-      clearInterval(interval.current)
-      if (hack) {
-        if (!mode || mode === 'word') {
-          setTitleState(
-            `${localStorage.dot === 'true' ? '.' : ''}${
-              localStorage.wifi || 'Hacked'
-            }`
-          )
-        } else if (mode === 'card') {
-          setTitleState(
-            `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
-              suit <= 12 ? mastsEmoji[mast] : ''
-            }`
-          )
-        }
-      } else setTitleState(title)
-      // setIteration(0)
-    }
-  }, [hack, iteration, mast, suit, mode])
+  }, [hack, iteration, mast, suit, mode, dontChange])
 
   useEffect(() => {
-    if (!hack) setIteration(0)
-  }, [hack])
+    if (!hack & !dontChange) setIteration(0)
+  }, [hack, dontChange])
 
   useEffect(() => {
     // let button = document.getElementById('button')
@@ -282,7 +296,7 @@ const ItemWiFi = ({ size, title, onClick, index, hidden, level }) => {
                   : 'text-lg'
               )}
             >
-              {titleState}
+              {dontChange ? title : titleState}
             </div>
           </div>
         </div>
@@ -366,7 +380,7 @@ const Item = ({
         onClick={onClick}
         className={cn(
           'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
-          big ? 'pb-[22px]' : 'pb-[13px]',
+          big ? 'pb-[24px] min-h-[60px]' : 'pb-[10px] min-h-[54px]',
           'px-[16px]'
         )}
       >
@@ -402,10 +416,10 @@ const Item = ({
         {Icon && (
           <div
             className={cn(
-              'rounded-full mt-3.5 aspect-square pointer-events-none mr-4 flex justify-center items-center',
+              'rounded-full aspect-square pointer-events-none mr-4 flex justify-center items-center',
               big
-                ? 'max-w-[40px] max-h-[40px] min-w-[40px] min-h-[40px]'
-                : 'max-w-[36px] max-h-[36px] min-w-[36px] min-h-[36px]',
+                ? 'mt-[22px] max-w-[40px] max-h-[40px] min-w-[40px] min-h-[40px]'
+                : 'mt-3.5 max-w-[36px] max-h-[36px] min-w-[36px] min-h-[36px]',
               alterColor ? 'bg-[#c9dae4]' : 'bg-[#009994]'
             )}
           >
@@ -415,7 +429,7 @@ const Item = ({
         <div
           className={cn(
             'flex gap-x-3 items-center justify-between flex-1',
-            big ? 'pt-[22px]' : 'pt-[13px]'
+            big ? 'pt-[26px]' : 'pt-[10px]'
           )}
         >
           <div
@@ -427,13 +441,13 @@ const Item = ({
               className={cn(
                 'text-left -mt-0.5', //font-semibold
                 activeTitle ? 'text-[#578ffe]' : '',
-                'text-[15px] leading-[18px]'
+                'text-[14px] leading-[18px]'
               )}
             >
               {title}
             </div>
             {subItems && (
-              <div className="mt-0.5 text-left text-[#767676] text-[11px] leading-[13px]">
+              <div className="mt-2 text-left text-[#767676] text-[11px] leading-[13px]">
                 {subItems.map((item, index) => (
                   <div key={item} className="inline">
                     <span>{item}</span>
@@ -455,7 +469,7 @@ const Item = ({
             >
               <input
                 type="checkbox"
-                className="switch_1"
+                className="switch_2"
                 checked={isChecked}
                 onChange={(e) => {
                   // e.stopPropagation()
@@ -471,7 +485,7 @@ const Item = ({
           )}
           {arrow && (
             <div className="rotate-180">
-              <ArrowBack width={16} height={16} className="fill-[#767676]" />
+              <ArrowBack width={18} height={18} className="fill-[#767676]" />
             </div>
           )}
         </div>
@@ -544,6 +558,7 @@ export const WiFiPage = ({
       className={className}
       icons={[
         () => QRScanerIcon({ className: 'fill-[#1a1a1a] dark:fill-white' }),
+        VerticalDots,
       ]}
       collapsedTitle
     >
@@ -551,7 +566,7 @@ export const WiFiPage = ({
         <Item
           title="Wi-Fi"
           arrow={false}
-          big
+          // big
           // activeTitle={true}
           // subItems={['Wi-Fi', 'Bluetooth', 'Диспетчер SIM-карт']}
           onClick={() => {
@@ -579,8 +594,13 @@ export const WiFiPage = ({
           checkbox
           checkboxBorder={false}
         />
+        <Item title="Помощник по Wi-Fi" />
       </ItemsBlock>
-      <ItemsBlock title="Сети Wi-Fi">
+      <ItemsBlock title="Сохраненные сети">
+        <ItemWiFi title="DIREZABLe" dontChange />
+        <ItemWiFi title="DIREZABLe-5G" dontChange />
+      </ItemsBlock>
+      <ItemsBlock title="Доступные сети">
         {wifiSpots.map((title, index) => {
           if (title.trim() === '') return null
           return (
@@ -592,47 +612,47 @@ export const WiFiPage = ({
             />
           )
         })}
-        {wifiSpots?.length < 1 && (
-          <ItemWiFi title="1234" index={5} level={wiFiSpotsLevels[0]} />
+        {hack && wifiSpots?.length < 1 && (
+          <ItemWiFi title="" index={5} level={wiFiSpotsLevels[0]} />
         )}
-        {wifiSpots?.length < 2 && (
+        {hack && wifiSpots?.length < 2 && (
           <ItemWiFi title="" index={5} hidden level={wiFiSpotsLevels[1]} />
         )}
-        {wifiSpots?.length < 3 && (
+        {hack && wifiSpots?.length < 3 && (
           <ItemWiFi title="" index={6} hidden level={wiFiSpotsLevels[2]} />
         )}
-        {wifiSpots?.length < 4 && (
+        {hack && wifiSpots?.length < 4 && (
           <ItemWiFi title="" index={7} hidden level={wiFiSpotsLevels[3]} />
         )}
-        {wifiSpots?.length < 5 && (
+        {hack && wifiSpots?.length < 5 && (
           <ItemWiFi title="" index={8} hidden level={wiFiSpotsLevels[4]} />
         )}
-        {wifiSpots?.length < 6 && (
+        {hack && wifiSpots?.length < 6 && (
           <ItemWiFi title="" index={9} hidden level={wiFiSpotsLevels[5]} />
         )}
-        {wifiSpots?.length < 7 && (
+        {hack && hack && wifiSpots?.length < 7 && (
           <ItemWiFi title="" index={10} hidden level={wiFiSpotsLevels[6]} />
         )}
         {wifiSpots?.length < 8 && (
           <ItemWiFi title="" index={11} hidden level={wiFiSpotsLevels[7]} />
         )}
-        {wifiSpots?.length < 9 && (
+        {hack && wifiSpots?.length < 9 && (
           <ItemWiFi title="" index={12} hidden level={wiFiSpotsLevels[8]} />
         )}
-        {wifiSpots?.length < 10 && (
+        {hack && wifiSpots?.length < 10 && (
           <ItemWiFi title="" index={13} hidden level={wiFiSpotsLevels[9]} />
         )}
-        {wifiSpots?.length < 11 && (
+        {hack && wifiSpots?.length < 11 && (
           <ItemWiFi title="" index={14} hidden level={wiFiSpotsLevels[10]} />
         )}
-        {wifiSpots?.length < 12 && (
+        {hack && wifiSpots?.length < 12 && (
           <ItemWiFi title="" index={15} hidden level={wiFiSpotsLevels[11]} />
         )}
       </ItemsBlock>
-      <ItemsBlock className="mt-2">
+      {/* <ItemsBlock className="mt-2">
         <Item title="Настройки Wi-Fi" big />
         <Item title="Расширенные настройки" big />
-      </ItemsBlock>
+      </ItemsBlock> */}
       {localStorage.learn === 'true' && (
         <>
           <div className="min-h-16" />
@@ -656,8 +676,8 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
           {BLEStatus}
         </div>
       )} */}
-      <div className="mb-2 rounded-3xl bg-[#f1f1f1] dark:bg-dark text-[#b5b5b5] flex px-[12px] py-[11px] items-center gap-x-3">
-        <SearchIcon className="fill-[#b5b5b5]" size="small" />
+      <div className="mb-2 rounded-3xl bg-[#f1f1f1] dark:bg-dark text-[#767676] flex px-[12px] py-[10px] items-center gap-x-3">
+        <SearchIcon className="fill-[#767676]" size="md" />
         Поиск
       </div>
       <ItemsBlock>
@@ -680,17 +700,6 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
         <Item
           title="Wi-Fi"
           Icon={WiFiIcon}
-          hiddenSwipeElementsFunc={[
-            () => setSuit(0),
-            () => setSuit(1),
-            () => setSuit(2),
-            () => setSuit(3),
-          ]}
-          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
-        />
-        <Item
-          title="Мобильная сеть"
-          Icon={NetworkIcon}
           onClick={() => {
             setPage('wifi')
           }}
@@ -711,6 +720,17 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
           hiddenSwipeElementsNames={[masts[0], masts[1], masts[2], masts[3]]}
         />
         <Item
+          title="Мобильная сеть"
+          Icon={NetworkIcon}
+          hiddenSwipeElementsFunc={[
+            () => setSuit(0),
+            () => setSuit(1),
+            () => setSuit(2),
+            () => setSuit(3),
+          ]}
+          hiddenSwipeElementsNames={[suits[0], suits[1], suits[2], suits[3]]}
+        />
+        <Item
           title="Bluetooth"
           Icon={BTIcon}
           hiddenSwipeElementsFunc={[
@@ -720,7 +740,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
             () => setSuit(7),
           ]}
           hiddenSwipeElementsNames={[suits[4], suits[5], suits[6], suits[7]]}
-          textRight="HUAWEI WATCH GT 3-2..."
+          // textRight="HUAWEI WATCH GT 3-2..."
         />
         <Item
           title="Подключение и общий доступ"
