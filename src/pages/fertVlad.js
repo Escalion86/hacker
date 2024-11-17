@@ -355,8 +355,8 @@ const Item = ({
       className={cn(
         'relative group first:rounded-t-xl last:rounded-b-xl',
         activeTitle
-          ? 'bg-[#eeeef0] dark:bg-[#2d2d2f]'
-          : 'bg-[#fcfcfe] dark:bg-dark',
+          ? 'bg-[#eeeef0] dark:bg-[#1a1a1a]'
+          : 'bg-[#fcfcfe] dark:bg-[#1a1a1a]',
         className
         //font-semibold
       )}
@@ -366,7 +366,7 @@ const Item = ({
         onClick={onClick}
         className={cn(
           'button flex items-center group-first:rounded-t-2xl group-last:rounded-b-2xl',
-          big ? 'pb-[18px]' : 'pb-[13px]',
+          big ? 'pb-[22px]' : 'pb-[13px]',
           'px-[16px]'
         )}
       >
@@ -415,7 +415,7 @@ const Item = ({
         <div
           className={cn(
             'flex gap-x-3 items-center justify-between flex-1',
-            big ? 'pt-[18px]' : 'pt-[13px]'
+            big ? 'pt-[22px]' : 'pt-[13px]'
           )}
         >
           <div
@@ -433,7 +433,7 @@ const Item = ({
               {title}
             </div>
             {subItems && (
-              <div className="mt-0.5 text-left text-secondary text-[11px] leading-[13px]">
+              <div className="mt-0.5 text-left text-[#767676] text-[11px] leading-[13px]">
                 {subItems.map((item, index) => (
                   <div key={item} className="inline">
                     <span>{item}</span>
@@ -471,11 +471,7 @@ const Item = ({
           )}
           {arrow && (
             <div className="rotate-180">
-              <ArrowBack
-                width={16}
-                height={16}
-                className="fill-[#c1c1c1] dark:fill-white"
-              />
+              <ArrowBack width={16} height={16} className="fill-[#767676]" />
             </div>
           )}
         </div>
@@ -672,6 +668,7 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
           // className="py-4"
           alterColor
           big
+          arrow={false}
         />
         {/* <Item
           title="Мой телефон"

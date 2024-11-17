@@ -5,7 +5,6 @@ const WiFiIcon = () => (
     width="36px"
     height="36px"
     viewBox="0 0 98.000000 98.000000"
-    // preserveAspectRatio="xMidYMid meet"
   >
     <g
       transform="translate(0.000000,98.000000) scale(0.100000,-0.100000)"
