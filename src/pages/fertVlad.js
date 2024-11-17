@@ -1,28 +1,3 @@
-import ConnectedDevicesIcon from '../icons/ConnectedDevicesIcon'
-import ScenariosIcon from '../icons/ScenariosIcon'
-import SoundIcon from '../icons/SoundIcon'
-import NotificationsIcon from '../icons/NotificationsIcon'
-import BateryIcon from '../icons/BateryIcon'
-import DisplayIcon from '../icons/DisplayIcon'
-import WallpappersIcon from '../icons/WallpappersIcon'
-import ThemesIcon from '../icons/ThemesIcon'
-import BlockScreenIcon from '../icons/BlockScreenIcon'
-import ShildIcon from '../icons/ShildIcon'
-import LocationIcon from '../icons/LocationIcon'
-import ExtraIcon from '../icons/ExtraIcon'
-import AccountsIcon from '../icons/AccountsIcon'
-import GoogleIcon from '../icons/GoogleIcon'
-import PlusIcon from '../icons/PlusIcon'
-import AdditionalFunctionsIcon from '../icons/AdditionalFunctionsIcon'
-import ParentsControlIcon from '../icons/ParentsControlIcon'
-import AppsIcon from '../icons/AppsIcon'
-import SettingsIcon from '../icons/SettingsIcon'
-import SpecialIcon from '../icons/SpecialIcon'
-import RefreshIcon from '../icons/RefreshIcon'
-import DocumentationIcon from '../icons/DocumentationIcon'
-import InfoIcon from '../icons/InfoIcon'
-import DevIcon from '../icons/DevIcon'
-import CleanUpIcon from '../icons/CleanUpIcon'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import wifiSpotsAtom from '../state/wifiSpotsAtom'
 import hackAtom from '../state/hackAtom'
@@ -38,16 +13,7 @@ import makeId from '../helpers/makeId'
 import getRandomInt from '../helpers/getRandomInt'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import WiFiSpot from '../icons/WiFiSpot'
-import QRCodeIcon from '../icons/QRCodeIcon'
 import VerticalDots from '../icons/VerticalDots'
-import UserIcon from '../icons/UserIcon'
-import PhoneIcon from '../icons/enkD83Js/PhoneIcon'
-import SimIcon from '../icons/enkD83Js/SimIcon'
-// import WiFiIcon from '../icons/enkD83Js/WiFiIcon'
-import HotSpotIcon from '../icons/enkD83Js/HotSpotIcon'
-import OtherDevicesIcon from '../icons/enkD83Js/OtherDevicesIcon'
-import PaintBrushIcon from '../icons/enkD83Js/PaintBrushIcon'
-import SunIcon from '../icons/enkD83Js/SunIcon'
 import QRScanerIcon from '../icons/enkD83Js/QRScanerIcon'
 import ArrowLeftIcon from '../icons/enkD83Js/ArrowLeftIcon'
 import WiFiIcon from '../icons/vladFert/WiFiIcon'
@@ -55,7 +21,12 @@ import NetworkIcon from '../icons/vladFert/NetworkIcon'
 import AccountIcon from '../icons/vladFert/AccountIcon'
 import BTIcon from '../icons/vladFert/BTIcon'
 import ConnectionsIcon from '../icons/vladFert/ConnectionsIcon'
-
+import InfoIcon from '../icons/vladFert/InfoIcon'
+import PicIcon from '../icons/vladFert/PicIcon'
+import GeneralScreenIcon from '../icons/vladFert/GeneralScreenIcon'
+import ScreenIcon from '../icons/vladFert/ScreenIcon'
+import SoundIcon from '../icons/vladFert/SoundIcon'
+import NotificationsIcon from '../icons/vladFert/NotificationsIcon'
 const PageWrapper = ({
   title,
   size,
@@ -301,10 +272,10 @@ const ItemWiFi = ({
           </div>
         </div>
         <div className="rotate-180 mt-[18px]">
-          <ArrowBack
+          <InfoIcon
             width={16}
             height={16}
-            className="fill-[#c1c1c1] dark:fill-white"
+            // className="fill-[#c1c1c1] dark:fill-white"
           />
         </div>
       </div>
@@ -495,12 +466,19 @@ const Item = ({
   )
 }
 
-const ItemsBlock = ({ title, children, className }) => {
+const ItemsBlock = ({ title, rightTitle, children, className }) => {
   return (
     <div className={className}>
-      {title && (
-        <div className="font-bold text-[#999999] text-sm ml-6 mb-1.5">
-          {title}
+      {(title || rightTitle) && (
+        <div className="flex justify-between mx-5 mb-2.5">
+          {title && (
+            <div className="font-bold text-[#999999] text-[12px]">{title}</div>
+          )}
+          {rightTitle && (
+            <div className="ont-bold text-[#099594] text-[12px]">
+              {rightTitle}
+            </div>
+          )}
         </div>
       )}
       <div className="flex flex-col items-stretch">{children}</div>
@@ -600,7 +578,7 @@ export const WiFiPage = ({
         <ItemWiFi title="DIREZABLe" dontChange />
         <ItemWiFi title="DIREZABLe-5G" dontChange />
       </ItemsBlock>
-      <ItemsBlock title="Доступные сети">
+      <ItemsBlock title="Доступные сети" rightTitle="Обновить">
         {wifiSpots.map((title, index) => {
           if (title.trim() === '') return null
           return (
@@ -757,14 +735,17 @@ export const GeneralPage = ({ size, setPage, className, BLEStatus }) => {
       <ItemsBlock>
         <Item
           title="Обои и стили"
-          Icon={NetworkIcon}
+          Icon={PicIcon}
           hiddenSwipeElementsFunc={[() => setSuit(12), () => setSuit(13)]}
           hiddenSwipeElementsNames={[suits[12], suits[13]]}
         />
-        <Item title="Главный экран и экран блокировки" Icon={NetworkIcon} />
-        <Item title="Экран и Яркость" Icon={NetworkIcon} />
-        <Item title="Звуки и вибрация" Icon={NetworkIcon} />
-        <Item title="Уведомления и строка состояния" Icon={NetworkIcon} />
+        <Item
+          title="Главный экран и экран блокировки"
+          Icon={GeneralScreenIcon}
+        />
+        <Item title="Экран и Яркость" Icon={ScreenIcon} />
+        <Item title="Звуки и вибрация" Icon={SoundIcon} />
+        <Item title="Уведомления и строка состояния" Icon={NotificationsIcon} />
       </ItemsBlock>
       <ItemsBlock>
         <Item title="Приложения" Icon={NetworkIcon} />
