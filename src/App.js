@@ -2,13 +2,9 @@
 import './App.css'
 // import * as Bluetooth from 'react-bluetooth'
 import { useCallback, useEffect, useState } from 'react'
-import cn from 'classnames'
-import SearchIcon from './icons/SearchIcon'
-import ArrowBack from './icons/ArrowBack'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import wifiSpotsAtom from './state/wifiSpotsAtom'
 import accessCodes from './accessCodes'
-import Switch from './components/Switch'
 import Button from './components/Button'
 import SettingsPage from './pages/SettingsPage'
 import FirstStartPage from './pages/FirstStartPage'
@@ -18,13 +14,35 @@ import cn from 'classnames'
 //Define BLE Device Specs
 const deviceName = 'Hacker'
 const bleService = '19b10000-e8f2-537e-4f6c-d104768a1214'
-const sensorCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
-const ledCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
+const wifiSpotsListCharacteristic = '19b10001-e8f2-537e-4f6c-d104768a1214'
+const spotNameCharacteristic = '19b10002-e8f2-537e-4f6c-d104768a1214'
+const deviceStatusCharacteristic = '19b10003-e8f2-537e-4f6c-d104768a1214'
 
 //Global Variables to Handle Bluetooth
+var bleDevice
 var bleServer
 var bleServiceFound
-var sensorCharacteristicFound
+var wifiSpotsListCharacteristicFound
+var deviceStatusCharacteristicFound
+
+async function exponentialBackoff(max, delay, toTry, success, fail) {
+  try {
+    const result = await toTry()
+    success(result)
+  } catch (error) {
+    if (max === 0) {
+      return fail()
+    }
+    time('Retrying in ' + delay + 's... (' + max + ' tries left)')
+    setTimeout(function () {
+      exponentialBackoff(--max, delay * 2, toTry, success, fail)
+    }, delay * 1000)
+  }
+}
+
+function time(text) {
+  console.log('[' + new Date().toJSON().substr(11, 8) + '] ' + text)
+}
 
 // Connect Button (search for BLE Devices only if BLE is available)
 // connectButton.addEventListener('click', (event) => {
@@ -68,223 +86,10 @@ function toggleTheme(theme) {
   }
 }
 
-const PageWrapper = ({
-  title,
-  size,
-  children,
-  onClickBack,
-  activeTitle,
-  noSearchIcon,
-}) => (
-  <div
-    className={cn(
-      'select-none px-0.5 dark:text-white text-black bg-white dark:bg-black max-h-screen min-h-screen flex flex-col gap-x-2 gap-y-4 overflow-y-scroll pb-5',
-      size === 'small' ? 'gap-y-4' : size === 'big' ? 'gap-y-5' : 'gap-y-4'
-    )}
-  >
-    <div
-      className={cn(
-        'bg-white dark:bg-black z-10 sticky top-0 font-bold flex justify-between items-center',
-        size === 'small'
-          ? 'pl-5 pr-4 pt-5 pb-3'
-          : size === 'big'
-          ? 'pl-6 pr-6 pt-8 pb-3.5'
-          : 'pl-6 pr-5 pt-6 pb-3.5'
-      )}
-      // onClick={toggleTheme}
-    >
-      {onClickBack && (
-        <div
-          onClick={onClickBack}
-          className="button cursor-pointer -ml-6 p-5 -mb-3.5 -mt-3.5 rounded-full"
-        >
-          <ArrowBack size={size} className="fill-black dark:fill-white" />
-        </div>
-      )}
-      <div
-        className={cn(
-          'text-left flex-1',
-          size === 'small' ? 'text-lg' : size === 'big' ? 'text-2xl' : 'text-xl'
-        )}
-      >
-        {title}
-      </div>
-      {!noSearchIcon && (
-        <SearchIcon size={size} className="fill-black dark:fill-white" />
-      )}
-    </div>
-    {children}
-  </div>
-)
-
-const SettingsPage = ({ size, toggleTheme, setPage }) => {
-  const [mode, setMode] = useState(localStorage.mode || 'word')
-  const [learn, setLearn] = useState(localStorage.learn)
-  const [theme, setTheme] = useState(localStorage.theme || 'light')
-  const [dot, setDot] = useState(localStorage.dot)
-  const [startOnSetWiFiPage, setStartOnSetWiFiPage] = useState(
-    localStorage.startOnSetWiFiPage
-  )
-
-  return (
-    <PageWrapper
-      size={size}
-      title="Настройка Hacker"
-      onClickBack={() => {
-        localStorage.startPage = 'general'
-        setPage('general')
-      }}
-      noSearchIcon
-    >
-      <Switch
-        id="theme"
-        label="Тёмная тема"
-        checked={theme === 'dark'}
-        onChange={(e) => {
-          const newValue = !theme || theme === 'light' ? 'dark' : 'light'
-          // localStorage.theme = newValue
-          setTheme(newValue)
-          toggleTheme(newValue)
-        }}
-      />
-      <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label htmlFor="mode">Режим:</label>
-        <select
-          id="mode"
-          defaultValue={mode}
-          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
-          onChange={(e) => {
-            localStorage.mode = e.target.value
-            setMode(e.target.value)
-          }}
-        >
-          <option value="word">Слово</option>
-          <option value="card">Карта</option>
-        </select>
-      </div>
-      {mode === 'word' && (
-        <div className="flex flex-wrap items-center px-5 gap-x-1">
-          <label htmlFor="wifiname">Название точки Wi-Fi</label>
-          <input
-            id="wifiname"
-            className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
-            defaultValue={localStorage.wifi || 'Hacked'}
-            onChange={(e) => {
-              localStorage.wifi = e.target.value
-            }}
-          />
-        </div>
-      )}
-      <Switch
-        id="learn"
-        label="Стартовать при переходе в меню Wi-Fi"
-        checked={startOnSetWiFiPage === 'true'}
-        onChange={(e) => {
-          const newValue =
-            !localStorage.startOnSetWiFiPage ||
-            localStorage.startOnSetWiFiPage === 'false'
-              ? 'true'
-              : 'false'
-          localStorage.startOnSetWiFiPage = newValue
-          setStartOnSetWiFiPage(newValue)
-        }}
-      />
-      <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label htmlFor="delay">
-          Задержка в секундах до старта анимации и трансляции спама
-        </label>
-        <input
-          id="delay"
-          type="number"
-          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
-          defaultValue={localStorage.delay || 3}
-          onChange={(e) => {
-            localStorage.delay = e.target.value
-          }}
-        />
-      </div>
-      <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label htmlFor="minutesBeforeStop">
-          Количество минут через которое спам автоматически остановится
-        </label>
-        <input
-          id="minutesBeforeStop"
-          type="number"
-          className="px-2 py-1 bg-gray-200 rounded dark:text-white text-dark dark:bg-dark"
-          defaultValue={localStorage.minutesBeforeStop || 3}
-          onChange={(e) => {
-            localStorage.minutesBeforeStop = e.target.value
-          }}
-        />
-      </div>
-      <Switch
-        id="dot"
-        label={`Добавить "." в начале названия точки (чтобы wi-fi точки были вверху
-          списка)`}
-        checked={dot === 'true'}
-        onChange={(e) => {
-          const newValue =
-            !localStorage.dot || localStorage.dot === 'false' ? 'true' : 'false'
-          localStorage.dot = newValue
-          setDot(newValue)
-        }}
-      />
-      <Switch
-        id="learn"
-        label="Режим обучения"
-        checked={learn === 'true'}
-        onChange={(e) => {
-          const newValue =
-            !localStorage.learn || localStorage.learn === 'false'
-              ? 'true'
-              : 'false'
-          localStorage.learn = newValue
-          setLearn(newValue)
-        }}
-      />
-      <Button onClick={() => setPage('firstStartPage')}>
-        Сменить учетную запись
-        <br />
-        (ввести другой код доступа)
-      </Button>
-    </PageWrapper>
-  )
-}
-
-const FirstStartPage = ({ size, setPage, setAccessCode }) => {
-  const [accessCodeInput, setAccessCodeInput] = useState(
-    localStorage.accessCode || ''
-  )
-  const [wrongCode, setWrongCode] = useState(false)
-  return (
-    <PageWrapper size={size} title="Первый запуск" noSearchIcon>
-      <div className="flex flex-wrap items-center px-5 gap-x-1">
-        <label htmlFor="accessCode">Введите Ваш код доступа</label>
-        <input
-          id="accessCode"
-          className="px-2 py-1 text-white bg-dark"
-          defaultValue={accessCodeInput}
-          onChange={(e) => {
-            setAccessCodeInput(e.target.value)
-            if (wrongCode) setWrongCode(false)
-          }}
-        />
-      </div>
-      <Button
-        onClick={() => {
-          if (accessCodes[accessCodeInput]) {
-            localStorage.accessCode = accessCodeInput
-            setAccessCode(accessCodeInput)
-            setPage('general')
-          } else setWrongCode(true)
-        }}
-      >
-        Ввести код
-      </Button>
-      {wrongCode && <div className="font-bold text-red-500">Код не верен</div>}
-    </PageWrapper>
-  )
-}
+// var interval
+var deviceStatusInterval
+// var reconnectFunc
+var hack
 
 function App() {
   const setWifiSpots = useSetRecoilState(wifiSpotsAtom)
@@ -300,6 +105,7 @@ function App() {
   // const [input, setInput] = useState('K♥')
   const [isConnected, setIsConnected] = useState(false)
   const [accessCode, setAccessCode] = useState(localStorage.accessCode || '')
+  const [deviceStatus, setDeviceStatus] = useState('Отключено')
   // const [state, setState] = useState('Устройство отключено')
   // const [retrievedValue, setRetrievedValue] = useState('NaN')
   // const [latestValueSent, setLatestValueSent] = useState('')
@@ -339,8 +145,9 @@ function App() {
     return true
   }, [])
 
-  const handleCharacteristicChange = useCallback(
+  const handleDeviceStatusCharacteristicChange = useCallback(
     (event) => {
+      console.log('event.target.value :>> ', event.target.value)
       const newValueReceived = new TextDecoder().decode(event.target.value)
       console.log(
         '"Device Status" characteristic value changed: ',
@@ -393,8 +200,8 @@ function App() {
     // }
 
     if (bleServer && bleServer.connected) {
-      if (sensorCharacteristicFound) {
-        sensorCharacteristicFound
+      if (wifiSpotsListCharacteristicFound) {
+        wifiSpotsListCharacteristicFound
           .stopNotifications()
           .then(() => {
             addLog('Notifications "Wifi Spots List" Stopped')
@@ -405,7 +212,6 @@ function App() {
             addLog('Устройство отключено')
             // setLog((state) => [...state, 'Устройство отключено'])
             // setState('Устройство отключено')
-            setIsConnected(false)
           })
           .catch((error) => {
             addLog('An error occurred:', error)
@@ -606,6 +412,23 @@ function App() {
   //   [connectToDevice]
   // )
 
+  async function connect() {
+    exponentialBackoff(
+      3 /* max retries */,
+      2 /* seconds delay */,
+      async function toTry() {
+        time('Connecting to Bluetooth Device... ')
+        await bleDevice.connect()
+      },
+      function success() {
+        console.log('> Bluetooth Device connected. Try disconnect it now.')
+      },
+      function fail() {
+        time('Failed to reconnect.')
+      }
+    )
+  }
+
   // Connect to BLE Device and Enable Notifications
   const connectToDevice = useCallback(
     (autostartName) => {
@@ -635,10 +458,10 @@ function App() {
             const value = autostartName
             if (bleServer && bleServer.connected) {
               bleServiceFound
-                .getCharacteristic(ledCharacteristic)
+                .getCharacteristic(spotNameCharacteristic)
                 .then((characteristic) => {
                   console.log(
-                    'Found the LED characteristic: ',
+                    'Found the "Wifi Spot Name" characteristic: ',
                     characteristic.uuid
                   )
                   return characteristic.writeValue(
@@ -652,11 +475,11 @@ function App() {
                   )
                 })
                 .then(() => {
-                  console.log('Value written to LEDcharacteristic:', value)
+                  console.log('Value written to spotNameCharacteristic:', value)
                 })
                 .catch((error) => {
                   console.error(
-                    'Error writing to the LED characteristic: ',
+                    'Error writing to the "Wifi Spot Name" characteristic: ',
                     error
                   )
                 })
@@ -673,14 +496,14 @@ function App() {
         // .then((service) => {
         //   bleServiceFound = service
         //   console.log('Service discovered:', service.uuid)
-        //   return service.getCharacteristic(sensorCharacteristic)
+        //   return service.getCharacteristic(wifiSpotsListCharacteristic)
         // })
         // .then((characteristic) => {
         //   console.log('Characteristic discovered:', characteristic.uuid)
-        //   sensorCharacteristicFound = characteristic
+        //   wifiSpotsListCharacteristicFound = characteristic
         //   characteristic.addEventListener(
         //     'characteristicvaluechanged',
-        //     handleCharacteristicChange
+        //     handleWiFiSpotsListCharacteristicChange
         //   )
         //   characteristic.startNotifications()
         //   console.log('Notifications Started.')
@@ -709,9 +532,12 @@ function App() {
     (value, autostart) => {
       if (bleServer && bleServer.connected) {
         bleServiceFound
-          .getCharacteristic(ledCharacteristic)
+          .getCharacteristic(spotNameCharacteristic)
           .then((characteristic) => {
-            console.log('Found the LED characteristic: ', characteristic.uuid)
+            console.log(
+              'Found the "Wifi Spot Name" characteristic: ',
+              characteristic.uuid
+            )
             // console.log('test :>> ', value.split(''))
             // const data = new Uint8Array(value.split(''))
 
@@ -733,10 +559,13 @@ function App() {
           })
           .then(() => {
             // setLatestValueSent(value)
-            console.log('Value written to LEDcharacteristic:', value)
+            console.log('Value written to spotNameCharacteristic:', value)
           })
           .catch((error) => {
-            console.error('Error writing to the LED characteristic: ', error)
+            console.error(
+              'Error writing to the "Wifi Spot Name" characteristic: ',
+              error
+            )
           })
       } else {
         connectToDevice(value)
@@ -752,7 +581,11 @@ function App() {
     [connectToDevice]
   )
 
-  const autoConnectDevice = useCallback(() => {
+  const autoConnectDevice = useCallback(async () => {
+    // if (interval) clearInterval(interval)
+    // if (reconnectFunc) return await reconnectFunc()
+    // console.log('interval seted')
+    // interval = setInterval(() => {
     navigator.bluetooth.getDevices().then((devices) => {
       // console.log('devices :>> ', devices)
       addLog('Devices found: ' + devices?.length)
@@ -763,7 +596,9 @@ function App() {
         setShowConnectDeviceButton(false)
         for (var device of devices) {
           let abortController = new AbortController()
-          // console.log('device :>> ', device)
+          // device.gatt.connect()
+          // console.log('device :>> ', device)\
+
           try {
             // device
             //   ?.watchAdvertisements({ signal: abortController.signal })
@@ -832,8 +667,7 @@ function App() {
       //   .connect()
       //   .then((result) => console.log('result :>> ', result))
     })
-    // const test2 = navigator.bluetooth.watchAdvertisements()
-    // watchAdvertisements(options)
+    // }, 5000)
   }, [afterConnectDevice])
 
   // const [isEnabled, setIsEnabled] = useState(true)
@@ -935,7 +769,7 @@ function App() {
   // })
 
   useEffect(() => {
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         if (isWebBluetoothEnabled()) await autoConnectDevice()
         else addLog('WebBluetooth Disabled!')
@@ -972,20 +806,22 @@ function App() {
         ))}
       </div>
       {JSON.stringify(wifiSpots)} */}
-      {showConnectDeviceButton && (
-        <div className="flex px-2 py-1">
-          {/* <div> */}
+      {showConnectDeviceButton &&
+        typeof accessIndex === 'number' &&
+        page !== 'firstStartPage' && (
+          <div className="flex px-2 py-1">
+            {/* <div> */}
 
-          <Button
-            onClick={() => {
-              if (isWebBluetoothEnabled()) connectToDevice()
-              // chrome://flags/#enable-web-bluetooth-new-permissions-backend
-            }}
-          >
-            !!! Подключить устройство hacker !!!
-          </Button>
+            <Button
+              onClick={() => {
+                if (isWebBluetoothEnabled()) connectToDevice()
+                // chrome://flags/#enable-web-bluetooth-new-permissions-backend
+              }}
+            >
+              !!! Подключить устройство hacker !!!
+            </Button>
 
-          {/* {!isConnected && (
+            {/* {!isConnected && (
         <button
           ref={connectRef}
           onClick={(event) => {
