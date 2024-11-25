@@ -633,7 +633,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[index] ?? 4}
           />
         ))}
-        {wifiSpots?.length < 1 && (
+        {hack && wifiSpots?.length < 1 && (
           <ItemWiFi
             title=""
             size={size}
@@ -642,7 +642,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[0]}
           />
         )}
-        {wifiSpots?.length < 2 && (
+        {hack && wifiSpots?.length < 2 && (
           <ItemWiFi
             title=""
             size={size}
@@ -651,7 +651,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[1]}
           />
         )}
-        {wifiSpots?.length < 3 && (
+        {hack && wifiSpots?.length < 3 && (
           <ItemWiFi
             title=""
             size={size}
@@ -660,7 +660,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[2]}
           />
         )}
-        {wifiSpots?.length < 4 && (
+        {hack && wifiSpots?.length < 4 && (
           <ItemWiFi
             title=""
             size={size}
@@ -669,7 +669,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[3]}
           />
         )}
-        {wifiSpots?.length < 5 && (
+        {hack && wifiSpots?.length < 5 && (
           <ItemWiFi
             title=""
             size={size}
@@ -678,7 +678,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[4]}
           />
         )}
-        {wifiSpots?.length < 6 && (
+        {hack && wifiSpots?.length < 6 && (
           <ItemWiFi
             title=""
             size={size}
@@ -687,7 +687,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[5]}
           />
         )}
-        {wifiSpots?.length < 7 && (
+        {hack && wifiSpots?.length < 7 && (
           <ItemWiFi
             title=""
             size={size}
@@ -696,7 +696,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[6]}
           />
         )}
-        {wifiSpots?.length < 8 && (
+        {hack && wifiSpots?.length < 8 && (
           <ItemWiFi
             title=""
             size={size}
@@ -705,7 +705,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[7]}
           />
         )}
-        {wifiSpots?.length < 9 && (
+        {hack && wifiSpots?.length < 9 && (
           <ItemWiFi
             title=""
             size={size}
@@ -714,7 +714,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[8]}
           />
         )}
-        {wifiSpots?.length < 10 && (
+        {hack && wifiSpots?.length < 10 && (
           <ItemWiFi
             title=""
             size={size}
@@ -723,7 +723,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[9]}
           />
         )}
-        {wifiSpots?.length < 11 && (
+        {hack && wifiSpots?.length < 11 && (
           <ItemWiFi
             title=""
             size={size}
@@ -732,7 +732,7 @@ export const WiFiPage = ({
             level={wiFiSpotsLevels[10]}
           />
         )}
-        {wifiSpots?.length < 12 && (
+        {hack && wifiSpots?.length < 12 && (
           <ItemWiFi
             title=""
             size={size}
