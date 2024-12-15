@@ -177,7 +177,7 @@ const ItemWiFi = ({
           } else if (mode === 'card') {
             setTitleState(
               `${localStorage.dot === 'true' ? '.' : ''}${suits[suit]}${
-                suit <= 12 ? mastsEmoji[mast] : ''
+                suit <= 12 ? masts[mast] : '' //mastsEmoji
               }`
             )
           }
