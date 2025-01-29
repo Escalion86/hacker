@@ -16,6 +16,10 @@ import {
   GeneralPage as GeneralPage4,
   WiFiPage as WiFiPage4,
 } from './pages/fertVlad'
+import {
+  GeneralPage as GeneralPage5,
+  WiFiPage as WiFiPage5,
+} from './pages/mihRogin'
 
 const accessCodes = {
   escalion: {
@@ -50,6 +54,14 @@ const accessCodes = {
     pages: {
       general: GeneralPage4,
       wifi: WiFiPage4,
+    },
+  },
+  mihRogin: {
+    name: 'Михаил Рожин',
+    index: 3,
+    pages: {
+      general: GeneralPage5,
+      wifi: WiFiPage5,
     },
   },
 }
