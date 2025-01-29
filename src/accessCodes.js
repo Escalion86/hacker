@@ -58,7 +58,7 @@ const accessCodes = {
   },
   mihRogin: {
     name: 'Михаил Рожин',
-    index: 3,
+    index: 5,
     pages: {
       general: GeneralPage5,
       wifi: WiFiPage5,

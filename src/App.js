@@ -122,6 +122,7 @@ function App() {
   const toggleShowLogs = () => setShowLogs((state) => !state)
 
   const accessIndex = accessCodes[accessCode]?.index || 0
+  console.log('accessCodes :>> ', accessCodes)
 
   useEffect(() => {
     if (
