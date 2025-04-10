@@ -865,7 +865,7 @@ export const GeneralPage = ({ size, setPage, className }) => {
           >
             <img
               className="w-full h-full rounded-full"
-              src="img/escalion.png"
+              src="img/shmidt.png"
               alt="avatar"
             />
           </div>
