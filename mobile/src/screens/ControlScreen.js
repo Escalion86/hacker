@@ -1,0 +1,225 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import PrimaryButton from '../components/PrimaryButton';
+import bleService from '../services/ble/bleService';
+import { colors, spacing } from '../theme/tokens';
+
+export default function ControlScreen({ settings }) {
+  const [status, setStatus] = useState('Отключено');
+  const [connected, setConnected] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [wifiSpots, setWifiSpots] = useState([]);
+
+  const normalizeDeviceStatus = (rawStatus) => {
+    const cleaned = String(rawStatus || '').replace(/\uFFFD/g, '').trim();
+    const lower = cleaned.toLowerCase();
+
+    if (
+      cleaned === 'Трансляция не ведется' ||
+      lower.includes('не ведется') ||
+      cleaned === 'Трансляция остановлена'
+    ) {
+      return 'Трансляция остановлена';
+    }
+    if (cleaned.startsWith('Идет транс') || lower.startsWith('идет транс')) {
+      return 'Идет трансляция';
+    }
+    return cleaned || 'Отключено';
+  };
+
+  useEffect(() => {
+    const unsubStatus = bleService.subscribeStatus((nextStatus) => {
+      const normalizedStatus = normalizeDeviceStatus(nextStatus);
+      setStatus(normalizedStatus);
+      if (normalizedStatus.startsWith('Идет трансляция')) {
+        setRunning(true);
+      } else if (
+        normalizedStatus === 'Трансляция остановлена' ||
+        normalizedStatus === 'Отключено' ||
+        normalizedStatus.startsWith('Ошибка')
+      ) {
+        setRunning(false);
+      }
+    });
+
+    const unsubSpots = bleService.subscribeWifiSpots((spots) => setWifiSpots(spots));
+    const unsubConnection = bleService.subscribeConnection((nextConnected) =>
+      setConnected(nextConnected)
+    );
+
+    return () => {
+      unsubStatus();
+      unsubSpots();
+      unsubConnection();
+    };
+  }, []);
+
+  const targetSsid = useMemo(() => {
+    if (settings.mode === 'card') {
+      return 'CARD';
+    }
+    return settings.wifi || 'Hacked';
+  }, [settings.mode, settings.wifi]);
+
+  const handleConnect = async () => {
+    try {
+      await bleService.connect();
+    } catch (error) {
+      setStatus(`Ошибка подключения: ${error.message || 'unknown'}`);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await bleService.disconnect();
+      setRunning(false);
+    } catch (error) {
+      setStatus(`Ошибка отключения: ${error.message || 'unknown'}`);
+    }
+  };
+
+  const handleStart = async () => {
+    try {
+      setRunning(true);
+      await bleService.sendStart({
+        ssid: targetSsid,
+        dot: settings.dot,
+        minutes: settings.minutesBeforeStop,
+      });
+    } catch (error) {
+      setRunning(false);
+      setStatus(`Ошибка start: ${error.message || 'unknown'}`);
+    }
+  };
+
+  const handleStop = async () => {
+    try {
+      await bleService.sendStop();
+      setRunning(false);
+      setStatus('Трансляция остановлена');
+    } catch (error) {
+      setStatus(`Ошибка stop: ${error.message || 'unknown'}`);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Управление устройством</Text>
+
+      <View style={styles.statusCard}>
+        <Text style={styles.statusLabel}>Статус:</Text>
+        <Text
+          style={[
+            styles.statusValue,
+            status.startsWith('Ошибка')
+              ? styles.disconnected
+              : running
+                ? styles.connected
+                : styles.inactive,
+          ]}
+        >
+          {status}
+        </Text>
+      </View>
+
+      <View style={styles.buttonsRow}>
+        {!connected ? (
+          <PrimaryButton title="Подключить" onPress={handleConnect} />
+        ) : (
+          <PrimaryButton title="Отключить" onPress={handleDisconnect} danger />
+        )}
+      </View>
+
+      <View style={styles.buttonsRow}>
+        {!running ? (
+          <PrimaryButton title="Старт трансляции" onPress={handleStart} disabled={!connected} />
+        ) : (
+          <PrimaryButton title="Стоп" onPress={handleStop} danger />
+        )}
+      </View>
+
+      <View style={styles.listWrap}>
+        <Text style={styles.subTitle}>Доступные сети (preview)</Text>
+        <FlatList
+          data={wifiSpots}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          renderItem={({ item }) => (
+            <View style={styles.spotItem}>
+              <Text style={styles.spotText}>{item}</Text>
+            </View>
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>Список пуст</Text>}
+        />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: spacing.md,
+    gap: spacing.md,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  subTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+  },
+  statusCard: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+    borderRadius: 14,
+    padding: spacing.md,
+    gap: 6,
+  },
+  statusLabel: {
+    color: colors.muted,
+    fontSize: 13,
+  },
+  statusValue: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  connected: {
+    color: colors.success,
+  },
+  inactive: {
+    color: colors.muted,
+  },
+  disconnected: {
+    color: colors.danger,
+  },
+  buttonsRow: {
+    minHeight: 50,
+  },
+  listWrap: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+    borderRadius: 14,
+    padding: spacing.md,
+  },
+  spotItem: {
+    borderRadius: 10,
+    padding: spacing.sm,
+    backgroundColor: '#10131a',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  spotText: {
+    color: colors.text,
+  },
+  empty: {
+    color: colors.muted,
+  },
+});
