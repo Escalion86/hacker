@@ -1,14 +1,15 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import { BleManager } from 'react-native-ble-plx';
 import { fromByteArray, toByteArray } from 'base64-js';
-
-export const BLE_UUIDS = {
-  deviceName: 'Hacker',
-  service: '19b10000-e8f2-537e-4f6c-d104768a1214',
-  wifiSpotsList: '19b10001-e8f2-537e-4f6c-d104768a1214',
-  spotName: '19b10002-e8f2-537e-4f6c-d104768a1214',
-  deviceStatus: '19b10003-e8f2-537e-4f6c-d104768a1214',
-};
+import {
+  ACK,
+  BLE_UUIDS,
+  NACK_PREFIX,
+  ERROR_CODES,
+  buildV1StartCommand,
+  buildV1StopCommand,
+} from './protocol';
+export { BLE_UUIDS } from './protocol';
 
 class BleService {
   constructor() {
@@ -23,7 +24,11 @@ class BleService {
     this.monitors = [];
     this.disconnectSub = null;
     this.connectPromise = null;
+    this.disconnectPromise = null;
+    this.scanPromise = null;
     this.lastDisconnectAt = 0;
+    this.onDiagnostics = new Set();
+    this.diagnostics = [];
   }
 
   sleep(ms) {
@@ -54,9 +59,29 @@ class BleService {
     };
   }
 
+  subscribeDiagnostics(listener) {
+    this.onDiagnostics.add(listener);
+    listener(this.diagnostics);
+    return () => {
+      this.onDiagnostics.delete(listener);
+    };
+  }
+
+  emitDiagnostics() {
+    this.onDiagnostics.forEach((listener) => listener(this.diagnostics));
+  }
+
+  logDiagnostic(event, details = '') {
+    const stamp = new Date().toISOString().slice(11, 19);
+    const line = details ? `${stamp} ${event}: ${details}` : `${stamp} ${event}`;
+    this.diagnostics = [line, ...this.diagnostics].slice(0, 20);
+    this.emitDiagnostics();
+  }
+
   emitStatus(nextStatus) {
     this.status = nextStatus;
     this.onStatus.forEach((listener) => listener(nextStatus));
+    this.logDiagnostic('status', nextStatus);
   }
 
   emitSpots(spots) {
@@ -98,17 +123,20 @@ class BleService {
       const fineLocation = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
-      return (
+      const granted =
         scan === PermissionsAndroid.RESULTS.GRANTED &&
         connect === PermissionsAndroid.RESULTS.GRANTED &&
-        fineLocation === PermissionsAndroid.RESULTS.GRANTED
-      );
+        fineLocation === PermissionsAndroid.RESULTS.GRANTED;
+      this.logDiagnostic('permissions', granted ? 'granted' : 'denied');
+      return granted;
     }
 
     const location = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
     );
-    return location === PermissionsAndroid.RESULTS.GRANTED;
+    const granted = location === PermissionsAndroid.RESULTS.GRANTED;
+    this.logDiagnostic('permissions', granted ? 'granted' : 'denied');
+    return granted;
   }
 
   async waitForBluetoothPoweredOn() {
@@ -132,14 +160,21 @@ class BleService {
   }
 
   async scanPhase({ timeoutMs, uuids, matchDevice }) {
-    return new Promise((resolve, reject) => {
+    if (this.scanPromise) {
+      await this.scanPromise;
+    }
+
+    this.scanPromise = new Promise((resolve, reject) => {
+      this.logDiagnostic('scan_start', uuids ? 'service-filtered' : 'name/service fallback');
       let settled = false;
 
       const finishResolve = (device) => {
         if (settled) return;
         settled = true;
         clearTimeout(timeout);
-        this.manager.stopDeviceScan();
+        try {
+          this.manager.stopDeviceScan();
+        } catch {}
         resolve(device);
       };
 
@@ -147,35 +182,44 @@ class BleService {
         if (settled) return;
         settled = true;
         clearTimeout(timeout);
-        this.manager.stopDeviceScan();
+        try {
+          this.manager.stopDeviceScan();
+        } catch {}
         reject(error);
       };
 
       const timeout = setTimeout(() => {
+        this.logDiagnostic('scan_timeout', `${timeoutMs}ms`);
         finishResolve(null);
       }, timeoutMs);
 
-      this.manager.startDeviceScan(
-        uuids,
-        { allowDuplicates: false },
-        (error, device) => {
-          if (error) {
-            finishReject(error);
-            return;
-          }
-          if (!device) return;
-          if (matchDevice(device)) {
-            finishResolve(device);
-          }
+      try {
+        this.manager.stopDeviceScan();
+      } catch {}
+
+      this.manager.startDeviceScan(uuids, { allowDuplicates: false }, (error, device) => {
+        if (error) {
+          finishReject(error);
+          return;
         }
-      );
+        if (!device) return;
+        if (matchDevice(device)) {
+          this.logDiagnostic('scan_match', device?.name || device?.localName || device?.id || 'unknown');
+          finishResolve(device);
+        }
+      });
     });
+
+    try {
+      return await this.scanPromise;
+    } finally {
+      this.scanPromise = null;
+    }
   }
 
   async scanForDevice(timeoutMs = 12000) {
     const targetName = this.normalize(BLE_UUIDS.deviceName);
     const targetService = this.normalize(BLE_UUIDS.service);
-    const halfTimeout = Math.max(4000, Math.floor(timeoutMs / 2));
 
     const matchedByName = (device) => {
       const advertised = this.normalize(device?.name || device?.localName);
@@ -189,20 +233,37 @@ class BleService {
         .includes(targetService);
     };
 
-    const strictDevice = await this.scanPhase({
-      timeoutMs: halfTimeout,
-      uuids: [BLE_UUIDS.service],
-      matchDevice: (device) => matchedByName(device) || matchedByService(device),
-    });
-    if (strictDevice) return strictDevice;
+    const runScanWithRetry = async () => {
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        try {
+          const found = await this.scanPhase({
+            timeoutMs,
+            uuids: null,
+            matchDevice: (device) => matchedByName(device) || matchedByService(device),
+          });
+          if (found) {
+            return found;
+          }
+        } catch (error) {
+          const message = String(error?.message || '').toLowerCase();
+          if (!message.includes('cannot start scanning operation')) {
+            throw error;
+          }
+          this.logDiagnostic('scan_retry_after_error', `cannot start scanning operation, attempt=${attempt + 1}`);
+        }
 
-    this.emitStatus(`Уточняющий поиск "${BLE_UUIDS.deviceName}"...`);
-    const fallbackDevice = await this.scanPhase({
-      timeoutMs: timeoutMs - halfTimeout,
-      uuids: null,
-      matchDevice: (device) => matchedByName(device) || matchedByService(device),
-    });
-    if (fallbackDevice) return fallbackDevice;
+        if (attempt < 4) {
+          try {
+            this.manager.stopDeviceScan();
+          } catch {}
+          await this.sleep(350 * attempt);
+        }
+      }
+      return null;
+    };
+
+    const device = await runScanWithRetry();
+    if (device) return device;
 
     throw new Error(
       'Устройство не найдено. Проверьте, что ESP32 включен, рядом и Bluetooth/геолокация включены на телефоне'
@@ -220,13 +281,16 @@ class BleService {
 
   async connectById(deviceId) {
     if (!deviceId) return null;
+    this.logDiagnostic('reconnect_by_id', deviceId);
     try {
       const connected = await this.manager.connectToDevice(deviceId, {
         timeout: 2500,
         autoConnect: false,
       });
+      this.logDiagnostic('reconnect_by_id_ok', deviceId);
       return connected;
     } catch {
+      this.logDiagnostic('reconnect_by_id_fail', deviceId);
       return null;
     }
   }
@@ -250,6 +314,7 @@ class BleService {
       this.disconnectSub = null;
     }
     this.disconnectSub = this.manager.onDeviceDisconnected(readyDevice.id, () => {
+      this.logDiagnostic('device_disconnected', readyDevice.id);
       this.clearMonitors();
       this.device = null;
       this.emitConnection(false);
@@ -259,16 +324,53 @@ class BleService {
   }
 
   setupMonitors(device) {
+    const isExpectedMonitorCancel = (error) => {
+      const message = String(error?.message || '').toLowerCase();
+      return message.includes('operation was cancelled');
+    };
+
     const statusMonitor = device.monitorCharacteristicForService(
       BLE_UUIDS.service,
       BLE_UUIDS.deviceStatus,
       (error, characteristic) => {
         if (error) {
+          if (isExpectedMonitorCancel(error)) {
+            this.logDiagnostic('monitor_cancelled', 'status');
+            return;
+          }
           this.emitStatus(`Ошибка статуса: ${error.message || 'unknown'}`);
           return;
         }
         const decoded = this.decodeBase64Utf8(characteristic?.value);
         if (decoded) {
+          if (decoded === ACK.start) {
+            this.emitStatus('Команда start подтверждена');
+            return;
+          }
+          if (decoded === ACK.stop) {
+            this.emitStatus('Трансляция остановлена');
+            return;
+          }
+          if (decoded === ERROR_CODES.unsupportedVersion) {
+            this.emitStatus('Ошибка: версия протокола не поддерживается');
+            return;
+          }
+          if (decoded === ERROR_CODES.invalidPayload) {
+            this.emitStatus('Ошибка: некорректный payload');
+            return;
+          }
+          if (decoded === ERROR_CODES.invalidCommand) {
+            this.emitStatus('Ошибка: неизвестная команда');
+            return;
+          }
+          if (decoded === ERROR_CODES.ssidTooLong) {
+            this.emitStatus('Ошибка: SSID слишком длинный');
+            return;
+          }
+          if (decoded.startsWith(NACK_PREFIX)) {
+            this.emitStatus('Ошибка команды устройства');
+            return;
+          }
           this.emitStatus(decoded);
         }
       }
@@ -278,7 +380,12 @@ class BleService {
       BLE_UUIDS.service,
       BLE_UUIDS.wifiSpotsList,
       (error, characteristic) => {
-        if (error) return;
+        if (error) {
+          if (isExpectedMonitorCancel(error)) {
+            this.logDiagnostic('monitor_cancelled', 'spots');
+          }
+          return;
+        }
         const decoded = this.decodeBase64Utf8(characteristic?.value);
         const spots = decoded
           .split('||')
@@ -292,6 +399,9 @@ class BleService {
   }
 
   async connect() {
+    if (this.disconnectPromise) {
+      await this.disconnectPromise;
+    }
     if (this.connectPromise) {
       return this.connectPromise;
     }
@@ -313,9 +423,11 @@ class BleService {
     if (!permissionsOk) {
       throw new Error('Нужны Bluetooth permissions');
     }
+    this.logDiagnostic('connect_request');
 
     const elapsedAfterDisconnect = Date.now() - this.lastDisconnectAt;
     if (this.lastDisconnectAt > 0 && elapsedAfterDisconnect < 500) {
+      this.logDiagnostic('connect_wait_after_disconnect', `${500 - elapsedAfterDisconnect}ms`);
       await this.sleep(500 - elapsedAfterDisconnect);
     }
 
@@ -346,6 +458,7 @@ class BleService {
       const scannedDevice = await this.scanForDevice(timeoutMs);
       this.lastDeviceId = scannedDevice.id;
       this.emitStatus(`Подключение к ${scannedDevice.name || 'Hacker'}...`);
+      this.logDiagnostic('connect_to_device', scannedDevice.id);
       return this.manager.connectToDevice(scannedDevice.id, {
         timeout: 8000,
         autoConnect: false,
@@ -369,10 +482,32 @@ class BleService {
   }
 
   async disconnect() {
+    if (this.disconnectPromise) {
+      return this.disconnectPromise;
+    }
+
+    this.disconnectPromise = this.disconnectInternal();
+    try {
+      return await this.disconnectPromise;
+    } finally {
+      this.disconnectPromise = null;
+    }
+  }
+
+  async disconnectInternal() {
+    this.logDiagnostic('disconnect_request');
+    this.emitConnection(false);
+    this.emitStatus('Отключено');
+    this.emitSpots([]);
+
     this.manager.stopDeviceScan();
     this.clearMonitors();
     if (this.device) {
       this.lastDeviceId = this.device.id;
+      try {
+        await this.writeCommand(buildV1StopCommand());
+        this.logDiagnostic('stop_before_disconnect', 'sent');
+      } catch {}
       try {
         await this.device.cancelConnection();
       } catch {}
@@ -384,9 +519,6 @@ class BleService {
     }
     await this.sleep(700);
     this.lastDisconnectAt = Date.now();
-    this.emitConnection(false);
-    this.emitStatus('Отключено');
-    this.emitSpots([]);
   }
 
   async writeCommand(command) {
@@ -403,16 +535,15 @@ class BleService {
   }
 
   async sendStart({ ssid, dot, minutes }) {
-    const duration = Number.isFinite(Number(minutes))
-      ? String(Math.max(0, Number(minutes)))
-      : '3';
-    const prefix = dot ? '.' : '';
-    const payload = `${duration}${prefix}${ssid || 'Hacked'}`;
+    const payload = buildV1StartCommand({ ssid, dot, minutes });
+    this.logDiagnostic('cmd_start', payload);
     await this.writeCommand(payload);
   }
 
   async sendStop() {
-    await this.writeCommand(' ');
+    const payload = buildV1StopCommand();
+    this.logDiagnostic('cmd_stop');
+    await this.writeCommand(payload);
   }
 
   isConnected() {

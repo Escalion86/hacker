@@ -8,6 +8,9 @@ export default function BottomTabs({ tab, setTab }) {
       <Pressable style={[styles.tab, tab === 'control' && styles.tabActive]} onPress={() => setTab('control')}>
         <Text style={styles.tabText}>Control</Text>
       </Pressable>
+      <Pressable style={[styles.tab, tab === 'show' && styles.tabActive]} onPress={() => setTab('show')}>
+        <Text style={styles.tabText}>Show</Text>
+      </Pressable>
       <Pressable style={[styles.tab, tab === 'settings' && styles.tabActive]} onPress={() => setTab('settings')}>
         <Text style={styles.tabText}>Settings</Text>
       </Pressable>

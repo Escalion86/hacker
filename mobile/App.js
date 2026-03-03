@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import BottomTabs from './src/components/BottomTabs';
 import ControlScreen from './src/screens/ControlScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import ShowSettingsScreen from './src/screens/ShowSettingsScreen';
 import { SettingsProvider, useSettings } from './src/state/SettingsContext';
 import { colors } from './src/theme/tokens';
 
@@ -25,11 +26,17 @@ function AppContent() {
       <View style={styles.main}>
         {tab === 'control' ? (
           <ControlScreen settings={settings} />
+        ) : tab === 'show' ? (
+          <ShowSettingsScreen
+            settings={settings}
+            onChange={updateSettings}
+            onOpenSettings={() => setTab('settings')}
+          />
         ) : (
           <SettingsScreen settings={settings} onChange={updateSettings} />
         )}
       </View>
-      <BottomTabs tab={tab} setTab={setTab} />
+      {tab !== 'show' ? <BottomTabs tab={tab} setTab={setTab} /> : null}
     </SafeAreaView>
   );
 }

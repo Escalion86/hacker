@@ -3,8 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const SETTINGS_KEY = 'hacker.settings.v1';
 
 export const defaultSettings = {
+  accessCode: '',
   mode: 'word',
   wifi: 'Hacked',
+  cardRankIndex: 0,
+  cardMastIndex: 0,
   delay: 3,
   minutesBeforeStop: 3,
   dot: false,

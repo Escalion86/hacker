@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toggle from '../components/Toggle';
+import { buildCardCode } from '../show/accessProfiles';
 import { colors, spacing } from '../theme/tokens';
 
 export default function SettingsScreen({ settings, onChange }) {
@@ -36,6 +37,13 @@ export default function SettingsScreen({ settings, onChange }) {
             placeholderTextColor={colors.muted}
             style={styles.input}
           />
+        </View>
+      )}
+
+      {settings.mode === 'card' && (
+        <View style={styles.card}>
+          <Text style={styles.label}>Карта (из Show экрана)</Text>
+          <Text style={styles.preview}>{buildCardCode(settings.cardRankIndex, settings.cardMastIndex)}</Text>
         </View>
       )}
 
@@ -120,5 +128,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: colors.text,
     backgroundColor: '#10131a',
+  },
+  preview: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '700',
   },
 });

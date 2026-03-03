@@ -81,7 +81,10 @@
   - добавлен `AsyncStorage` слой для настроек,
   - подключен реальный BLE сервис на `react-native-ble-plx` (scan/connect/monitor/write).
 - Не завершено:
-  - протокол с ACK/NACK еще не внедрен в прошивку и клиент.
+  - протокол ACK/NACK (start/stop/bad_command) внедрен в прошивку и Expo-клиент.
+  - добавлен базовый BLE Diagnostics в ControlScreen.
+  - legacy-формат команд удален из mobile/firmware ExpoReady, используется только protocol v1 JSON.
+  - требуется зафиксировать результаты smoke-тестов по циклам reconnect.
 
 ## Ближайший спринт (текущий фокус)
 1. Подключить реальный BLE-слой в `mobile/src/services/ble/bleService.js`.
