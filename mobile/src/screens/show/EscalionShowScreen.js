@@ -60,7 +60,7 @@ export default function EscalionShowScreen({
   onChange,
   onOpenSettings,
 }) {
-  const bottomInset = Platform.OS === 'android' ? 22 : 0
+  const bottomInset = Platform.OS === 'android' ? 60 : 0
   const [page, setPage] = useState('general')
   const [wifiSpots, setWifiSpots] = useState([])
   const swipeStartY = useRef(0)
