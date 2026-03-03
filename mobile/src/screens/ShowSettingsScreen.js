@@ -66,7 +66,11 @@ function Row({ row, ui, onPress, onSwipeStart, onSwipeEnd, onSegmentTouch }) {
 
 export default function ShowSettingsScreen({ settings, onChange, onOpenSettings }) {
   if (settings.accessCode === 'escalion') {
-    return <EscalionShowScreen settings={settings} onChange={onChange} onOpenSettings={onOpenSettings} />;
+    return (
+      <View style={styles.escalionWrap}>
+        <EscalionShowScreen settings={settings} onChange={onChange} onOpenSettings={onOpenSettings} />
+      </View>
+    );
   }
 
   const [accessCodeInput, setAccessCodeInput] = useState(settings.accessCode || '');
@@ -245,6 +249,10 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
 }
 
 const styles = StyleSheet.create({
+  escalionWrap: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
   container: {
     flex: 1,
     padding: spacing.md,

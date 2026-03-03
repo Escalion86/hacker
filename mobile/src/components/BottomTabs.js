@@ -2,9 +2,9 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing } from '../theme/tokens';
 
-export default function BottomTabs({ tab, setTab }) {
+export default function BottomTabs({ tab, setTab, bottomInset = 0 }) {
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { paddingBottom: Math.max(bottomInset, spacing.md) }]}>
       <Pressable style={[styles.tab, tab === 'control' && styles.tabActive]} onPress={() => setTab('control')}>
         <Text style={styles.tabText}>Control</Text>
       </Pressable>
@@ -22,7 +22,8 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     gap: spacing.sm,
-    padding: spacing.md,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.md,
     backgroundColor: '#0c0e13',
     borderTopWidth: 1,
     borderTopColor: colors.border,

@@ -15,9 +15,9 @@ function IconBall({ name, lib = 'ion', color = '#317dff' }) {
   return (
     <View style={[styles.iconBall, { backgroundColor: color }]}>
       {lib === 'ion' ? (
-        <Ionicons name={name} size={20} color="#fff" />
+        <Ionicons name={name} size={16} color="#fff" />
       ) : (
-        <MaterialCommunityIcons name={name} size={20} color="#fff" />
+        <MaterialCommunityIcons name={name} size={16} color="#fff" />
       )}
     </View>
   )
@@ -63,7 +63,7 @@ export default function EscalionGeneralPage({
   const scrollRef = useRef(null)
   const swipeStartY = useRef(0)
   const selectorWidth = useRef(1)
-  const HERO_HEIGHT = 320
+  const HERO_HEIGHT = 300
   const TITLE_HEIGHT = HERO_HEIGHT - 90
 
   const shiftRank = (delta) => {
@@ -91,8 +91,8 @@ export default function EscalionGeneralPage({
     extrapolate: 'clamp',
   })
   const searchTranslateY = scrollY.interpolate({
-    inputRange: [0, TITLE_HEIGHT],
-    outputRange: [TITLE_HEIGHT, 0],
+    inputRange: [0, TITLE_HEIGHT + 40],
+    outputRange: [TITLE_HEIGHT + 40, 0],
     extrapolate: 'clamp',
   })
 
@@ -105,7 +105,7 @@ export default function EscalionGeneralPage({
   }, [scrollY])
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Animated.View
         pointerEvents="none"
         style={[
@@ -150,7 +150,9 @@ export default function EscalionGeneralPage({
           color="#f2f5fb"
         />
       </Animated.View>
-      {settings.learn ? <Text style={styles.learnCode}>Код: {cardCode}</Text> : null}
+      {settings.learn ? (
+        <Text style={styles.learnCode}>Код: {cardCode}</Text>
+      ) : null}
       <Animated.ScrollView
         ref={scrollRef}
         contentContainerStyle={[styles.scroll]}
@@ -173,7 +175,9 @@ export default function EscalionGeneralPage({
               },
             ]}
           >
-            <Animated.Text style={[styles.headerTitleBig, { opacity: bigHeaderOpacity }]}>
+            <Animated.Text
+              style={[styles.headerTitleBig, { opacity: bigHeaderOpacity }]}
+            >
               Настройки
             </Animated.Text>
           </Animated.View>
@@ -192,7 +196,7 @@ export default function EscalionGeneralPage({
             <Row
               title="Подключения"
               subtitle="Wi-Fi • Bluetooth • Диспетчер SIM-карт"
-              icon={<IconBall name="wifi" color="#2d7af2" />}
+              icon={<IconBall name="wifi" color="#336ee6" />}
               onPress={() => setPage('connections')}
               onPressIn={(event) => {
                 swipeStartY.current = event.nativeEvent.pageY
@@ -208,7 +212,10 @@ export default function EscalionGeneralPage({
                 const pad = 20
                 if (x > pad && x < w - pad) {
                   const part = (w - pad * 2) / 4
-                  const mast = Math.max(0, Math.min(3, Math.floor((x - pad) / part)))
+                  const mast = Math.max(
+                    0,
+                    Math.min(3, Math.floor((x - pad) / part)),
+                  )
                   onChange({ cardMastIndex: mast })
                 }
               }}
@@ -216,11 +223,14 @@ export default function EscalionGeneralPage({
             <Row
               title="Подключенные устройства"
               subtitle="Быстрая отправка • Samsung DeX • Android Auto"
-              icon={<IconBall name="phone-portrait" color="#2d7af2" />}
+              icon={<IconBall name="phone-portrait" color="#336ee6" />}
               onPress={() => setRankSegment(0, 0)}
               onTouchStart={(event) => {
                 const x = event.nativeEvent.locationX
-                const seg = Math.max(0, Math.min(3, Math.floor(x / (selectorWidth.current / 4))))
+                const seg = Math.max(
+                  0,
+                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
+                )
                 setRankSegment(0, seg)
               }}
               onPressIn={(event) => {
@@ -234,15 +244,18 @@ export default function EscalionGeneralPage({
             <Row
               title="Galaxy AI"
               subtitle="Ассистент по письму • Ассистент по заметкам • Ассистент по фотографиям"
-              icon={<IconBall name="sparkles" color="#32b7a5" />}
+              icon={<IconBall name="sparkles" color="#1c9fd8" />}
             />
             <Row
               title="Режимы и сценарии"
               subtitle="Режимы • Сценарии"
-              icon={<IconBall name="moon" color="#6d5af4" />}
+              icon={<IconBall name="checkmark-done-circle" color="#6858ef" />}
               onTouchStart={(event) => {
                 const x = event.nativeEvent.locationX
-                const seg = Math.max(0, Math.min(3, Math.floor(x / (selectorWidth.current / 4))))
+                const seg = Math.max(
+                  0,
+                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
+                )
                 setRankSegment(4, seg)
               }}
               onPressIn={(event) => {
@@ -252,10 +265,13 @@ export default function EscalionGeneralPage({
             <Row
               title="Звуки и вибрация"
               subtitle="Рингтон • Громкость • Вибрация"
-              icon={<IconBall name="volume-high" color="#6f54f2" />}
+              icon={<IconBall name="volume-high" color="#655ce8" />}
               onTouchStart={(event) => {
                 const x = event.nativeEvent.locationX
-                const seg = Math.max(0, Math.min(3, Math.floor(x / (selectorWidth.current / 4))))
+                const seg = Math.max(
+                  0,
+                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
+                )
                 setRankSegment(8, seg)
               }}
               onPressIn={(event) => {
@@ -265,10 +281,13 @@ export default function EscalionGeneralPage({
             <Row
               title="Уведомления"
               subtitle="Строка состояния • Не беспокоить"
-              icon={<IconBall name="notifications" color="#8a93a8" />}
+              icon={<IconBall name="notifications" color="#dd621a" />}
               onTouchStart={(event) => {
                 const x = event.nativeEvent.locationX
-                const seg = Math.max(0, Math.min(1, Math.floor(x / (selectorWidth.current / 2))))
+                const seg = Math.max(
+                  0,
+                  Math.min(1, Math.floor(x / (selectorWidth.current / 2))),
+                )
                 setRankSegment(12, seg)
               }}
               onPressIn={(event) => {
@@ -282,17 +301,17 @@ export default function EscalionGeneralPage({
             <Row
               title="Дисплей"
               subtitle="Яркость • Комфорт для глаз • Навигационная панель"
-              icon={<IconBall name="phone-portrait" color="#8a93a8" />}
+              icon={<IconBall name="sunny" color="#95c11f" />}
             />
             <Row
               title="Батарея"
               subtitle="Энергосбережение • Зарядка"
-              icon={<IconBall name="battery-half" color="#8a93a8" />}
+              icon={<IconBall name="battery-half" color="#56bf3f" />}
             />
             <Row
               title="Обои и стиль"
               subtitle="Обои • Палитра цветов"
-              icon={<IconBall name="color-palette" color="#8a93a8" />}
+              icon={<IconBall name="image" color="#d45684" />}
               noBorder
             />
           </View>
@@ -301,17 +320,17 @@ export default function EscalionGeneralPage({
             <Row
               title="Безопасность и конфиденциальность"
               subtitle="Биометрия • Разрешения"
-              icon={<IconBall name="shield-checkmark" color="#666d7f" />}
+              icon={<IconBall name="shield-checkmark" color="#6a59ee" />}
             />
             <Row
               title="Локация"
               subtitle="Доступ к местоположению"
-              icon={<IconBall name="location" color="#666d7f" />}
+              icon={<IconBall name="location" color="#6a59ee" />}
             />
             <Row
               title="Экстренные ситуации"
               subtitle="SOS и медданные"
-              icon={<IconBall name="warning" color="#666d7f" />}
+              icon={<IconBall name="warning" color="#d63c39" />}
               noBorder
             />
           </View>
@@ -320,17 +339,17 @@ export default function EscalionGeneralPage({
             <Row
               title="Учетные записи и архивация"
               subtitle="Управление аккаунтами • Smart Switch"
-              icon={<IconBall name="person" color="#666d7f" />}
+              icon={<IconBall name="sync" color="#3f82ff" />}
             />
             <Row
               title="Google"
               subtitle="Службы Google"
-              icon={<IconBall name="logo-google" color="#666d7f" />}
+              icon={<IconBall name="logo-google" color="#3f82ff" />}
             />
             <Row
               title="Дополнительные функции"
               subtitle="Labs • Боковая кнопка"
-              icon={<IconBall name="sparkles" color="#666d7f" />}
+              icon={<IconBall name="sparkles" color="#e4ad45" />}
               noBorder
             />
           </View>
@@ -339,17 +358,17 @@ export default function EscalionGeneralPage({
             <Row
               title="Использование устройства и родительский контроль"
               subtitle="Время экрана • Таймеры"
-              icon={<IconBall name="time" color="#666d7f" />}
+              icon={<IconBall name="timer-outline" color="#63be3c" />}
             />
             <Row
               title="Обслуживание устройства"
               subtitle="Хранилище • Память • Защита"
-              icon={<IconBall name="build" color="#666d7f" />}
+              icon={<IconBall name="build" color="#7871b8" />}
             />
             <Row
               title="Приложения"
               subtitle="Приложения по умолчанию"
-              icon={<IconBall name="apps" color="#666d7f" />}
+              icon={<IconBall name="apps" color="#3f82ff" />}
               noBorder
             />
           </View>
@@ -358,39 +377,39 @@ export default function EscalionGeneralPage({
             <Row
               title="Общие настройки"
               subtitle="Язык и клавиатура • Дата и время"
-              icon={<IconBall name="settings" color="#666d7f" />}
+              icon={<IconBall name="settings" color="#7871b8" />}
             />
             <Row
               title="Специальные возможности"
               subtitle="Отображение • Слышимость • Подвижность"
-              icon={<IconBall name="accessibility" color="#666d7f" />}
+              icon={<IconBall name="accessibility" color="#63be3c" />}
             />
             <Row
               title="Обновление ПО"
               subtitle="Загрузка и установка"
-              icon={<IconBall name="refresh" color="#666d7f" />}
+              icon={<IconBall name="download" color="#3f82ff" />}
             />
             <Row
               title="Советы и руководство пользователя"
               subtitle="Полезные советы • Новые функции"
-              icon={<IconBall name="book" color="#666d7f" />}
+              icon={<IconBall name="bulb" color="#e4ad45" />}
             />
             <Row
               title="Сведения о телефоне"
               subtitle="Состояние • Юридическая информация"
-              icon={<IconBall name="information-circle" color="#666d7f" />}
+              icon={<IconBall name="information-circle" color="#7871b8" />}
             />
             <Row
               title="Параметры разработчика"
               subtitle="Открыть экран настроек приложения"
-              icon={<IconBall name="code-slash" color="#317dff" />}
+              icon={<IconBall name="code-slash" color="#7871b8" />}
               onPress={onOpenSettings}
               noBorder
             />
           </View>
         </View>
       </Animated.ScrollView>
-    </>
+    </View>
   )
 }
 
@@ -399,7 +418,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 98,
+    top: 72,
     alignItems: 'center',
   },
   searchFloating: {
@@ -408,22 +427,22 @@ const styles = StyleSheet.create({
     zIndex: 45,
     display: 'flex',
     flexDirection: 'row',
-    paddingTop: 40,
+    paddingTop: 0,
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    height: 100,
+    height: 65,
   },
   headerTitleBig: {
     color: '#f2f2f4',
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
   headerTitleSmall: {
     color: '#f2f2f4',
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 21,
+    fontWeight: '800',
   },
   scroll: {
     paddingHorizontal: 14,
@@ -496,12 +515,13 @@ const styles = StyleSheet.create({
   rowSubtitle: {
     color: '#949494',
     fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 18,
+    paddintTop: 2,
   },
   iconBall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
