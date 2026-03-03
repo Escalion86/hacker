@@ -1,114 +1,92 @@
 import React from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 
-function IconBall({ name, lib = 'ion', color = '#317dff' }) {
+function SwitchMock({ on }) {
   return (
-    <View style={[styles.iconBall, { backgroundColor: color }]}>
-      {lib === 'ion' ? (
-        <Ionicons name={name} size={20} color="#fff" />
-      ) : (
-        <MaterialCommunityIcons name={name} size={20} color="#fff" />
-      )}
+    <View
+      style={[
+        styles.switchTrack,
+        on ? styles.switchTrackOn : styles.switchTrackOff,
+      ]}
+    >
+      <View
+        style={[
+          styles.switchKnob,
+          on ? styles.switchKnobOn : styles.switchKnobOff,
+        ]}
+      />
     </View>
   )
 }
 
-function Row({ title, subtitle, icon, onPress, noBorder }) {
+function WifiRow({ title, color = '#2f76ff', noBorder = false }) {
   return (
-    <Pressable onPress={onPress} style={[styles.row]}>
-      <View style={styles.rowLeft}>
-        {icon}
-        <View style={[styles.rowTextWrap, noBorder && styles.rowNoBorder]}>
-          <Text style={styles.rowTitle}>{title}</Text>
-          {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
-        </View>
-      </View>
-    </Pressable>
+    <View style={[styles.wifiRow, !noBorder && styles.wifiRowDivider]}>
+      <Ionicons name="wifi" size={28} color={color} />
+      <Text style={styles.wifiName}>{title}</Text>
+    </View>
   )
 }
 
 export default function EscalionWifiPage({ setPage, scrollY, wifiSpots }) {
-  const EXPAND_RANGE = 180
-  const scrollRef = React.useRef(null)
-
-  React.useEffect(() => {
-    scrollY.setValue(EXPAND_RANGE)
-    const id = requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ x: 0, y: EXPAND_RANGE, animated: false })
-    })
-    return () => cancelAnimationFrame(id)
-  }, [scrollY])
-
-  const pullProgress = scrollY.interpolate({
-    inputRange: [0, EXPAND_RANGE],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  })
-  const extraHeroTranslateY = scrollY.interpolate({
-    inputRange: [0, EXPAND_RANGE],
-    outputRange: [0, -EXPAND_RANGE],
-    extrapolate: 'clamp',
-  })
+  const shownSpots = wifiSpots.filter((spot) => spot && spot.trim() !== '')
 
   return (
     <View style={styles.page}>
-      <Animated.View style={styles.headerLayer} pointerEvents="box-none">
-        <View style={styles.header}>
-          <Pressable onPress={() => setPage('connections')} hitSlop={10} style={styles.headerBack}>
-            <Ionicons name="chevron-back" size={24} color="#f2f5fb" />
-          </Pressable>
-          <Animated.Text style={[styles.headerTitleSmall, { opacity: Animated.subtract(1, pullProgress) }]}>
-            Wi-Fi
-          </Animated.Text>
-          <Pressable hitSlop={10} style={styles.searchWrapSmall}>
-            <Ionicons name="search" size={24} color="#f2f5fb" />
-          </Pressable>
-        </View>
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.headerHero,
-            {
-              transform: [{ translateY: extraHeroTranslateY }],
-              opacity: pullProgress,
-            },
-          ]}
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => setPage('connections')}
+          hitSlop={10}
+          style={styles.headerBack}
         >
-          <Text style={styles.headerHeroTitle}>Wi-Fi</Text>
-        </Animated.View>
-      </Animated.View>
+          <Ionicons name="chevron-back" size={24} color="#f2f5fb" />
+        </Pressable>
+        <Text style={styles.headerTitle}>Wi-Fi</Text>
+        <Pressable hitSlop={10} style={styles.headerIcon}>
+          <Ionicons name="qr-code-outline" size={22} color="#f2f5fb" />
+        </Pressable>
+        <Pressable hitSlop={10} style={styles.headerIcon}>
+          <Ionicons name="ellipsis-vertical" size={22} color="#f2f5fb" />
+        </Pressable>
+      </View>
+
       <Animated.ScrollView
-        ref={scrollRef}
-        contentContainerStyle={[styles.scroll]}
-        contentOffset={{ x: 0, y: EXPAND_RANGE }}
+        contentContainerStyle={styles.scroll}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          {
-            useNativeDriver: true,
-          },
+          { useNativeDriver: true },
         )}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ height: EXPAND_RANGE }} />
         <View style={styles.card}>
-          <Row title="Включено" subtitle="Сети доступны" icon={<IconBall name="wifi" color="#317dff" />} />
+          <View style={styles.enabledRow}>
+            <Text style={styles.enabledTitle}>Включено</Text>
+            <SwitchMock on />
+          </View>
         </View>
-        <View style={styles.card}>
-          {wifiSpots.length === 0 ? (
-            <Row title="Список пуст" subtitle="" icon={<IconBall name="wifi" color="#317dff" />} noBorder />
-          ) : (
-            wifiSpots.map((spot, index) => (
-              <Row
-                key={`${spot}-${index}`}
-                title={spot}
-                subtitle=""
-                icon={<IconBall name="wifi" color="#317dff" />}
-                noBorder={index === wifiSpots.length - 1}
-              />
-            ))
+        <View style={{ gap: 8 }}>
+          <Text style={styles.sectionTitle}>Доступные сети</Text>
+
+          {shownSpots.length === 0 ? null : (
+            <View style={styles.card}>
+              {shownSpots.map((spot, index) => (
+                <WifiRow
+                  key={`${spot}-${index}`}
+                  title={spot}
+                  color={index % 3 === 1 ? '#7f8593' : '#2f76ff'}
+                  noBorder={index === shownSpots.length - 1}
+                />
+              ))}
+            </View>
           )}
+          <View style={styles.card}>
+            <View style={styles.addRow}>
+              <Ionicons name="add" size={34} color="#2fc35b" />
+              <Text style={styles.addText}>Добавить сеть</Text>
+            </View>
+          </View>
         </View>
       </Animated.ScrollView>
     </View>
@@ -120,100 +98,114 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  headerLayer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 30,
-  },
   header: {
-    height: 86,
-    backgroundColor: '#000',
-    paddingTop: 34,
+    height: 74,
     paddingHorizontal: 14,
+    backgroundColor: '#000',
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  headerTitleSmall: {
-    flex: 1,
-    color: '#f2f2f4',
-    fontSize: 19,
-    fontWeight: '700',
-    letterSpacing: -0.2,
-    marginLeft: 4,
   },
   headerBack: {
     width: 28,
     alignItems: 'flex-start',
-    justifyContent: 'center',
   },
-  searchWrapSmall: {
-    width: 28,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  headerHero: {
-    height: 180,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerHeroTitle: {
-    color: '#f2f5fb',
-    fontSize: 34,
+  headerTitle: {
+    flex: 1,
+    color: '#f3f5fa',
+    fontSize: 21,
     fontWeight: '700',
-    letterSpacing: -0.3,
+    marginLeft: 20,
+  },
+  headerIcon: {
+    width: 28,
+    alignItems: 'center',
+    marginLeft: 8,
   },
   scroll: {
     paddingHorizontal: 14,
-    paddingTop: 86,
-    paddingBottom: 18,
+    paddingTop: 6,
+    paddingBottom: 24,
     gap: 14,
   },
   card: {
-    backgroundColor: '#171719',
-    borderRadius: 26,
+    borderRadius: 40,
     overflow: 'hidden',
-    borderWidth: 0,
+    backgroundColor: '#171719',
   },
-  row: {
-    minHeight: 72,
+  enabledRow: {
+    minHeight: 60,
     paddingHorizontal: 20,
-    justifyContent: 'center',
-  },
-  rowNoBorder: {
-    borderBottomWidth: 0,
-  },
-  rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    justifyContent: 'space-between',
   },
-  rowTextWrap: {
-    flex: 1,
-    gap: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: '#3a3a3c',
+  enabledTitle: {
+    color: '#4d86ff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  switchTrack: {
+    width: 38,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  switchTrackOn: {
+    backgroundColor: '#3b8cff',
+    borderColor: '#5c9fff',
+  },
+  switchTrackOff: {
+    backgroundColor: '#262b35',
+    borderColor: '#3b424f',
+  },
+  switchKnob: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#f2f4fa',
+  },
+  switchKnobOn: {
+    right: 2,
+  },
+  switchKnobOff: {
+    left: 2,
+  },
+  sectionTitle: {
+    color: '#8f949e',
+    fontSize: 12,
+    fontWeight: '700',
+    paddingHorizontal: 26,
+    marginTop: 2,
+  },
+  addRow: {
     minHeight: 60,
-    marginTop: 12,
-    paddingBottom: 12,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
   },
-  rowTitle: {
-    color: '#f5f7fa',
-    fontSize: 15,
+  addText: {
+    color: '#f4f6fb',
+    fontSize: 18,
     fontWeight: '400',
   },
-  rowSubtitle: {
-    color: '#949494',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  iconBall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  wifiRow: {
+    minHeight: 72,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 12,
+  },
+  wifiRowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#23252c',
+  },
+  wifiName: {
+    color: '#f4f6fb',
+    fontSize: 22 / 2,
+    fontWeight: '400',
+    letterSpacing: -0.1,
   },
 })
