@@ -13,6 +13,7 @@ import { buildCardCode, resolveProfile } from '../show/accessProfiles'
 import { resolveTemplate } from '../show/templates'
 import { colors, spacing } from '../theme/tokens'
 import EscalionShowScreen from './show/EscalionShowScreen'
+import FertVladShowScreen from './show/fertVlad/FertVladShowScreen'
 
 function RowIcon({ kind, color }) {
   const tint = color || '#7f8aa3'
@@ -126,6 +127,14 @@ export default function ShowSettingsScreen({
           onChange={onChange}
           onOpenSettings={onOpenSettings}
         />
+      </View>
+    )
+  }
+
+  if (settings.accessCode === 'fertVlad' || settings.accessCode === 'fertvlad') {
+    return (
+      <View style={styles.escalionWrap}>
+        <FertVladShowScreen settings={settings} onChange={onChange} />
       </View>
     )
   }

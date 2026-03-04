@@ -4,37 +4,60 @@ const ShowConfig = require('../models/ShowConfig');
 const AccessCode = require('../models/AccessCode');
 const { normalizeCode, hashAccessCode, getCodeLast4 } = require('../utils/hash');
 
+function resolveSeedTemplateByCode(code) {
+  if (code === 'fertvlad' || code === 'fertVlad') {
+    return {
+      templateId: 'fertVlad',
+      templateName: 'One Plus',
+      profileId: 'fertVlad',
+      displayName: 'Владимир Ферт',
+      version: '2026-03-04.1',
+      notes: 'Initial fertVlad config',
+    };
+  }
+
+  return {
+    templateId: 'escalion',
+    templateName: 'Samsung OneUi 8',
+    profileId: 'escalion',
+    displayName: 'Алексей Белинский',
+    version: '2026-03-04.1',
+    notes: 'Initial escalion config',
+  };
+}
+
 async function run() {
   const rawCode = process.argv[2] || 'escalion';
   const normalizedCode = normalizeCode(rawCode);
+  const seedTemplate = resolveSeedTemplateByCode(normalizedCode);
 
   await connectDb(env.mongoUri);
 
   const config = await ShowConfig.findOneAndUpdate(
-    { templateId: 'escalion', version: '2026-03-04.1' },
+    { templateId: seedTemplate.templateId, version: seedTemplate.version },
     {
       $set: {
-        templateName: 'Samsung OneUi 8',
+        templateName: seedTemplate.templateName,
         profile: {
-          id: 'escalion',
-          displayName: 'Алексей Белинский',
+          id: seedTemplate.profileId,
+          displayName: seedTemplate.displayName,
         },
         payload: {
           operatorProfile: {
-            fullName: 'Алексей Белинский',
+            fullName: seedTemplate.displayName,
             avatarUrl: '',
           },
           templateMeta: {
-            title: 'Samsung OneUi 8',
+            title: seedTemplate.templateName,
           },
         },
       },
       $setOnInsert: {
         schemaVersion: 1,
-        version: '2026-03-04.1',
-        templateId: 'escalion',
+        version: seedTemplate.version,
+        templateId: seedTemplate.templateId,
         isActive: true,
-        notes: 'Initial escalion config',
+        notes: seedTemplate.notes,
       },
     },
     { upsert: true, new: true },

@@ -41,6 +41,12 @@ npm run seed -- escalion
 - конфиг `templateId=escalion`
 - код `escalion` (hashed) привязанный к этому конфигу
 
+Для профиля Fert:
+```bash
+npm run seed -- fertVlad
+```
+Создаст конфиг `templateId=fertVlad` с `templateName=One Plus`.
+
 ## 4. Публичный API
 
 ### `GET /api/show-config?code=escalion`

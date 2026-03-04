@@ -15,6 +15,10 @@ export const ACCESS_PROFILES = {
     name: 'Владимир Ферт',
     hasConnections: false,
   },
+  fertvlad: {
+    name: 'Владимир Ферт',
+    hasConnections: false,
+  },
   mihRogin: {
     name: 'Михаил Рожин',
     hasConnections: false,
@@ -29,7 +33,8 @@ export const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q
 export const MASTS = ['S', 'H', 'C', 'D'];
 
 export function resolveProfile(accessCode) {
-  return ACCESS_PROFILES[accessCode] || null;
+  if (!accessCode) return null;
+  return ACCESS_PROFILES[accessCode] || ACCESS_PROFILES[String(accessCode).trim()] || ACCESS_PROFILES[String(accessCode).trim().toLowerCase()] || null;
 }
 
 export function buildCardCode(rankIndex, mastIndex) {
@@ -41,4 +46,3 @@ export function buildCardCode(rankIndex, mastIndex) {
   }
   return `${rank}${MASTS[safeMast]}`;
 }
-
