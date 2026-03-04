@@ -16,6 +16,7 @@ import { resolveProfile } from './src/show/accessProfiles';
 function AppContent() {
   const [tab, setTab] = useState('show');
   const [bleConnected, setBleConnected] = useState(bleService.isConnected());
+  const [bluetoothOn, setBluetoothOn] = useState(bleService.isBluetoothPoweredOn());
   const [bleStatus, setBleStatus] = useState('Отключено');
   const [configLoading, setConfigLoading] = useState(false);
   const [configError, setConfigError] = useState('');
@@ -30,6 +31,7 @@ function AppContent() {
   const hasValidCode = !!resolveProfile(effectiveAccessCode);
 
   const getBleDotColor = () => {
+    if (!bluetoothOn) return '#2f76ff';
     if (String(bleStatus || '').startsWith('Ошибка')) return '#ff4d4f';
     if (
       String(bleStatus || '').startsWith('Идет транс') ||
@@ -130,6 +132,13 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    const unsub = bleService.subscribeBluetoothState((nextState) => {
+      setBluetoothOn(nextState === 'PoweredOn');
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
     const unsub = bleService.subscribeStatus((nextStatus) => {
       setBleStatus(String(nextStatus || ''));
     });
@@ -212,7 +221,7 @@ function AppContent() {
           },
         ]}
       >
-        {hasValidCode ? (
+        {hasValidCode && (!bluetoothOn || bleConnected || String(bleStatus || '').startsWith('Ошибка')) ? (
           <View
             pointerEvents="none"
             style={[
