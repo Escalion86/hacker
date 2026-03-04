@@ -184,7 +184,7 @@ export default function FertVladGeneralPage({
         <Text style={styles.headerTitle}>Настройки</Text>
 
         <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={23} color="#777c84" />
+          <Ionicons name="search-outline" size={21} color="#777c84" />
           <Text style={styles.searchText}>Поиск</Text>
         </View>
 
@@ -432,21 +432,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   scroll: {
-    paddingTop: 92,
+    paddingTop: 80,
     paddingHorizontal: 20,
     paddingBottom: 24,
     gap: 14,
   },
   headerTitle: {
     color: '#ebedf1',
-    fontSize: 39,
-    fontWeight: '700',
+    fontSize: 38,
+    fontWeight: '600',
     marginBottom: 14,
     letterSpacing: -0.5,
   },
   searchBox: {
-    minHeight: 50,
-    borderRadius: 25,
+    minHeight: 46,
+    borderRadius: 23,
     backgroundColor: '#1a1c22',
     borderWidth: 1,
     borderColor: '#22262f',
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#17191f',
   },
   row: {
-    minHeight: 68,
+    minHeight: 64,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   profileRow: {
-    minHeight: 84,
+    minHeight: 80,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -499,21 +499,21 @@ const styles = StyleSheet.create({
   profileSubtitle: {
     color: '#9ea4af',
     fontSize: 12,
-    lineHeight: 18,
+    lineHeight: 19,
     marginTop: 2,
   },
   profileAvatarWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     overflow: 'hidden',
     backgroundColor: '#4a4a4a',
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileAvatarImage: {
-    width: 56,
-    height: 56,
+    width: 52,
+    height: 52,
   },
   profileArrow: {
     // marginLeft: 2,
@@ -553,9 +553,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#2a2e37',
   },
   switchTrack: {
-    width: 46,
-    height: 27,
-    borderRadius: 13.5,
+    width: 42,
+    height: 25,
+    borderRadius: 12.5,
     borderWidth: 1,
     justifyContent: 'center',
     marginRight: 6,
@@ -566,13 +566,13 @@ const styles = StyleSheet.create({
   },
   switchTrackOff: {
     backgroundColor: '#3f4248',
-    borderColor: '#50545d',
+    borderColor: '#3f4248',
   },
   switchKnob: {
     position: 'absolute',
-    width: 23,
-    height: 23,
-    borderRadius: 11.5,
+    width: 20,
+    height: 20,
+    borderRadius: 10.5,
     backgroundColor: '#f3f5f7',
   },
   switchKnobOn: {
