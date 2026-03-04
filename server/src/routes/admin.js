@@ -32,6 +32,12 @@ function buildAdminRouter({ accessCodePepper }) {
     code: z.string().min(1).max(128),
     configId: z.string().min(1),
   });
+  const operatorProfileByCodeSchema = z.object({
+    code: z.string().min(1).max(128),
+    fullName: z.string().min(1).max(128),
+    avatarUrl: z.string().max(2048).optional().default(''),
+    templateTitle: z.string().max(128).optional(),
+  });
 
   router.get('/admin/access-codes', async (req, res, next) => {
     try {
@@ -161,6 +167,61 @@ function buildAdminRouter({ accessCodePepper }) {
         return res.status(404).json({ error: 'code_not_found' });
       }
       return res.json({ ok: true });
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.post('/admin/operator-profile', async (req, res, next) => {
+    try {
+      const parsed = operatorProfileByCodeSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'invalid_payload', issues: parsed.error.issues });
+      }
+
+      const normalizedCode = normalizeCode(parsed.data.code);
+      const codeHash = hashAccessCode(normalizedCode, accessCodePepper);
+
+      const accessCode = await AccessCode.findOne({ codeHash }).populate('configId');
+      if (!accessCode) {
+        return res.status(404).json({ error: 'code_not_found' });
+      }
+      if (!accessCode.configId) {
+        return res.status(404).json({ error: 'config_not_found' });
+      }
+
+      const config = accessCode.configId;
+      const nextPayload = { ...(config.payload || {}) };
+      nextPayload.operatorProfile = {
+        ...(nextPayload.operatorProfile || {}),
+        fullName: parsed.data.fullName,
+        avatarUrl: parsed.data.avatarUrl || '',
+      };
+
+      if (typeof parsed.data.templateTitle === 'string' && parsed.data.templateTitle.trim()) {
+        nextPayload.templateMeta = {
+          ...(nextPayload.templateMeta || {}),
+          title: parsed.data.templateTitle.trim(),
+        };
+      }
+
+      config.profile = {
+        ...(config.profile || {}),
+        id: config.profile?.id || config.templateId,
+        displayName: parsed.data.fullName,
+      };
+      config.payload = nextPayload;
+      if (typeof parsed.data.templateTitle === 'string' && parsed.data.templateTitle.trim()) {
+        config.templateName = parsed.data.templateTitle.trim();
+      }
+      await config.save();
+
+      return res.json({
+        ok: true,
+        templateId: config.templateId,
+        profile: config.profile,
+        payload: config.payload,
+      });
     } catch (error) {
       return next(error);
     }

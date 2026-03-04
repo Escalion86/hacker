@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -35,6 +36,7 @@ function createApp(env) {
   app.use('/api', healthRouter);
   app.use('/api', buildShowConfigRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/api', requireAdminKey(env.adminApiKey), buildAdminRouter({ accessCodePepper: env.accessCodePepper }));
+  app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

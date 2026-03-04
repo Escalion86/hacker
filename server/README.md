@@ -111,6 +111,17 @@ npm run seed -- escalion
 }
 ```
 
+### Обновить ФИО/аватар по коду (без Mongo)
+`POST /api/admin/operator-profile`
+```json
+{
+  "code": "escalion",
+  "fullName": "Алексей Белинский",
+  "avatarUrl": "https://hacker20.escalion.ru/static/alex.jpg",
+  "templateTitle": "Samsung OneUi 8"
+}
+```
+
 ### Список кодов
 `GET /api/admin/access-codes`
 
@@ -156,6 +167,15 @@ pm2 startup
 ```bash
 EXPO_PUBLIC_CONFIG_API_BASE_URL=https://hacker20.escalion.ru/api
 ```
+
+## 8. Встроенная мини-админка
+- URL: `https://hacker20.escalion.ru/admin/`
+- Вверху страницы вставьте `ADMIN_API_KEY`.
+- Доступные действия:
+  - обновление ФИО/аватара по коду
+  - создание `ShowConfig`
+  - создание `AccessCode`
+  - просмотр списка кодов
 
 ## Безопасность (минимум)
 - используйте длинные `ADMIN_API_KEY` и `ACCESS_CODE_PEPPER`
