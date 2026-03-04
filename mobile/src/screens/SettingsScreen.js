@@ -1,10 +1,17 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import PrimaryButton from '../components/PrimaryButton';
 import Toggle from '../components/Toggle';
 import { buildCardCode } from '../show/accessProfiles';
 import { colors, spacing } from '../theme/tokens';
 
-export default function SettingsScreen({ settings, onChange }) {
+export default function SettingsScreen({
+  settings,
+  onChange,
+  onRefreshShowUi,
+  refreshInProgress,
+  refreshStatus,
+}) {
   const formatCardPreview = (rawCode) => {
     const text = String(rawCode || '').trim();
     const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/);
@@ -88,6 +95,18 @@ export default function SettingsScreen({ settings, onChange }) {
         onToggle={() => onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })}
       />
       <Toggle label="Режим обучения" value={settings.learn} onToggle={() => onChange({ learn: !settings.learn })} />
+
+      <View style={styles.card}>
+        <Text style={styles.label}>Синхронизация Show UI</Text>
+        <PrimaryButton
+          title={refreshInProgress ? 'Обновление...' : 'Обновить Show UI'}
+          onPress={onRefreshShowUi}
+          disabled={refreshInProgress}
+        />
+        {refreshStatus ? (
+          <Text style={styles.syncStatus}>{refreshStatus}</Text>
+        ) : null}
+      </View>
     </ScrollView>
   );
 }
@@ -147,5 +166,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 20,
     fontWeight: '700',
+  },
+  syncStatus: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

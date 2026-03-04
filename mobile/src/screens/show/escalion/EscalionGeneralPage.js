@@ -1,15 +1,13 @@
 import React, { useRef } from 'react'
 import {
   Animated,
-  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
+  Image,
 } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-
-const defaultAvatar = require('../../../../assets/escalion.png')
 
 function IconBall({ name, lib = 'ion', color = '#317dff' }) {
   return (
@@ -172,7 +170,6 @@ export default function EscalionGeneralPage({
 
   const profileName = (settings.showOperatorName || '').trim() || 'Алексей Белинский'
   const avatarUri = (settings.showOperatorAvatar || '').trim()
-  const avatarSource = avatarUri ? { uri: avatarUri } : defaultAvatar
 
   return (
     <View style={{ flex: 1 }}>
@@ -261,7 +258,11 @@ export default function EscalionGeneralPage({
               <Text style={styles.profileName}>{profileName}</Text>
               <Text style={styles.profileSub}>Samsung account</Text>
             </View>
-            <Image source={avatarSource} style={styles.avatar} />
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarPlaceholder} />
+            )}
           </View>
 
           <View style={styles.card}>
@@ -526,6 +527,14 @@ const styles = StyleSheet.create({
     borderRadius: 42,
     borderWidth: 1,
     borderColor: '#2f3441',
+  },
+  avatarPlaceholder: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 1,
+    borderColor: '#2f3441',
+    backgroundColor: '#222631',
   },
   row: {
     minHeight: 72,

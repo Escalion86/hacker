@@ -19,6 +19,7 @@ function AppContent() {
   const [bleStatus, setBleStatus] = useState('Отключено');
   const [configLoading, setConfigLoading] = useState(false);
   const [configError, setConfigError] = useState('');
+  const [configSyncStatus, setConfigSyncStatus] = useState('');
   const [resolvedAccessCode, setResolvedAccessCode] = useState('');
   const { loading, settings, updateSettings } = useSettings();
   const reconnectIntervalRef = useRef(null);
@@ -34,6 +35,7 @@ function AppContent() {
 
     setConfigLoading(true);
     setConfigError('');
+    setConfigSyncStatus('');
 
     try {
       const result = await configService.resolveConfigByCode(code);
@@ -74,10 +76,17 @@ function AppContent() {
         showOperatorAvatarRemote: operatorAvatarRemote,
         showTemplateTitle: templateTitle,
       });
+      setConfigSyncStatus(
+        result.source === 'cache'
+          ? 'Show UI обновлен из локального кэша'
+          : 'Show UI обновлен с сервера',
+      );
       return true;
     } catch (error) {
       setResolvedAccessCode('');
-      setConfigError(String(error?.message || 'Не удалось загрузить конфигурацию экрана'));
+      const message = String(error?.message || 'Не удалось загрузить конфигурацию экрана');
+      setConfigError(message);
+      setConfigSyncStatus(message);
       return false;
     } finally {
       setConfigLoading(false);
@@ -200,7 +209,13 @@ function AppContent() {
             onOpenSettings={() => setTab('settings')}
           />
         ) : (
-          <SettingsScreen settings={{ ...settings, accessCode: effectiveAccessCode }} onChange={updateSettings} />
+          <SettingsScreen
+            settings={{ ...settings, accessCode: effectiveAccessCode }}
+            onChange={updateSettings}
+            onRefreshShowUi={() => resolveCodeAndLoadConfig(effectiveAccessCode)}
+            refreshInProgress={configLoading}
+            refreshStatus={configSyncStatus}
+          />
         )}
       </View>
       {tab !== 'show' ? <BottomTabs tab={tab} setTab={setTab} bottomInset={bottomInset} /> : null}
