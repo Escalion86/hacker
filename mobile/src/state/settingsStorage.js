@@ -16,6 +16,7 @@ export const defaultSettings = {
   showTemplateTitle: '',
   showOperatorName: '',
   showOperatorAvatar: '',
+  showOperatorAvatarRemote: '',
 };
 
 export async function loadSettings() {

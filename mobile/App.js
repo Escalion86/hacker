@@ -8,6 +8,7 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import ShowSettingsScreen from './src/screens/ShowSettingsScreen';
 import bleService from './src/services/ble/bleService';
 import configService from './src/services/config/configService';
+import { cacheAvatarLocally } from './src/services/config/avatarCache';
 import { SettingsProvider, useSettings } from './src/state/SettingsContext';
 import { colors } from './src/theme/tokens';
 import { resolveProfile } from './src/show/accessProfiles';
@@ -40,8 +41,26 @@ function AppContent() {
       const templateId = String(result?.config?.templateId || '').trim().toLowerCase();
       const targetCode = profileId || templateId || code;
       const operatorName = String(result?.config?.ui?.operatorName || '').trim();
-      const operatorAvatar = String(result?.config?.ui?.operatorAvatarUrl || '').trim();
+      const operatorAvatarRemote = String(result?.config?.ui?.operatorAvatarUrl || '').trim();
       const templateTitle = String(result?.config?.ui?.templateTitle || '').trim();
+      const cachedAvatarLocal = await cacheAvatarLocally(operatorAvatarRemote);
+
+      let operatorAvatar = '';
+      if (!operatorAvatarRemote) {
+        operatorAvatar = '';
+      } else if (cachedAvatarLocal) {
+        operatorAvatar = cachedAvatarLocal;
+      } else if (
+        settings.showOperatorAvatar &&
+        settings.showOperatorAvatarRemote &&
+        settings.showOperatorAvatarRemote === operatorAvatarRemote
+      ) {
+        // Offline fallback: keep previously cached local file path.
+        operatorAvatar = settings.showOperatorAvatar;
+      } else {
+        // Last resort for first run if download failed.
+        operatorAvatar = operatorAvatarRemote;
+      }
 
       if (!resolveProfile(targetCode)) {
         throw new Error(`Профиль "${targetCode}" не поддерживается в текущей сборке`);
@@ -52,6 +71,7 @@ function AppContent() {
         accessCode: targetCode,
         showOperatorName: operatorName,
         showOperatorAvatar: operatorAvatar,
+        showOperatorAvatarRemote: operatorAvatarRemote,
         showTemplateTitle: templateTitle,
       });
       return true;
