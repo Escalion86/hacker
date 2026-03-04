@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     position: 'absolute',
-    left: 68,
+    left: 57,
     right: 16,
     bottom: 0,
     height: 1,
