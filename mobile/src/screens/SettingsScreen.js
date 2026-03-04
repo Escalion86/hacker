@@ -5,6 +5,18 @@ import { buildCardCode } from '../show/accessProfiles';
 import { colors, spacing } from '../theme/tokens';
 
 export default function SettingsScreen({ settings, onChange }) {
+  const formatCardPreview = (rawCode) => {
+    const text = String(rawCode || '').trim();
+    const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/);
+    if (!match) return text;
+    const suit =
+      match[2] === 'S' ? '♠' :
+      match[2] === 'H' ? '♥' :
+      match[2] === 'C' ? '♣' :
+      match[2] === 'D' ? '♦' : match[2];
+    return `${match[1]} ${suit}`;
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.title}>Настройки Hacker</Text>
@@ -43,7 +55,9 @@ export default function SettingsScreen({ settings, onChange }) {
       {settings.mode === 'card' && (
         <View style={styles.card}>
           <Text style={styles.label}>Карта (из Show экрана)</Text>
-          <Text style={styles.preview}>{buildCardCode(settings.cardRankIndex, settings.cardMastIndex)}</Text>
+          <Text style={styles.preview}>
+            {formatCardPreview(buildCardCode(settings.cardRankIndex, settings.cardMastIndex))}
+          </Text>
         </View>
       )}
 

@@ -55,7 +55,29 @@ function NavRow({ title, noBorder }) {
   )
 }
 
-export default function EscalionConnectionsPage({ setPage, scrollY }) {
+export default function EscalionConnectionsPage({
+  setPage,
+  scrollY,
+  cardCode,
+  wifiEnabled,
+}) {
+  const formatCardCode = (raw) => {
+    const text = String(raw || '').trim()
+    const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/)
+    if (!match) return text
+    const suit =
+      match[2] === 'S'
+        ? '♠'
+        : match[2] === 'H'
+          ? '♥'
+          : match[2] === 'C'
+            ? '♣'
+            : match[2] === 'D'
+              ? '♦'
+              : match[2]
+    return `${match[1]}${suit}`
+  }
+
   return (
     <View style={styles.page}>
       <View style={styles.header}>
@@ -84,7 +106,7 @@ export default function EscalionConnectionsPage({ setPage, scrollY }) {
         <View style={styles.card}>
           <ConnectionRow
             title="Wi-Fi"
-            right={<SwitchMock on={false} />}
+            right={<SwitchMock on={Boolean(wifiEnabled)} />}
             onPress={() => setPage('wifi')}
             rightDivider
           />
@@ -169,6 +191,15 @@ const styles = StyleSheet.create({
   headerSearch: {
     width: 28,
     alignItems: 'flex-end',
+  },
+  debugCodeWrap: {
+    paddingHorizontal: 14,
+    paddingBottom: 4,
+  },
+  debugCodeText: {
+    color: '#8ea3cf',
+    fontSize: 12,
+    fontWeight: '600',
   },
   scroll: {
     paddingHorizontal: 14,

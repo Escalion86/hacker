@@ -1,88 +1,153 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import bleService from '../services/ble/bleService';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { buildCardCode, resolveProfile } from '../show/accessProfiles';
-import { resolveTemplate } from '../show/templates';
-import { colors, spacing } from '../theme/tokens';
-import EscalionShowScreen from './show/EscalionShowScreen';
+import React, { useMemo, useRef, useState } from 'react'
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import bleService from '../services/ble/bleService'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { buildCardCode, resolveProfile } from '../show/accessProfiles'
+import { resolveTemplate } from '../show/templates'
+import { colors, spacing } from '../theme/tokens'
+import EscalionShowScreen from './show/EscalionShowScreen'
 
 function RowIcon({ kind, color }) {
-  const tint = color || '#7f8aa3';
-  if (kind === 'wifi') return <Ionicons name="wifi" size={14} color="#fff" />;
-  if (kind === 'bluetooth') return <MaterialCommunityIcons name="bluetooth" size={14} color="#fff" />;
-  if (kind === 'sim') return <MaterialCommunityIcons name="sim" size={14} color="#fff" />;
-  if (kind === 'share') return <Ionicons name="share-social" size={14} color="#fff" />;
-  if (kind === 'palette') return <Ionicons name="color-palette" size={14} color="#fff" />;
-  if (kind === 'home') return <Ionicons name="home" size={14} color="#fff" />;
-  if (kind === 'brightness') return <Ionicons name="sunny" size={14} color="#fff" />;
-  if (kind === 'sound') return <Ionicons name="volume-high" size={14} color="#fff" />;
-  if (kind === 'notifications') return <Ionicons name="notifications" size={14} color="#fff" />;
-  if (kind === 'account') return <Ionicons name="person" size={14} color="#fff" />;
-  if (kind === 'connections') return <MaterialCommunityIcons name="access-point-network" size={14} color="#fff" />;
-  if (kind === 'devices') return <Ionicons name="phone-portrait" size={14} color="#fff" />;
-  if (kind === 'modes') return <Ionicons name="moon" size={14} color="#fff" />;
-  if (kind === 'call') return <Ionicons name="call" size={14} color="#fff" />;
-  if (kind === 'nfc') return <MaterialCommunityIcons name="contactless-payment-circle-outline" size={14} color="#fff" />;
-  if (kind === 'radar') return <MaterialCommunityIcons name="radar" size={14} color="#fff" />;
-  if (kind === 'magic') return <Ionicons name="sparkles" size={14} color="#fff" />;
-  return <Text style={styles.rowIconFallback}>•</Text>;
+  const tint = color || '#7f8aa3'
+  if (kind === 'wifi') return <Ionicons name="wifi" size={14} color="#fff" />
+  if (kind === 'bluetooth')
+    return <MaterialCommunityIcons name="bluetooth" size={14} color="#fff" />
+  if (kind === 'sim')
+    return <MaterialCommunityIcons name="sim" size={14} color="#fff" />
+  if (kind === 'share')
+    return <Ionicons name="share-social" size={14} color="#fff" />
+  if (kind === 'palette')
+    return <Ionicons name="color-palette" size={14} color="#fff" />
+  if (kind === 'home') return <Ionicons name="home" size={14} color="#fff" />
+  if (kind === 'brightness')
+    return <Ionicons name="sunny" size={14} color="#fff" />
+  if (kind === 'sound')
+    return <Ionicons name="volume-high" size={14} color="#fff" />
+  if (kind === 'notifications')
+    return <Ionicons name="notifications" size={14} color="#fff" />
+  if (kind === 'account')
+    return <Ionicons name="person" size={14} color="#fff" />
+  if (kind === 'connections')
+    return (
+      <MaterialCommunityIcons
+        name="access-point-network"
+        size={14}
+        color="#fff"
+      />
+    )
+  if (kind === 'devices')
+    return <Ionicons name="phone-portrait" size={14} color="#fff" />
+  if (kind === 'modes') return <Ionicons name="moon" size={14} color="#fff" />
+  if (kind === 'call') return <Ionicons name="call" size={14} color="#fff" />
+  if (kind === 'nfc')
+    return (
+      <MaterialCommunityIcons
+        name="contactless-payment-circle-outline"
+        size={14}
+        color="#fff"
+      />
+    )
+  if (kind === 'radar')
+    return <MaterialCommunityIcons name="radar" size={14} color="#fff" />
+  if (kind === 'magic')
+    return <Ionicons name="sparkles" size={14} color="#fff" />
+  return <Text style={styles.rowIconFallback}>•</Text>
 }
 
 function Row({ row, ui, onPress, onSwipeStart, onSwipeEnd, onSegmentTouch }) {
-  const widthRef = useRef(1);
+  const widthRef = useRef(1)
   return (
     <Pressable
       onPress={onPress}
       onPressIn={onSwipeStart}
       onPressOut={onSwipeEnd}
       onLayout={(event) => {
-        widthRef.current = Math.max(1, event.nativeEvent.layout.width);
+        widthRef.current = Math.max(1, event.nativeEvent.layout.width)
       }}
       onTouchStart={(event) => {
-        if (!row.segmented || !onSegmentTouch) return;
-        const locationX = event.nativeEvent.locationX;
-        const segmentWidth = widthRef.current / 4;
-        const segment = Math.max(0, Math.min(3, Math.floor(locationX / segmentWidth)));
-        onSegmentTouch(segment);
+        if (!row.segmented || !onSegmentTouch) return
+        const locationX = event.nativeEvent.locationX
+        const segmentWidth = widthRef.current / 4
+        const segment = Math.max(
+          0,
+          Math.min(3, Math.floor(locationX / segmentWidth)),
+        )
+        onSegmentTouch(segment)
       }}
       style={[
         styles.row,
         { minHeight: ui.rowMinHeight, paddingVertical: ui.rowPaddingY },
-        row.highlight && [styles.rowHighlight, { backgroundColor: ui.rowHighlightBg }],
+        row.highlight && [
+          styles.rowHighlight,
+          { backgroundColor: ui.rowHighlightBg },
+        ],
       ]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: row.iconColor || '#3b4252' }]}>
+      <View
+        style={[
+          styles.rowIcon,
+          { backgroundColor: row.iconColor || '#3b4252' },
+        ]}
+      >
         <RowIcon kind={row.icon} color={row.iconColor} />
       </View>
       <View style={styles.rowTextWrap}>
-        <Text style={[styles.rowTitle, { fontSize: ui.rowTitleSize }]}>{row.title}</Text>
-        {row.subtitle ? <Text style={[styles.rowSubtitle, { fontSize: ui.rowSubtitleSize }]}>{row.subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { fontSize: ui.rowTitleSize }]}>
+          {row.title}
+        </Text>
+        {row.subtitle ? (
+          <Text style={[styles.rowSubtitle, { fontSize: ui.rowSubtitleSize }]}>
+            {row.subtitle}
+          </Text>
+        ) : null}
       </View>
       <Text style={styles.rowArrow}>{row.nav ? '>' : ''}</Text>
     </Pressable>
-  );
+  )
 }
 
-export default function ShowSettingsScreen({ settings, onChange, onOpenSettings }) {
+export default function ShowSettingsScreen({
+  settings,
+  onChange,
+  onOpenSettings,
+}) {
   if (settings.accessCode === 'escalion') {
     return (
       <View style={styles.escalionWrap}>
-        <EscalionShowScreen settings={settings} onChange={onChange} onOpenSettings={onOpenSettings} />
+        <EscalionShowScreen
+          settings={settings}
+          onChange={onChange}
+          onOpenSettings={onOpenSettings}
+        />
       </View>
-    );
+    )
   }
 
-  const [accessCodeInput, setAccessCodeInput] = useState(settings.accessCode || '');
-  const [wrongCode, setWrongCode] = useState(false);
-  const [page, setPage] = useState('general');
-  const [wifiSpots, setWifiSpots] = useState([]);
-  const swipeStartY = useRef(0);
-  const swipeRowMeta = useRef(null);
+  const [accessCodeInput, setAccessCodeInput] = useState(
+    settings.accessCode || '',
+  )
+  const [wrongCode, setWrongCode] = useState(false)
+  const [page, setPage] = useState('general')
+  const [wifiSpots, setWifiSpots] = useState([])
+  const swipeStartY = useRef(0)
+  const swipeRowMeta = useRef(null)
 
-  const profile = useMemo(() => resolveProfile(settings.accessCode), [settings.accessCode]);
-  const template = useMemo(() => resolveTemplate(settings.accessCode), [settings.accessCode]);
-  const currentPage = template?.pages?.[page];
+  const profile = useMemo(
+    () => resolveProfile(settings.accessCode),
+    [settings.accessCode],
+  )
+  const template = useMemo(
+    () => resolveTemplate(settings.accessCode),
+    [settings.accessCode],
+  )
+  const currentPage = template?.pages?.[page]
   const ui = template?.ui || {
     titleSize: 30,
     headerGap: 4,
@@ -97,69 +162,71 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
     cardBg: colors.card,
     rowHighlightBg: '#1a202d',
     searchBg: '#171b24',
-  };
+  }
 
   const cardCode = useMemo(
     () => buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
-    [settings.cardRankIndex, settings.cardMastIndex]
-  );
+    [settings.cardRankIndex, settings.cardMastIndex],
+  )
 
   React.useEffect(() => {
-    const unsub = bleService.subscribeWifiSpots((spots) => setWifiSpots(spots.slice(0, 12)));
-    return () => unsub();
-  }, []);
+    const unsub = bleService.subscribeWifiSpots((spots) =>
+      setWifiSpots(spots.slice(0, 12)),
+    )
+    return () => unsub()
+  }, [])
 
   const applyAccessCode = () => {
-    const normalized = accessCodeInput.trim();
+    const normalized = accessCodeInput.trim()
     if (!resolveProfile(normalized)) {
-      setWrongCode(true);
-      return;
+      setWrongCode(true)
+      return
     }
-    onChange({ accessCode: normalized, mode: 'card' });
-    setWrongCode(false);
-    setPage('general');
-  };
+    onChange({ accessCode: normalized, mode: 'card' })
+    setWrongCode(false)
+    setPage('general')
+  }
 
   const shiftRank = (delta) => {
-    const next = (settings.cardRankIndex + delta + 14) % 14;
-    onChange({ cardRankIndex: next });
-  };
+    const next = (settings.cardRankIndex + delta + 14) % 14
+    onChange({ cardRankIndex: next })
+  }
 
   const handleRowPress = (row) => {
     if (Number.isFinite(row.suitBase)) {
-      const rank = Math.min(13, row.suitBase);
-      onChange({ cardRankIndex: rank });
-      return;
+      const rank = Math.min(13, row.suitBase)
+      onChange({ cardRankIndex: rank })
+      return
     }
     if (row.nav) {
-      setPage(row.nav);
-      return;
+      setPage(row.nav)
+      return
     }
-  };
+  }
 
   const handleSwipeStart = (row, event) => {
-    if (!row.mastSelector) return;
-    swipeRowMeta.current = row;
-    swipeStartY.current = event.nativeEvent.pageY;
-  };
+    if (!row.mastSelector) return
+    swipeRowMeta.current = row
+    swipeStartY.current = event.nativeEvent.pageY
+  }
 
   const handleSwipeEnd = (event) => {
-    if (!swipeRowMeta.current) return;
-    const deltaY = event.nativeEvent.pageY - swipeStartY.current;
-    swipeRowMeta.current = null;
-    if (deltaY <= -18) shiftRank(1);
-    if (deltaY >= 18) shiftRank(-1);
-  };
+    if (!swipeRowMeta.current) return
+    const deltaY = event.nativeEvent.pageY - swipeStartY.current
+    swipeRowMeta.current = null
+    if (deltaY <= -18) shiftRank(1)
+    if (deltaY >= 18) shiftRank(-1)
+  }
 
   const handleSegmentTouch = (row, segment) => {
     if (row.mastSelector) {
-      onChange({ cardMastIndex: segment });
-      return;
+      onChange({ cardMastIndex: segment })
+      return
     }
     if (Number.isFinite(row.suitBase)) {
-      onChange({ cardRankIndex: Math.min(13, row.suitBase + segment) });
+      onChange({ cardRankIndex: Math.min(13, row.suitBase + segment) })
     }
-  };
+  }
 
   if (!profile || !template) {
     return (
@@ -170,33 +237,40 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
           <TextInput
             value={accessCodeInput}
             onChangeText={(value) => {
-              setAccessCodeInput(value);
-              if (wrongCode) setWrongCode(false);
+              setAccessCodeInput(value)
+              if (wrongCode) setWrongCode(false)
             }}
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.input}
-            placeholder="например: fertVlad"
             placeholderTextColor={colors.muted}
           />
           <Pressable style={styles.actionButton} onPress={applyAccessCode}>
             <Text style={styles.actionText}>Войти</Text>
           </Pressable>
-          {wrongCode ? <Text style={styles.errorText}>Код неверный</Text> : null}
+          {wrongCode ? (
+            <Text style={styles.errorText}>Код неверный</Text>
+          ) : null}
         </View>
       </View>
-    );
+    )
   }
 
   return (
     <View style={[styles.container, { backgroundColor: ui.pageBg }]}>
       <View style={[styles.header, { gap: ui.headerGap }]}>
-        <Text style={[styles.title, { fontSize: ui.titleSize }]}>{currentPage?.title || template.generalTitle}</Text>
+        <Text style={[styles.title, { fontSize: ui.titleSize }]}>
+          {currentPage?.title || template.generalTitle}
+        </Text>
         <Text style={styles.profileText}>{profile.name}</Text>
-        {settings.learn ? <Text style={styles.learnText}>Карта: {cardCode}</Text> : null}
+        {settings.learn ? (
+          <Text style={styles.learnText}>Карта: {cardCode}</Text>
+        ) : null}
       </View>
 
-      <ScrollView contentContainerStyle={[styles.scrollContent, { gap: ui.blockSpacing }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { gap: ui.blockSpacing }]}
+      >
         {page === 'general' && ui.search ? (
           <View style={[styles.searchBox, { backgroundColor: ui.searchBg }]}>
             <Text style={styles.searchText}>Поиск</Text>
@@ -205,9 +279,14 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
         {currentPage?.sections?.map((section, sectionIndex) => (
           <View
             key={`section-${sectionIndex}`}
-            style={[styles.block, { borderRadius: ui.blockRadius, backgroundColor: ui.cardBg }]}
+            style={[
+              styles.block,
+              { borderRadius: ui.blockRadius, backgroundColor: ui.cardBg },
+            ]}
           >
-            {section.title ? <Text style={styles.blockTitle}>{section.title}</Text> : null}
+            {section.title ? (
+              <Text style={styles.blockTitle}>{section.title}</Text>
+            ) : null}
             {section.rows.map((row, rowIndex) => (
               <Row
                 key={`${sectionIndex}-${row.title}-${rowIndex}`}
@@ -225,7 +304,12 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
                   .map((spot, index) => (
                     <Row
                       key={`wifi-spot-${index}-${spot}`}
-                      row={{ title: spot, subtitle: '', icon: 'wifi', iconColor: '#2b8cff' }}
+                      row={{
+                        title: spot,
+                        subtitle: '',
+                        icon: 'wifi',
+                        iconColor: '#2b8cff',
+                      }}
                       ui={ui}
                       onPress={() => {}}
                     />
@@ -234,7 +318,10 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
           </View>
         ))}
         {page !== 'general' ? (
-          <Pressable style={styles.backButton} onPress={() => setPage('general')}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => setPage('general')}
+          >
             <Text style={styles.backText}>Назад в Настройки</Text>
           </Pressable>
         ) : null}
@@ -245,7 +332,7 @@ export default function ShowSettingsScreen({ settings, onChange, onOpenSettings 
         </View>
       ) : null}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -417,4 +504,4 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontWeight: '600',
   },
-});
+})

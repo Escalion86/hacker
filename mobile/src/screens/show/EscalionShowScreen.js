@@ -14,6 +14,9 @@ export default function EscalionShowScreen({
   const bottomInset = Platform.OS === 'android' ? 0 : 0
   const [page, setPage] = useState('general')
   const [wifiSpots, setWifiSpots] = useState([])
+  const [wifiEnabled, setWifiEnabled] = useState(
+    Boolean(settings.startOnSetWiFiPage),
+  )
   const generalScrollY = React.useRef(new Animated.Value(0)).current
   const connectionsScrollY = React.useRef(new Animated.Value(0)).current
   const wifiScrollY = React.useRef(new Animated.Value(0)).current
@@ -46,6 +49,8 @@ export default function EscalionShowScreen({
         <EscalionConnectionsPage
           setPage={setPage}
           scrollY={connectionsScrollY}
+          cardCode={cardCode}
+          wifiEnabled={wifiEnabled}
         />
       )}
       {page === 'wifi' && (
@@ -53,6 +58,10 @@ export default function EscalionShowScreen({
           setPage={setPage}
           scrollY={wifiScrollY}
           wifiSpots={wifiSpots}
+          settings={settings}
+          cardCode={cardCode}
+          wifiEnabled={wifiEnabled}
+          onWifiEnabledChange={setWifiEnabled}
         />
       )}
 

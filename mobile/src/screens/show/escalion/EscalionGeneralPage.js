@@ -30,24 +30,88 @@ function Row({
   onPress,
   onPressIn,
   onPressOut,
-  onTouchStart,
   noBorder,
+  segmentCount = 0,
+  onSegmentTouch,
+  showLearnOverlay = false,
+  learnOverlayLabels = [],
+  onLearnSelect,
 }) {
+  const rowWidthRef = useRef(1)
+
+  const emitSegment = (segment) => {
+    if (onSegmentTouch) onSegmentTouch(segment)
+    if (onLearnSelect) onLearnSelect(segment)
+  }
+
+  const getSegmentFromEvent = (event, count) => {
+    if (!count) return null
+    const width = Math.max(1, rowWidthRef.current)
+    const x = Math.max(0, Math.min(width, event.nativeEvent.locationX))
+    return Math.max(0, Math.min(count - 1, Math.floor(x / (width / count))))
+  }
+
+  const handleSegmentTouch = (event, count = segmentCount) => {
+    const segment = getSegmentFromEvent(event, count)
+    if (segment === null) return
+    emitSegment(segment)
+  }
+
+  const overlayCount = learnOverlayLabels.length || segmentCount
+
+  const handleLearnTouch = (event) => {
+    if (!overlayCount) return
+    handleSegmentTouch(event, overlayCount)
+  }
+
   return (
     <Pressable
       onPress={onPress}
-      onPressIn={onPressIn}
+      onPressIn={(event) => {
+        if (!showLearnOverlay && segmentCount > 0) {
+          handleSegmentTouch(event)
+        }
+        if (onPressIn) onPressIn(event)
+      }}
       onPressOut={onPressOut}
-      onTouchStart={onTouchStart}
+      onLayout={(event) => {
+        rowWidthRef.current = event.nativeEvent.layout.width
+      }}
+      onTouchMove={!showLearnOverlay ? handleSegmentTouch : undefined}
       style={[styles.row]}
     >
-      <View style={styles.rowLeft}>
+      <View pointerEvents="none" style={styles.rowLeft}>
         {icon}
-        <View style={[styles.rowTextWrap, noBorder && styles.rowNoBorder]}>
+        <View
+          pointerEvents="none"
+          style={[styles.rowTextWrap, noBorder && styles.rowNoBorder]}
+        >
           <Text style={styles.rowTitle}>{title}</Text>
           {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
         </View>
       </View>
+      {showLearnOverlay && learnOverlayLabels.length > 0 ? (
+        <View
+          style={styles.learnOverlayWrap}
+          onTouchStart={handleLearnTouch}
+          onTouchMove={handleLearnTouch}
+        >
+          {learnOverlayLabels.map((label, index) => (
+            <View
+              key={`${title}-learn-${label}-${index}`}
+              pointerEvents="none"
+              style={[
+                styles.learnOverlaySegment,
+                index > 0 && styles.learnOverlaySegmentBorder,
+              ]}
+            >
+              <Text pointerEvents="none" style={styles.learnOverlayText}>
+                {label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </Pressable>
   )
 }
@@ -62,16 +126,18 @@ export default function EscalionGeneralPage({
 }) {
   const scrollRef = useRef(null)
   const swipeStartY = useRef(0)
-  const selectorWidth = useRef(1)
+  const hasManualRankSelectionRef = useRef(false)
   const HERO_HEIGHT = 300
   const TITLE_HEIGHT = HERO_HEIGHT - 90
 
   const shiftRank = (delta) => {
+    hasManualRankSelectionRef.current = true
     const next = (settings.cardRankIndex + delta + 14) % 14
     onChange({ cardRankIndex: next })
   }
 
   const setRankSegment = (base, segment) => {
+    hasManualRankSelectionRef.current = true
     onChange({ cardRankIndex: Math.min(13, base + segment) })
   }
 
@@ -151,7 +217,9 @@ export default function EscalionGeneralPage({
         />
       </Animated.View>
       {settings.learn ? (
-        <Text style={styles.learnCode}>Код: {cardCode}</Text>
+        <View style={styles.learnCode}>
+          <Text style={styles.code}>Код: {cardCode}</Text>
+        </View>
       ) : null}
       <Animated.ScrollView
         ref={scrollRef}
@@ -197,7 +265,18 @@ export default function EscalionGeneralPage({
               title="Подключения"
               subtitle="Wi-Fi • Bluetooth • Диспетчер SIM-карт"
               icon={<IconBall name="wifi" color="#336ee6" />}
-              onPress={() => setPage('connections')}
+              segmentCount={4}
+              onSegmentTouch={(segment) => {
+                onChange({
+                  cardMastIndex: segment,
+                  cardRankIndex: hasManualRankSelectionRef.current
+                    ? settings.cardRankIndex
+                    : 0,
+                })
+                setPage('connections')
+              }}
+              showLearnOverlay={settings.learn}
+              learnOverlayLabels={['♠️', '♥️', '♣️', '♦️']}
               onPressIn={(event) => {
                 swipeStartY.current = event.nativeEvent.pageY
               }}
@@ -206,36 +285,16 @@ export default function EscalionGeneralPage({
                 if (delta <= -16) shiftRank(1)
                 if (delta >= 16) shiftRank(-1)
               }}
-              onTouchStart={(event) => {
-                const w = selectorWidth.current || 1
-                const x = event.nativeEvent.locationX
-                const pad = 20
-                if (x > pad && x < w - pad) {
-                  const part = (w - pad * 2) / 4
-                  const mast = Math.max(
-                    0,
-                    Math.min(3, Math.floor((x - pad) / part)),
-                  )
-                  onChange({ cardMastIndex: mast })
-                }
-              }}
             />
             <Row
               title="Подключенные устройства"
               subtitle="Быстрая отправка • Samsung DeX • Android Auto"
               icon={<IconBall name="phone-portrait" color="#336ee6" />}
               onPress={() => setRankSegment(0, 0)}
-              onTouchStart={(event) => {
-                const x = event.nativeEvent.locationX
-                const seg = Math.max(
-                  0,
-                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
-                )
-                setRankSegment(0, seg)
-              }}
-              onPressIn={(event) => {
-                selectorWidth.current = event.nativeEvent.locationX * 2 || 320
-              }}
+              segmentCount={4}
+              onSegmentTouch={(segment) => setRankSegment(0, segment)}
+              showLearnOverlay={settings.learn}
+              learnOverlayLabels={['A', '2', '3', '4']}
               noBorder
             />
           </View>
@@ -245,54 +304,33 @@ export default function EscalionGeneralPage({
               title="Galaxy AI"
               subtitle="Ассистент по письму • Ассистент по заметкам • Ассистент по фотографиям"
               icon={<IconBall name="sparkles" color="#1c9fd8" />}
+              segmentCount={4}
+              onSegmentTouch={(segment) => setRankSegment(4, segment)}
+              showLearnOverlay={settings.learn}
+              learnOverlayLabels={['5', '6', '7', '8']}
             />
             <Row
               title="Режимы и сценарии"
               subtitle="Режимы • Сценарии"
               icon={<IconBall name="checkmark-done-circle" color="#6858ef" />}
-              onTouchStart={(event) => {
-                const x = event.nativeEvent.locationX
-                const seg = Math.max(
-                  0,
-                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
-                )
-                setRankSegment(4, seg)
-              }}
-              onPressIn={(event) => {
-                selectorWidth.current = event.nativeEvent.locationX * 2 || 320
-              }}
+              segmentCount={4}
+              onSegmentTouch={(segment) => setRankSegment(8, segment)}
+              showLearnOverlay={settings.learn}
+              learnOverlayLabels={['9', '10', 'J', 'Q']}
             />
             <Row
               title="Звуки и вибрация"
               subtitle="Рингтон • Громкость • Вибрация"
               icon={<IconBall name="volume-high" color="#655ce8" />}
-              onTouchStart={(event) => {
-                const x = event.nativeEvent.locationX
-                const seg = Math.max(
-                  0,
-                  Math.min(3, Math.floor(x / (selectorWidth.current / 4))),
-                )
-                setRankSegment(8, seg)
-              }}
-              onPressIn={(event) => {
-                selectorWidth.current = event.nativeEvent.locationX * 2 || 320
-              }}
+              segmentCount={2}
+              onSegmentTouch={(segment) => setRankSegment(12, segment)}
+              showLearnOverlay={settings.learn}
+              learnOverlayLabels={['K', 'Joker']}
             />
             <Row
               title="Уведомления"
               subtitle="Строка состояния • Не беспокоить"
               icon={<IconBall name="notifications" color="#dd621a" />}
-              onTouchStart={(event) => {
-                const x = event.nativeEvent.locationX
-                const seg = Math.max(
-                  0,
-                  Math.min(1, Math.floor(x / (selectorWidth.current / 2))),
-                )
-                setRankSegment(12, seg)
-              }}
-              onPressIn={(event) => {
-                selectorWidth.current = event.nativeEvent.locationX * 2 || 320
-              }}
               noBorder
             />
           </View>
@@ -489,6 +527,7 @@ const styles = StyleSheet.create({
     minHeight: 72,
     paddingHorizontal: 20,
     justifyContent: 'center',
+    position: 'relative',
   },
   rowNoBorder: {
     borderBottomWidth: 0,
@@ -525,10 +564,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  learnOverlayWrap: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    top: 6,
+    bottom: 6,
+    borderRadius: 8,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    zIndex: 30,
+    backgroundColor: 'rgba(22, 35, 64, 0.25)',
+  },
+  learnOverlaySegment: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  learnOverlaySegmentBorder: {
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(140, 170, 255, 0.45)',
+  },
+  learnOverlayText: {
+    color: '#d9e6ff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
   learnCode: {
     position: 'absolute',
     left: 20,
     top: 6,
+    zIndex: 99,
+    padding: 4,
+    backgroundColor: 'rgba(22, 35, 64, 0.9Cltqk)',
+    borderRadius: 8,
+  },
+  code: {
     color: '#8ca8ff',
     fontSize: 12,
     fontWeight: '600',
