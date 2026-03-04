@@ -9,6 +9,7 @@ import { colors, spacing } from '../theme/tokens';
 export default function ControlScreen({ settings }) {
   const [status, setStatus] = useState('Отключено');
   const [connected, setConnected] = useState(false);
+  const [bluetoothOn, setBluetoothOn] = useState(bleService.isBluetoothPoweredOn());
   const [running, setRunning] = useState(false);
   const [wifiSpots, setWifiSpots] = useState([]);
   const [diagnostics, setDiagnostics] = useState([]);
@@ -53,12 +54,16 @@ export default function ControlScreen({ settings }) {
     const unsubDiagnostics = bleService.subscribeDiagnostics((entries) =>
       setDiagnostics(entries)
     );
+    const unsubBluetoothState = bleService.subscribeBluetoothState((nextState) =>
+      setBluetoothOn(nextState === 'PoweredOn')
+    );
 
     return () => {
       unsubStatus();
       unsubSpots();
       unsubConnection();
       unsubDiagnostics();
+      unsubBluetoothState();
     };
   }, []);
 
@@ -70,6 +75,7 @@ export default function ControlScreen({ settings }) {
   }, [settings.mode, settings.wifi, settings.cardRankIndex, settings.cardMastIndex]);
 
   const handleConnect = async () => {
+    if (!bluetoothOn) return;
     try {
       await bleService.connect();
     } catch (error) {
@@ -87,6 +93,7 @@ export default function ControlScreen({ settings }) {
   };
 
   const handleStart = async () => {
+    if (!bluetoothOn) return;
     try {
       setRunning(true);
       await bleService.sendStart({
@@ -119,6 +126,15 @@ export default function ControlScreen({ settings }) {
     setCopiedAt(Date.now());
   };
 
+  const shownStatus = bluetoothOn ? status : 'Bluetooth не включен!';
+  const shownStatusStyle = !bluetoothOn
+    ? styles.disconnected
+    : status.startsWith('Ошибка')
+      ? styles.disconnected
+      : running
+        ? styles.connected
+        : styles.inactive;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Управление устройством</Text>
@@ -128,20 +144,16 @@ export default function ControlScreen({ settings }) {
         <Text
           style={[
             styles.statusValue,
-            status.startsWith('Ошибка')
-              ? styles.disconnected
-              : running
-                ? styles.connected
-                : styles.inactive,
+            shownStatusStyle,
           ]}
         >
-          {status}
+          {shownStatus}
         </Text>
       </View>
 
       <View style={styles.buttonsRow}>
         {!connected ? (
-          <PrimaryButton title="Подключить" onPress={handleConnect} />
+          <PrimaryButton title="Подключить" onPress={handleConnect} disabled={!bluetoothOn} />
         ) : (
           <PrimaryButton title="Отключить" onPress={handleDisconnect} danger />
         )}
@@ -149,7 +161,7 @@ export default function ControlScreen({ settings }) {
 
       <View style={styles.buttonsRow}>
         {!running ? (
-          <PrimaryButton title="Старт трансляции" onPress={handleStart} disabled={!connected} />
+          <PrimaryButton title="Старт трансляции" onPress={handleStart} disabled={!connected || !bluetoothOn} />
         ) : (
           <PrimaryButton title="Стоп" onPress={handleStop} danger />
         )}

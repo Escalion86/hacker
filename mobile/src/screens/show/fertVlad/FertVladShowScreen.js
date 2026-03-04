@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
 import bleService from '../../../services/ble/bleService'
 import { buildCardCode } from '../../../show/accessProfiles'
-import EscalionWifiPage from '../escalion/EscalionWifiPage'
 import FertVladGeneralPage from './FertVladGeneralPage'
+import FertVladWifiPage from './FertVladWifiPage'
 
-export default function FertVladShowScreen({ settings, onChange }) {
+export default function FertVladShowScreen({ settings, onChange, onOpenSettings }) {
   const [page, setPage] = useState('general')
   const [wifiSpots, setWifiSpots] = useState([])
   const [wifiEnabled, setWifiEnabled] = useState(
@@ -34,10 +34,11 @@ export default function FertVladShowScreen({ settings, onChange }) {
           onChange={onChange}
           setPage={setPage}
           scrollY={generalScrollY}
+          onOpenSettings={onOpenSettings}
         />
       ) : (
-        <EscalionWifiPage
-          setPage={() => setPage('general')}
+        <FertVladWifiPage
+          setPage={setPage}
           scrollY={wifiScrollY}
           wifiSpots={wifiSpots}
           settings={settings}

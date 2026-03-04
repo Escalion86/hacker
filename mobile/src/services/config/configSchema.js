@@ -1,5 +1,5 @@
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPPORTED_TEMPLATE_IDS = new Set(['escalion']);
+const SUPPORTED_TEMPLATE_IDS = new Set(['escalion', 'fertVlad', 'fertvlad']);
 
 function asObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : null;

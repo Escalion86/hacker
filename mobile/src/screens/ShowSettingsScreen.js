@@ -12,7 +12,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { buildCardCode, resolveProfile } from '../show/accessProfiles'
 import { resolveTemplate } from '../show/templates'
 import { colors, spacing } from '../theme/tokens'
-import EscalionShowScreen from './show/EscalionShowScreen'
+import EscalionShowScreen from './show/escalion/EscalionShowScreen'
 import FertVladShowScreen from './show/fertVlad/FertVladShowScreen'
 
 function RowIcon({ kind, color }) {
@@ -134,7 +134,11 @@ export default function ShowSettingsScreen({
   if (settings.accessCode === 'fertVlad' || settings.accessCode === 'fertvlad') {
     return (
       <View style={styles.escalionWrap}>
-        <FertVladShowScreen settings={settings} onChange={onChange} />
+        <FertVladShowScreen
+          settings={settings}
+          onChange={onChange}
+          onOpenSettings={onOpenSettings}
+        />
       </View>
     )
   }

@@ -29,6 +29,18 @@ function AppContent() {
   const effectiveAccessCode = resolvedAccessCode || normalizedCode;
   const hasValidCode = !!resolveProfile(effectiveAccessCode);
 
+  const getBleDotColor = () => {
+    if (String(bleStatus || '').startsWith('Ошибка')) return '#ff4d4f';
+    if (
+      String(bleStatus || '').startsWith('Идет транс') ||
+      bleStatus === 'Команда start подтверждена'
+    ) {
+      return '#34c759';
+    }
+    if (bleConnected) return '#8a8a8a';
+    return '#2f76ff';
+  };
+
   const resolveCodeAndLoadConfig = async (inputCode) => {
     const code = String(inputCode || '').trim().toLowerCase();
     if (!code) return false;
@@ -91,6 +103,23 @@ function AppContent() {
     } finally {
       setConfigLoading(false);
     }
+  };
+
+  const resetActivation = async () => {
+    setResolvedAccessCode('');
+    setConfigError('');
+    setConfigSyncStatus('');
+    try {
+      await bleService.disconnect();
+    } catch {}
+    updateSettings({
+      accessCode: '',
+      showOperatorName: '',
+      showOperatorAvatar: '',
+      showOperatorAvatarRemote: '',
+      showTemplateTitle: '',
+    });
+    setTab('show');
   };
 
   useEffect(() => {
@@ -183,19 +212,14 @@ function AppContent() {
           },
         ]}
       >
-        {(bleConnected || bleStatus.startsWith('Ошибка')) ? (
+        {hasValidCode ? (
           <View
             pointerEvents="none"
             style={[
               styles.bleConnectedDot,
               {
                 top: topInset + 2,
-                backgroundColor:
-                  bleStatus.startsWith('Ошибка')
-                    ? '#ff4d4f'
-                    : bleStatus.startsWith('Идет транс') || bleStatus === 'Команда start подтверждена'
-                      ? '#34c759'
-                      : '#8a8a8a',
+                backgroundColor: getBleDotColor(),
               },
             ]}
           />
@@ -215,6 +239,7 @@ function AppContent() {
             onRefreshShowUi={() => resolveCodeAndLoadConfig(effectiveAccessCode)}
             refreshInProgress={configLoading}
             refreshStatus={configSyncStatus}
+            onResetActivation={resetActivation}
           />
         )}
       </View>

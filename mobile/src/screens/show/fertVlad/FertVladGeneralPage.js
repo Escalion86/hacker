@@ -1,17 +1,12 @@
 import React, { useRef } from 'react'
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
   Feather,
 } from '@expo/vector-icons'
+import { Image } from 'react-native'
 
 function SwitchMock({ on }) {
   return (
@@ -56,7 +51,10 @@ function Row({
 
     const width = Math.max(1, rowWidthRef.current)
     const x = Math.max(0, Math.min(width, event.nativeEvent.locationX))
-    const segment = Math.max(0, Math.min(count - 1, Math.floor(x / (width / count))))
+    const segment = Math.max(
+      0,
+      Math.min(count - 1, Math.floor(x / (width / count))),
+    )
     onSegmentTouch(segment)
   }
 
@@ -66,12 +64,12 @@ function Row({
       onLayout={(event) => {
         rowWidthRef.current = event.nativeEvent.layout.width
       }}
-      onTouchStart={segmentCount > 0 || showLearnOverlay ? handleSegmentTouch : undefined}
+      onTouchStart={
+        segmentCount > 0 || showLearnOverlay ? handleSegmentTouch : undefined
+      }
       style={styles.row}
     >
-      <View style={styles.rowIconWrap}>
-        {icon}
-      </View>
+      <View style={styles.rowIconWrap}>{icon}</View>
       <View style={styles.rowTextWrap}>
         <Text style={styles.rowTitle}>{title}</Text>
         {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
@@ -110,11 +108,46 @@ function Block({ children }) {
   return <View style={styles.block}>{children}</View>
 }
 
+function ProfileAvatar({ uri }) {
+  const cleanUri = String(uri || '').trim()
+  if (cleanUri) {
+    return (
+      <View style={styles.profileAvatarWrap}>
+        <Image source={{ uri: cleanUri }} style={styles.profileAvatarImage} />
+      </View>
+    )
+  }
+  return (
+    <View style={styles.profileAvatarWrap}>
+      <MaterialCommunityIcons name="account" size={34} color="#a6a6a6" />
+    </View>
+  )
+}
+
+function ProfileRow({ title, subtitle, avatarUri }) {
+  return (
+    <Pressable style={styles.profileRow}>
+      <ProfileAvatar uri={avatarUri} />
+      <View style={styles.profileTextWrap}>
+        <Text style={styles.profileTitle}>{title}</Text>
+        <Text style={styles.profileSubtitle}>{subtitle}</Text>
+      </View>
+      <Ionicons
+        name="chevron-forward"
+        size={19}
+        color="#565b64"
+        style={styles.profileArrow}
+      />
+    </Pressable>
+  )
+}
+
 export default function FertVladGeneralPage({
   settings,
   onChange,
   setPage,
   scrollY,
+  onOpenSettings,
 }) {
   const hasManualRankSelectionRef = useRef(false)
 
@@ -132,6 +165,10 @@ export default function FertVladGeneralPage({
     })
     setPage('wifi')
   }
+
+  const operatorAvatarUri =
+    (settings.showOperatorAvatar || '').trim() ||
+    (settings.showOperatorAvatarRemote || '').trim()
 
   return (
     <View style={styles.page}>
@@ -151,21 +188,11 @@ export default function FertVladGeneralPage({
           <Text style={styles.searchText}>Поиск</Text>
         </View>
 
-        <Block>
-          <Row
-            title={settings.showOperatorName || 'Magfert'}
-            subtitle="Управляйте сведениями об аккаунте и его безопасностью."
-            withArrow
-            noBorder
-            icon={
-              <MaterialCommunityIcons
-                name="account"
-                size={30}
-                color="#a6a6a6"
-              />
-            }
-          />
-        </Block>
+        <ProfileRow
+          title={settings.showOperatorName || 'Magfert'}
+          subtitle="Управляйте сведениями об аккаунте и его безопасностью."
+          avatarUri={operatorAvatarUri}
+        />
 
         <Block>
           <Row
@@ -176,7 +203,7 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Wi-Fi"
-            rightText="DIREZABLe"
+            // rightText="DIREZABLe"
             icon={<Ionicons name="wifi" size={20} color="#1b67ff" />}
             onPress={() => setPage('wifi')}
             segmentCount={4}
@@ -187,7 +214,13 @@ export default function FertVladGeneralPage({
           <Row
             title="Bluetooth"
             rightText="Подключено"
-            icon={<MaterialCommunityIcons name="bluetooth" size={22} color="#1f73ff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="bluetooth"
+                size={22}
+                color="#1f73ff"
+              />
+            }
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(4, segment)}
             showLearnOverlay={settings.learn}
@@ -195,7 +228,13 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Мобильная сеть"
-            icon={<MaterialCommunityIcons name="signal-cellular-2" size={22} color="#32c244" />}
+            icon={
+              <MaterialCommunityIcons
+                name="signal-cellular-2"
+                size={22}
+                color="#32c244"
+              />
+            }
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(0, segment)}
             showLearnOverlay={settings.learn}
@@ -203,7 +242,13 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Подключение к устройствам"
-            icon={<MaterialCommunityIcons name="access-point-network" size={21} color="#1e6cff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="access-point-network"
+                size={21}
+                color="#1e6cff"
+              />
+            }
             noBorder
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(8, segment)}
@@ -215,7 +260,13 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="Главный экран, экран блокировки и стиль"
-            icon={<MaterialCommunityIcons name="gesture-swipe" size={20} color="#ff971d" />}
+            icon={
+              <MaterialCommunityIcons
+                name="gesture-swipe"
+                size={20}
+                color="#ff971d"
+              />
+            }
             segmentCount={2}
             onSegmentTouch={(segment) => setRankSegment(12, segment)}
             showLearnOverlay={settings.learn}
@@ -223,7 +274,13 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Экран и яркость"
-            icon={<MaterialCommunityIcons name="white-balance-sunny" size={20} color="#f0ba08" />}
+            icon={
+              <MaterialCommunityIcons
+                name="white-balance-sunny"
+                size={20}
+                color="#f0ba08"
+              />
+            }
             noBorder
           />
         </Block>
@@ -235,7 +292,13 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Уведомления и быстрые настройки"
-            icon={<MaterialIcons name="notifications-none" size={21} color="#2a72ff" />}
+            icon={
+              <MaterialIcons
+                name="notifications-none"
+                size={21}
+                color="#2a72ff"
+              />
+            }
             noBorder
           />
         </Block>
@@ -243,7 +306,13 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="Защита и конфиденциальность"
-            icon={<MaterialCommunityIcons name="shield-outline" size={20} color="#2b6aff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="shield-outline"
+                size={20}
+                color="#2b6aff"
+              />
+            }
           />
           <Row
             title="Безопасность и экстренные случаи"
@@ -251,11 +320,19 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Местоположение"
-            icon={<Ionicons name="location-outline" size={20} color="#f8bb19" />}
+            icon={
+              <Ionicons name="location-outline" size={20} color="#f8bb19" />
+            }
           />
           <Row
             title="Цифровое благополучие и родительский контроль"
-            icon={<MaterialCommunityIcons name="account-group-outline" size={20} color="#2a72ff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="account-group-outline"
+                size={20}
+                color="#2a72ff"
+              />
+            }
             noBorder
           />
         </Block>
@@ -271,11 +348,23 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Plus Key"
-            icon={<MaterialCommunityIcons name="plus-circle-outline" size={20} color="#2b77ff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="plus-circle-outline"
+                size={20}
+                color="#2b77ff"
+              />
+            }
           />
           <Row
             title="Специальные возможности и удобство"
-            icon={<MaterialCommunityIcons name="human-male-board" size={20} color="#ff9b17" />}
+            icon={
+              <MaterialCommunityIcons
+                name="human-male-board"
+                size={20}
+                color="#ff9b17"
+              />
+            }
             noBorder
           />
         </Block>
@@ -291,11 +380,19 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="Система и обновление"
-            icon={<Ionicons name="settings-outline" size={20} color="#818792" />}
+            icon={
+              <Ionicons name="settings-outline" size={20} color="#818792" />
+            }
           />
           <Row
             title="Об устройстве"
-            icon={<Ionicons name="phone-portrait-outline" size={20} color="#20c346" />}
+            icon={
+              <Ionicons
+                name="phone-portrait-outline"
+                size={20}
+                color="#20c346"
+              />
+            }
           />
           <Row
             title="Пользователи и аккаунты"
@@ -303,11 +400,24 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Google"
-            icon={<MaterialCommunityIcons name="google-circles" size={20} color="#1d68ff" />}
+            icon={
+              <MaterialCommunityIcons
+                name="google-circles"
+                size={20}
+                color="#1d68ff"
+              />
+            }
           />
           <Row
             title="Справка и отзывы"
-            icon={<MaterialCommunityIcons name="message-outline" size={20} color="#f0851d" />}
+            icon={
+              <MaterialCommunityIcons
+                name="message-outline"
+                size={20}
+                color="#f0851d"
+              />
+            }
+            onPress={onOpenSettings}
             noBorder
           />
         </Block>
@@ -322,14 +432,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   scroll: {
-    paddingTop: 110,
+    paddingTop: 92,
     paddingHorizontal: 20,
     paddingBottom: 24,
     gap: 14,
   },
   headerTitle: {
     color: '#ebedf1',
-    fontSize: 46,
+    fontSize: 39,
     fontWeight: '700',
     marginBottom: 14,
     letterSpacing: -0.5,
@@ -347,7 +457,7 @@ const styles = StyleSheet.create({
   },
   searchText: {
     color: '#7f848e',
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '400',
   },
   block: {
@@ -367,8 +477,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  profileRow: {
+    minHeight: 84,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 36,
+    overflow: 'hidden',
+    backgroundColor: '#17191f',
+  },
+  profileTextWrap: {
+    flex: 1,
+  },
+  profileTitle: {
+    color: '#f2f4f8',
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  profileSubtitle: {
+    color: '#9ea4af',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  profileAvatarWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    overflow: 'hidden',
+    backgroundColor: '#4a4a4a',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileAvatarImage: {
+    width: 56,
+    height: 56,
+  },
+  profileArrow: {
+    // marginLeft: 2,
+  },
   rowTextWrap: {
     flex: 1,
+    paddingLeft: 8,
     paddingRight: 12,
     gap: 1,
   },
@@ -380,8 +532,8 @@ const styles = StyleSheet.create({
   },
   rowSubtitle: {
     color: '#9ea4af',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
   },
   rowRightText: {

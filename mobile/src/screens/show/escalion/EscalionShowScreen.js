@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native'
-import bleService from '../../services/ble/bleService'
-import { buildCardCode } from '../../show/accessProfiles'
-import EscalionGeneralPage from './escalion/EscalionGeneralPage'
-import EscalionConnectionsPage from './escalion/EscalionConnectionsPage'
-import EscalionWifiPage from './escalion/EscalionWifiPage'
+import bleService from '../../../services/ble/bleService'
+import { buildCardCode } from '../../../show/accessProfiles'
+import EscalionGeneralPage from './EscalionGeneralPage'
+import EscalionConnectionsPage from './EscalionConnectionsPage'
+import EscalionWifiPage from './EscalionWifiPage'
 
 export default function EscalionShowScreen({
   settings,

@@ -29,6 +29,12 @@ class BleService {
     this.lastDisconnectAt = 0;
     this.onDiagnostics = new Set();
     this.diagnostics = [];
+    this.bluetoothState = 'Unknown';
+    this.onBluetoothState = new Set();
+    this.bluetoothStateSub = this.manager.onStateChange((nextState) => {
+      this.bluetoothState = nextState;
+      this.onBluetoothState.forEach((listener) => listener(nextState));
+    }, true);
   }
 
   sleep(ms) {
@@ -65,6 +71,18 @@ class BleService {
     return () => {
       this.onDiagnostics.delete(listener);
     };
+  }
+
+  subscribeBluetoothState(listener) {
+    this.onBluetoothState.add(listener);
+    listener(this.bluetoothState);
+    return () => {
+      this.onBluetoothState.delete(listener);
+    };
+  }
+
+  isBluetoothPoweredOn() {
+    return this.bluetoothState === 'PoweredOn';
   }
 
   emitDiagnostics() {

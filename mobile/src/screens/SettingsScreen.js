@@ -11,6 +11,7 @@ export default function SettingsScreen({
   onRefreshShowUi,
   refreshInProgress,
   refreshStatus,
+  onResetActivation,
 }) {
   const formatCardPreview = (rawCode) => {
     const text = String(rawCode || '').trim();
@@ -106,6 +107,18 @@ export default function SettingsScreen({
         {refreshStatus ? (
           <Text style={styles.syncStatus}>{refreshStatus}</Text>
         ) : null}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.label}>Код доступа</Text>
+        <PrimaryButton
+          title="Сменить код доступа"
+          danger
+          onPress={onResetActivation}
+        />
+        <Text style={styles.syncStatus}>
+          Сбросит текущую активацию и вернет на экран ввода кода.
+        </Text>
       </View>
     </ScrollView>
   );
