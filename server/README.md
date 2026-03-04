@@ -56,7 +56,16 @@ npm run seed -- escalion
     "displayName": "Алексей Белинский"
   },
   "templateId": "escalion",
-  "payload": {}
+  "templateName": "Samsung OneUi 8",
+  "payload": {
+    "operatorProfile": {
+      "fullName": "Алексей Белинский",
+      "avatarUrl": "https://..."
+    },
+    "templateMeta": {
+      "title": "Samsung OneUi 8"
+    }
+  }
 }
 ```
 

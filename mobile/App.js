@@ -39,15 +39,21 @@ function AppContent() {
       const profileId = String(result?.config?.profile?.id || '').trim().toLowerCase();
       const templateId = String(result?.config?.templateId || '').trim().toLowerCase();
       const targetCode = profileId || templateId || code;
+      const operatorName = String(result?.config?.ui?.operatorName || '').trim();
+      const operatorAvatar = String(result?.config?.ui?.operatorAvatarUrl || '').trim();
+      const templateTitle = String(result?.config?.ui?.templateTitle || '').trim();
 
       if (!resolveProfile(targetCode)) {
         throw new Error(`Профиль "${targetCode}" не поддерживается в текущей сборке`);
       }
 
       setResolvedAccessCode(targetCode);
-      if (settings.accessCode !== targetCode) {
-        updateSettings({ accessCode: targetCode });
-      }
+      updateSettings({
+        accessCode: targetCode,
+        showOperatorName: operatorName,
+        showOperatorAvatar: operatorAvatar,
+        showTemplateTitle: templateTitle,
+      });
       return true;
     } catch (error) {
       setResolvedAccessCode('');

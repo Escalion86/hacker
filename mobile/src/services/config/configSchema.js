@@ -42,6 +42,7 @@ export function validateShowConfigPayload(payload) {
   const normalized = {
     schemaVersion,
     templateId,
+    templateName: asNonEmptyString(candidate.templateName),
     profile: {
       id: asNonEmptyString(profile?.id) || templateId,
       displayName: asNonEmptyString(profile?.displayName) || '',
@@ -49,6 +50,17 @@ export function validateShowConfigPayload(payload) {
     meta: {
       version: asNonEmptyString(candidate.version) || '1',
       updatedAt: asNonEmptyString(candidate.updatedAt) || '',
+    },
+    ui: {
+      operatorName:
+        asNonEmptyString(candidate?.payload?.operatorProfile?.fullName) ||
+        asNonEmptyString(profile?.displayName) ||
+        '',
+      operatorAvatarUrl: asNonEmptyString(candidate?.payload?.operatorProfile?.avatarUrl) || '',
+      templateTitle:
+        asNonEmptyString(candidate?.payload?.templateMeta?.title) ||
+        asNonEmptyString(candidate.templateName) ||
+        '',
     },
     payload: candidate,
   };

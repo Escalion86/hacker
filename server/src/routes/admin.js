@@ -11,6 +11,7 @@ function buildAdminRouter({ accessCodePepper }) {
     schemaVersion: z.number().int().min(1).default(1),
     version: z.string().min(1).max(64),
     templateId: z.string().min(1).max(64),
+    templateName: z.string().max(128).optional().default(''),
     profile: z.object({
       id: z.string().min(1).max(64),
       displayName: z.string().max(128).optional().default(''),

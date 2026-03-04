@@ -13,6 +13,9 @@ export const defaultSettings = {
   dot: false,
   learn: false,
   startOnSetWiFiPage: false,
+  showTemplateTitle: '',
+  showOperatorName: '',
+  showOperatorAvatar: '',
 };
 
 export async function loadSettings() {

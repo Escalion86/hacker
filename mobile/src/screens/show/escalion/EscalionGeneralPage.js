@@ -9,7 +9,7 @@ import {
 } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
-const avatar = require('../../../../assets/escalion.png')
+const defaultAvatar = require('../../../../assets/escalion.png')
 
 function IconBall({ name, lib = 'ion', color = '#317dff' }) {
   return (
@@ -170,6 +170,10 @@ export default function EscalionGeneralPage({
     return () => cancelAnimationFrame(id)
   }, [scrollY])
 
+  const profileName = (settings.showOperatorName || '').trim() || 'Алексей Белинский'
+  const avatarUri = (settings.showOperatorAvatar || '').trim()
+  const avatarSource = avatarUri ? { uri: avatarUri } : defaultAvatar
+
   return (
     <View style={{ flex: 1 }}>
       <Animated.View
@@ -254,10 +258,10 @@ export default function EscalionGeneralPage({
         <View style={styles.cardsStack}>
           <View style={[styles.card, styles.profileCard]}>
             <View style={styles.profileTextWrap}>
-              <Text style={styles.profileName}>Алексей Белинский</Text>
+              <Text style={styles.profileName}>{profileName}</Text>
               <Text style={styles.profileSub}>Samsung account</Text>
             </View>
-            <Image source={avatar} style={styles.avatar} />
+            <Image source={avatarSource} style={styles.avatar} />
           </View>
 
           <View style={styles.card}>

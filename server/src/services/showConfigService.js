@@ -30,6 +30,7 @@ async function resolveConfigByCodeHash(codeHash) {
         displayName: config.profile.displayName || '',
       },
       templateId: config.templateId,
+      templateName: config.templateName || '',
       payload: config.payload || {},
     },
   };

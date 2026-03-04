@@ -5,6 +5,7 @@ const showConfigSchema = new mongoose.Schema(
     schemaVersion: { type: Number, required: true, default: 1 },
     version: { type: String, required: true },
     templateId: { type: String, required: true, index: true },
+    templateName: { type: String, default: '' },
     profile: {
       id: { type: String, required: true },
       displayName: { type: String, default: '' },

@@ -13,15 +13,26 @@ async function run() {
   const config = await ShowConfig.findOneAndUpdate(
     { templateId: 'escalion', version: '2026-03-04.1' },
     {
-      $setOnInsert: {
-        schemaVersion: 1,
-        version: '2026-03-04.1',
-        templateId: 'escalion',
+      $set: {
+        templateName: 'Samsung OneUi 8',
         profile: {
           id: 'escalion',
           displayName: 'Алексей Белинский',
         },
-        payload: {},
+        payload: {
+          operatorProfile: {
+            fullName: 'Алексей Белинский',
+            avatarUrl: '',
+          },
+          templateMeta: {
+            title: 'Samsung OneUi 8',
+          },
+        },
+      },
+      $setOnInsert: {
+        schemaVersion: 1,
+        version: '2026-03-04.1',
+        templateId: 'escalion',
         isActive: true,
         notes: 'Initial escalion config',
       },
