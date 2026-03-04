@@ -47,7 +47,10 @@
           "bluetoothAlwaysPermission": "Приложение использует Bluetooth для подключения к устройству Hacker."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "configApiBaseUrl": ""
+    }
   }
 }
 

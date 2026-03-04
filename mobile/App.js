@@ -7,6 +7,7 @@ import ControlScreen from './src/screens/ControlScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ShowSettingsScreen from './src/screens/ShowSettingsScreen';
 import bleService from './src/services/ble/bleService';
+import configService from './src/services/config/configService';
 import { SettingsProvider, useSettings } from './src/state/SettingsContext';
 import { colors } from './src/theme/tokens';
 import { resolveProfile } from './src/show/accessProfiles';
@@ -15,12 +16,47 @@ function AppContent() {
   const [tab, setTab] = useState('show');
   const [bleConnected, setBleConnected] = useState(bleService.isConnected());
   const [bleStatus, setBleStatus] = useState('Отключено');
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configError, setConfigError] = useState('');
+  const [resolvedAccessCode, setResolvedAccessCode] = useState('');
   const { loading, settings, updateSettings } = useSettings();
   const reconnectIntervalRef = useRef(null);
   const topInset = Platform.OS === 'android' ? RNStatusBar.currentHeight || 0 : 0;
   const bottomInset = Platform.OS === 'android' ? 56 : 0;
-  const normalizedCode = (settings.accessCode || '').trim();
-  const hasValidCode = normalizedCode === 'escalion' && !!resolveProfile(normalizedCode);
+  const normalizedCode = (settings.accessCode || '').trim().toLowerCase();
+  const effectiveAccessCode = resolvedAccessCode || normalizedCode;
+  const hasValidCode = !!resolveProfile(effectiveAccessCode);
+
+  const resolveCodeAndLoadConfig = async (inputCode) => {
+    const code = String(inputCode || '').trim().toLowerCase();
+    if (!code) return false;
+
+    setConfigLoading(true);
+    setConfigError('');
+
+    try {
+      const result = await configService.resolveConfigByCode(code);
+      const profileId = String(result?.config?.profile?.id || '').trim().toLowerCase();
+      const templateId = String(result?.config?.templateId || '').trim().toLowerCase();
+      const targetCode = profileId || templateId || code;
+
+      if (!resolveProfile(targetCode)) {
+        throw new Error(`Профиль "${targetCode}" не поддерживается в текущей сборке`);
+      }
+
+      setResolvedAccessCode(targetCode);
+      if (settings.accessCode !== targetCode) {
+        updateSettings({ accessCode: targetCode });
+      }
+      return true;
+    } catch (error) {
+      setResolvedAccessCode('');
+      setConfigError(String(error?.message || 'Не удалось загрузить конфигурацию экрана'));
+      return false;
+    } finally {
+      setConfigLoading(false);
+    }
+  };
 
   useEffect(() => {
     const unsub = bleService.subscribeConnection((nextConnected) => {
@@ -35,6 +71,16 @@ function AppContent() {
     });
     return unsub;
   }, []);
+
+  useEffect(() => {
+    if (!normalizedCode) {
+      setResolvedAccessCode('');
+      setConfigError('');
+      return;
+    }
+    resolveCodeAndLoadConfig(normalizedCode).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedCode]);
 
   useEffect(() => {
     if (!hasValidCode) return;
@@ -75,13 +121,11 @@ function AppContent() {
         <StatusBar style="light" />
         <View style={[styles.main, { paddingTop: topInset, backgroundColor: '#000' }]}>
           <AccessCodeGateScreen
-            loading={false}
-            onSubmit={(code) => {
-              const normalized = code.trim();
-              if (normalized !== 'escalion' || !resolveProfile(normalized)) {
-                return false;
-              }
-              updateSettings({ accessCode: normalized });
+            loading={configLoading}
+            serverError={configError}
+            onSubmit={async (code) => {
+              const ok = await resolveCodeAndLoadConfig(code);
+              if (!ok) return false;
               setTab('show');
               return true;
             }}
@@ -122,15 +166,15 @@ function AppContent() {
           />
         ) : null}
         {tab === 'control' ? (
-          <ControlScreen settings={settings} />
+          <ControlScreen settings={{ ...settings, accessCode: effectiveAccessCode }} />
         ) : tab === 'show' ? (
           <ShowSettingsScreen
-            settings={settings}
+            settings={{ ...settings, accessCode: effectiveAccessCode }}
             onChange={updateSettings}
             onOpenSettings={() => setTab('settings')}
           />
         ) : (
-          <SettingsScreen settings={settings} onChange={updateSettings} />
+          <SettingsScreen settings={{ ...settings, accessCode: effectiveAccessCode }} onChange={updateSettings} />
         )}
       </View>
       {tab !== 'show' ? <BottomTabs tab={tab} setTab={setTab} bottomInset={bottomInset} /> : null}

@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { colors, spacing } from '../theme/tokens'
 
-export default function AccessCodeGateScreen({ onSubmit, loading }) {
+export default function AccessCodeGateScreen({ onSubmit, loading, serverError = '' }) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
 
@@ -11,12 +11,16 @@ export default function AccessCodeGateScreen({ onSubmit, loading }) {
     [loading, value],
   )
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    if (serverError) setError(serverError)
+  }, [serverError])
+
+  const handleSubmit = async () => {
     const normalized = value.trim()
     if (!normalized) return
-    const ok = onSubmit(normalized)
+    const ok = await Promise.resolve(onSubmit(normalized))
     if (!ok) {
-      setError('Неверный код')
+      if (!serverError) setError('Неверный код')
       return
     }
     setError('')
