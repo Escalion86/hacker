@@ -123,14 +123,6 @@ function ProfileRow({ title, subtitle, avatarUri }) {
   )
 }
 
-function SwitchMock() {
-  return (
-    <View style={styles.switchTrack}>
-      <View style={styles.switchKnob} />
-    </View>
-  )
-}
-
 export default function HuaweiGeneralPage({
   settings,
   onChange,
@@ -209,14 +201,7 @@ export default function HuaweiGeneralPage({
 
         <Block>
           <Row
-            title="Авиарежим"
-            iconColor="#f7b228"
-            rightNode={<SwitchMock />}
-            withArrow={false}
-          />
-          <Row
             title="Wi-Fi"
-            rightText="Beeline_5G_A0AA0C"
             iconColor="#52b8ed"
             onPress={() => setPage('wifi')}
             segmentCount={4}
@@ -446,20 +431,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e1e3e7',
   },
   switchTrack: {
-    width: 42,
-    height: 25,
-    borderRadius: 12.5,
-    justifyContent: 'center',
-    marginRight: 4,
-    backgroundColor: '#2f78ff',
-  },
-  switchKnob: {
-    position: 'absolute',
-    right: 1.5,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#f5f7fb',
+    display: 'none',
   },
   learnOverlayWrap: {
     position: 'absolute',

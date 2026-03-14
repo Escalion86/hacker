@@ -3,6 +3,7 @@ import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons'
 import { Image } from 'react-native'
 
+const WIFI_ICON = require('../../../../icons/vladFert/WiFi.png')
 const NETWORK_ICON = require('../../../../icons/vladFert/Network.png')
 const CONNECTIONS_ICON = require('../../../../icons/vladFert/Connections.png')
 const GENERAL_SCREEN_ICON = require('../../../../icons/vladFert/GeneralScreen.png')
@@ -23,9 +24,9 @@ const ACCOUNTS_ICON = require('../../../../icons/vladFert/Accounts.png')
 const GOOGLE_ICON = require('../../../../icons/vladFert/Google.png')
 
 const HEADER_HEIGHT_MAX = 110
-const HEADER_HEIGHT_MIN = 66
+const HEADER_HEIGHT_MIN = 58
 const TITLE_SIZE_MAX = 34
-const TITLE_SIZE_MIN = 22
+const TITLE_SIZE_MIN = 20
 
 function SwitchMock({ on }) {
   return (
@@ -248,7 +249,7 @@ export default function OnePlusGeneralPage({
           <Row
             title="Wi-Fi"
             // rightText="DIREZABLe"
-            icon={<Ionicons name="wifi" size={20} color="#1b67ff" />}
+            icon={<Image source={WIFI_ICON} style={styles.onePlusIcon} />}
             onPress={() => setPage('wifi')}
             segmentCount={4}
             onSegmentTouch={setMastAndOpenWifi}
@@ -431,6 +432,7 @@ const styles = StyleSheet.create({
     color: '#ebedf1',
     fontWeight: '600',
     letterSpacing: -0.5,
+    paddingBottom: 2,
   },
   searchBox: {
     minHeight: 40,
