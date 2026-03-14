@@ -24,7 +24,10 @@
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: Segoe UI, Arial, sans-serif;
+        font-family:
+          Segoe UI,
+          Arial,
+          sans-serif;
         background: radial-gradient(circle at top, #1e293b, var(--bg));
         color: var(--text);
         display: grid;
@@ -85,11 +88,7 @@
         кнопку установки, выберите COM-порт и подтвердите прошивку.
       </p>
 
-      <esp-web-install-button manifest="manifest.json">
-        <button slot="activate">Установить прошивку</button>
-      </esp-web-install-button>
-
-      <p class="status">Цель: ESP32, схема разделов без OTA (увеличенный APP).</p>
+      <p class="status">Необходимая плата: ESP32.</p>
 
       <ol>
         <li>Откройте эту страницу в Chrome или Edge на Windows/macOS/Linux.</li>
@@ -105,145 +104,158 @@
 
       <p class="warn">
         Важно: если устройство не определяется или старт прошивки не начинается,
-        удерживайте <code>BOOT</code> во время подключения и на старте прошивки.
+        удерживайте <code>BOOT</code> во время подключения и на протяжении всего
+        времени прошивки.
       </p>
+      <esp-web-install-button manifest="manifest.json">
+        <button slot="activate">Установить прошивку</button>
+      </esp-web-install-button>
     </main>
     <script>
       // ESP Web Tools не предоставляет публичный i18n API для install-диалога.
       // Делаем мягкую локализацию текста в shadow DOM после открытия окна.
-      (() => {
+      ;(() => {
         const exactMap = new Map([
-          ["Close", "Закрыть"],
-          ["Back", "Назад"],
-          ["Skip", "Пропустить"],
-          ["Connect", "Подключить"],
-          ["Connect to Wi-Fi", "Подключить к Wi-Fi"],
-          ["Change Wi-Fi", "Изменить Wi-Fi"],
-          ["Configure Wi-Fi", "Настроить Wi-Fi"],
-          ["Logs & Console", "Логи и консоль"],
-          ["Visit Device", "Открыть устройство"],
-          ["Add to Home Assistant", "Добавить в Home Assistant"],
-          ["Erase device", "Стереть устройство"],
-          ["Erase User Data", "Стереть пользовательские данные"],
-          ["Confirm Installation", "Подтверждение установки"],
-          ["Preparing installation", "Подготовка установки"],
-          ["Installing", "Установка"],
-          ["Installation failed", "Ошибка установки"],
-          ["Installation complete!", "Установка завершена!"],
-          ["Writing complete", "Запись завершена"],
-          ["All done!", "Готово!"],
-          ["Connecting", "Подключение"],
-          ["Download Logs", "Скачать логи"],
-          ["Terminal disconnected", "Терминал отключен"],
-          ["Device erased", "Устройство очищено"],
-          ["Erasing device...", "Очистка устройства..."],
-          ["Unable to connect", "Не удалось подключиться"],
-          ["Timeout", "Таймаут"],
-        ]);
+          ['Close', 'Закрыть'],
+          ['Back', 'Назад'],
+          ['Skip', 'Пропустить'],
+          ['Connect', 'Подключить'],
+          ['Connect to Wi-Fi', 'Подключить к Wi-Fi'],
+          ['Change Wi-Fi', 'Изменить Wi-Fi'],
+          ['Configure Wi-Fi', 'Настроить Wi-Fi'],
+          ['Logs & Console', 'Логи и консоль'],
+          ['Visit Device', 'Открыть устройство'],
+          ['Add to Home Assistant', 'Добавить в Home Assistant'],
+          ['Erase device', 'Стереть устройство'],
+          ['Erase User Data', 'Стереть пользовательские данные'],
+          ['Confirm Installation', 'Подтверждение установки'],
+          ['Preparing installation', 'Подготовка установки'],
+          ['Installing', 'Установка'],
+          ['Installation failed', 'Ошибка установки'],
+          ['Installation complete!', 'Установка завершена!'],
+          ['Writing complete', 'Запись завершена'],
+          ['All done!', 'Готово!'],
+          ['Connecting', 'Подключение'],
+          ['Download Logs', 'Скачать логи'],
+          ['Terminal disconnected', 'Терминал отключен'],
+          ['Device erased', 'Устройство очищено'],
+          ['Erasing device...', 'Очистка устройства...'],
+          ['Unable to connect', 'Не удалось подключиться'],
+          ['Timeout', 'Таймаут'],
+        ])
 
         const replaceRules = [
-          [/^Install (.+)$/u, "Установить $1"],
-          [/^Update (.+)$/u, "Обновить $1"],
-          [/^Writing progress:\s*(\d+)%$/u, "Запись: $1%"],
-          [/^Initialized\. Found (.+)$/u, "Инициализация завершена. Найдено: $1"],
-          [/^Your (.+) board is not supported\.$/u, "Плата $1 не поддерживается."],
-          [/^Downlading firmware (.+) failed: (\d+)$/u, "Ошибка загрузки прошивки $1: $2"],
+          [/^Install (.+)$/u, 'Установить $1'],
+          [/^Update (.+)$/u, 'Обновить $1'],
+          [/^Writing progress:\s*(\d+)%$/u, 'Запись: $1%'],
+          [
+            /^Initialized\. Found (.+)$/u,
+            'Инициализация завершена. Найдено: $1',
+          ],
+          [
+            /^Your (.+) board is not supported\.$/u,
+            'Плата $1 не поддерживается.',
+          ],
+          [
+            /^Downlading firmware (.+) failed: (\d+)$/u,
+            'Ошибка загрузки прошивки $1: $2',
+          ],
           [
             /^Failed to initialize\. Try resetting your device or holding the BOOT button while clicking INSTALL\.$/u,
-            "Не удалось инициализировать. Перезагрузите устройство или удерживайте BOOT при нажатии Установить.",
+            'Не удалось инициализировать. Перезагрузите устройство или удерживайте BOOT при нажатии Установить.',
           ],
           [
             /^Serial port is not readable\/writable\. Close any other application using it and try again\.$/u,
-            "Последовательный порт недоступен. Закройте другие приложения, использующие порт, и повторите попытку.",
+            'Последовательный порт недоступен. Закройте другие приложения, использующие порт, и повторите попытку.',
           ],
           [
             /^Connect your device to the network to start using it\.$/u,
-            "Подключите устройство к сети, чтобы начать работу.",
+            'Подключите устройство к сети, чтобы начать работу.',
           ],
-        ];
+        ]
 
-        const normalize = (text) => text.replace(/\s+/g, " ").trim();
+        const normalize = (text) => text.replace(/\s+/g, ' ').trim()
 
         const localizeText = (raw) => {
-          const key = normalize(raw);
-          if (!key) return raw;
+          const key = normalize(raw)
+          if (!key) return raw
 
           if (exactMap.has(key)) {
-            return raw.replace(key, exactMap.get(key));
+            return raw.replace(key, exactMap.get(key))
           }
 
           for (const [pattern, replacement] of replaceRules) {
             if (pattern.test(key)) {
-              return raw.replace(key, key.replace(pattern, replacement));
+              return raw.replace(key, key.replace(pattern, replacement))
             }
           }
 
-          return raw;
-        };
+          return raw
+        }
 
         const translateRoot = (root) => {
-          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-          let node = walker.nextNode();
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+          let node = walker.nextNode()
           while (node) {
-            const next = walker.nextNode();
-            const localized = localizeText(node.nodeValue || "");
+            const next = walker.nextNode()
+            const localized = localizeText(node.nodeValue || '')
             if (localized !== node.nodeValue) {
-              node.nodeValue = localized;
+              node.nodeValue = localized
             }
-            node = next;
+            node = next
           }
-        };
+        }
 
         const setupDialogLocalization = (dialog) => {
-          if (!dialog || dialog.__ruLocalized) return;
-          dialog.__ruLocalized = true;
+          if (!dialog || dialog.__ruLocalized) return
+          dialog.__ruLocalized = true
 
           const tryAttach = () => {
-            if (!dialog.shadowRoot) return false;
-            translateRoot(dialog.shadowRoot);
+            if (!dialog.shadowRoot) return false
+            translateRoot(dialog.shadowRoot)
             const observer = new MutationObserver(() => {
-              translateRoot(dialog.shadowRoot);
-            });
+              translateRoot(dialog.shadowRoot)
+            })
             observer.observe(dialog.shadowRoot, {
               childList: true,
               subtree: true,
               characterData: true,
-            });
+            })
             dialog.addEventListener(
-              "closed",
+              'closed',
               () => {
-                observer.disconnect();
+                observer.disconnect()
               },
-              { once: true }
-            );
-            return true;
-          };
+              { once: true },
+            )
+            return true
+          }
 
           if (!tryAttach()) {
             const delayed = setInterval(() => {
               if (tryAttach()) {
-                clearInterval(delayed);
+                clearInterval(delayed)
               }
-            }, 50);
-            setTimeout(() => clearInterval(delayed), 4000);
+            }, 50)
+            setTimeout(() => clearInterval(delayed), 4000)
           }
-        };
+        }
 
         const bodyObserver = new MutationObserver((mutations) => {
           for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
-              if (!(node instanceof HTMLElement)) continue;
-              if (node.tagName === "EWT-INSTALL-DIALOG") {
-                setupDialogLocalization(node);
+              if (!(node instanceof HTMLElement)) continue
+              if (node.tagName === 'EWT-INSTALL-DIALOG') {
+                setupDialogLocalization(node)
               }
-              const nested = node.querySelector?.("ewt-install-dialog");
-              if (nested) setupDialogLocalization(nested);
+              const nested = node.querySelector?.('ewt-install-dialog')
+              if (nested) setupDialogLocalization(nested)
             }
           }
-        });
+        })
 
-        bodyObserver.observe(document.body, { childList: true, subtree: true });
-      })();
+        bodyObserver.observe(document.body, { childList: true, subtree: true })
+      })()
     </script>
   </body>
 </html>
