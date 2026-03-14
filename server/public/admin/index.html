@@ -72,6 +72,10 @@
       .btn-secondary {
         background: #283145;
       }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .log {
         white-space: pre-wrap;
         background: #0b1018;
@@ -119,12 +123,14 @@
         <div class="card">
           <h2>Обновить ФИО/аватар по коду</h2>
           <div class="row">
-            <label>Code</label>
-            <input id="opCode" value="escalion" />
+            <label>Пользователь</label>
+            <select id="opUserSelect">
+              <option value="">Сначала нажмите "Обновить список"</option>
+            </select>
           </div>
           <div class="row">
             <label>Full Name</label>
-            <input id="opName" value="Алексей Белинский" />
+            <input id="opName" value="" />
           </div>
           <div class="row">
             <label>Avatar URL</label>
@@ -132,9 +138,9 @@
           </div>
           <div class="row">
             <label>Template Title</label>
-            <input id="opTemplateTitle" value="Samsung OneUi 8" />
+            <input id="opTemplateTitle" value="" />
           </div>
-          <button id="btnUpdateProfile">Сохранить профиль</button>
+          <button id="btnUpdateProfile" disabled>Сохранить профиль</button>
         </div>
 
         <div class="card">
@@ -160,29 +166,14 @@
             <label>Avatar URL</label>
             <input id="cfgAvatar" placeholder="https://..." />
           </div>
-          <button id="btnCreateConfig">Создать конфиг</button>
+          <button id="btnCreateConfig">Создать конфиг и привязать code</button>
         </div>
       </div>
 
-      <div class="grid">
-        <div class="card">
-          <h2>Создать access-code</h2>
-          <div class="row">
-            <label>Code</label>
-            <input id="codeValue" value="escalion" />
-          </div>
-          <div class="row">
-            <label>Config ID</label>
-            <input id="codeConfigId" placeholder="Вставь ObjectId от /admin/configs" />
-          </div>
-          <button id="btnCreateCode">Создать код</button>
-        </div>
-
-        <div class="card">
-          <h2>Список кодов</h2>
-          <button id="btnLoadCodes" class="btn-secondary">Обновить список</button>
-          <div id="codesList" class="codes-list"></div>
-        </div>
+      <div class="card">
+        <h2>Список кодов</h2>
+        <button id="btnLoadCodes" class="btn-secondary">Обновить список</button>
+        <div id="codesList" class="codes-list"></div>
       </div>
     </div>
 
@@ -216,7 +207,11 @@
         const y = now.getFullYear();
         const m = String(now.getMonth() + 1).padStart(2, '0');
         const d = String(now.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}.1`;
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const ms = String(now.getMilliseconds()).padStart(3, '0');
+        return `${y}-${m}-${d}.${hh}${mm}${ss}${ms}`;
       }
 
       async function api(path, options = {}, withAdmin = false) {
@@ -234,6 +229,104 @@
         return data;
       }
 
+      const ui = {
+        opUserSelect: document.getElementById('opUserSelect'),
+        opName: document.getElementById('opName'),
+        opAvatar: document.getElementById('opAvatar'),
+        opTemplateTitle: document.getElementById('opTemplateTitle'),
+        btnUpdateProfile: document.getElementById('btnUpdateProfile'),
+        btnCreateConfig: document.getElementById('btnCreateConfig'),
+        btnLoadCodes: document.getElementById('btnLoadCodes'),
+        codesList: document.getElementById('codesList'),
+      };
+
+      let accessCodeItems = [];
+      let selectedAccessCodeId = '';
+      let profileBaseline = null;
+
+      function getProfileDraft() {
+        return {
+          fullName: ui.opName.value.trim(),
+          avatarUrl: ui.opAvatar.value.trim(),
+          templateTitle: ui.opTemplateTitle.value.trim(),
+        };
+      }
+
+      function syncUpdateProfileButton() {
+        if (!selectedAccessCodeId || !profileBaseline) {
+          ui.btnUpdateProfile.disabled = true;
+          return;
+        }
+        const draft = getProfileDraft();
+        const changed =
+          draft.fullName !== profileBaseline.fullName ||
+          draft.avatarUrl !== profileBaseline.avatarUrl ||
+          draft.templateTitle !== profileBaseline.templateTitle;
+        ui.btnUpdateProfile.disabled = !changed;
+      }
+
+      function getProfileLabel(item) {
+        const name = item?.config?.profileDisplayName || item?.config?.profileId || '';
+        const last4 = item?.codeLast4 || '----';
+        return `${name || 'Без имени'} (..${last4})`;
+      }
+
+      function fillProfileFormByItem(item) {
+        selectedAccessCodeId = String(item?.id || '');
+        const fullName = item?.config?.profileDisplayName || '';
+        const avatarUrl = item?.config?.avatarUrl || '';
+        const templateTitle =
+          item?.config?.templateName ||
+          buildTemplateTitle(item?.config?.templateId || '');
+        ui.opName.value = fullName;
+        ui.opAvatar.value = avatarUrl;
+        ui.opTemplateTitle.value = templateTitle;
+        profileBaseline = { fullName, avatarUrl, templateTitle };
+        syncUpdateProfileButton();
+      }
+
+      async function loadCodes() {
+        const data = await api('/admin/access-codes', {}, true);
+        accessCodeItems = Array.isArray(data.items) ? data.items : [];
+
+        ui.codesList.innerHTML = '';
+        if (!accessCodeItems.length) {
+          ui.codesList.innerHTML = '<div class="code-item">Нет записей</div>';
+        } else {
+          accessCodeItems.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'code-item';
+            div.textContent =
+              `${getProfileLabel(item)} | status=${item.status} | ` +
+              `template=${item.config?.templateId || '-'} | version=${item.config?.version || '-'}`;
+            ui.codesList.appendChild(div);
+          });
+        }
+
+        ui.opUserSelect.innerHTML = '';
+        if (!accessCodeItems.length) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'Пользователи не найдены';
+          ui.opUserSelect.appendChild(option);
+          selectedAccessCodeId = '';
+          profileBaseline = null;
+          syncUpdateProfileButton();
+          return accessCodeItems;
+        }
+
+        accessCodeItems.forEach((item, index) => {
+          const option = document.createElement('option');
+          option.value = String(item.id || '');
+          option.textContent = getProfileLabel(item);
+          if (index === 0) option.selected = true;
+          ui.opUserSelect.appendChild(option);
+        });
+
+        fillProfileFormByItem(accessCodeItems[0]);
+        return accessCodeItems;
+      }
+
       document.getElementById('btnHealth').addEventListener('click', async () => {
         try {
           const data = await api('/health');
@@ -243,26 +336,42 @@
         }
       });
 
-      document.getElementById('btnUpdateProfile').addEventListener('click', async () => {
+      ui.opUserSelect.addEventListener('change', () => {
+        const selectedId = ui.opUserSelect.value;
+        const item = accessCodeItems.find((entry) => String(entry.id) === String(selectedId));
+        if (!item) return;
+        fillProfileFormByItem(item);
+      });
+
+      ui.opName.addEventListener('input', syncUpdateProfileButton);
+      ui.opAvatar.addEventListener('input', syncUpdateProfileButton);
+      ui.opTemplateTitle.addEventListener('input', syncUpdateProfileButton);
+
+      ui.btnUpdateProfile.addEventListener('click', async () => {
         try {
+          if (!selectedAccessCodeId) throw new Error('Сначала выберите пользователя');
           const payload = {
-            code: document.getElementById('opCode').value.trim(),
-            fullName: document.getElementById('opName').value.trim(),
-            avatarUrl: document.getElementById('opAvatar').value.trim(),
-            templateTitle: document.getElementById('opTemplateTitle').value.trim(),
+            accessCodeId: selectedAccessCodeId,
+            fullName: ui.opName.value.trim(),
+            avatarUrl: ui.opAvatar.value.trim(),
+            templateTitle: ui.opTemplateTitle.value.trim(),
           };
           const data = await api('/admin/operator-profile', {
             method: 'POST',
             body: JSON.stringify(payload),
           }, true);
-          log(data, true);
+          profileBaseline = getProfileDraft();
+          syncUpdateProfileButton();
+          await loadCodes();
+          log('Профиль обновлен', true);
         } catch (error) {
           log(error.message, false);
         }
       });
 
-      document.getElementById('btnCreateConfig').addEventListener('click', async () => {
+      ui.btnCreateConfig.addEventListener('click', async () => {
         try {
+          ui.btnCreateConfig.disabled = true;
           const code = normalizeCode(document.getElementById('cfgCode').value.trim());
           const templateId = document.getElementById('cfgTemplateId').value.trim();
           const fullName = document.getElementById('cfgFullName').value.trim();
@@ -296,52 +405,46 @@
             method: 'POST',
             body: JSON.stringify(payload),
           }, true);
-          if (data.id) {
-            document.getElementById('codeConfigId').value = data.id;
-            document.getElementById('codeValue').value = code;
-            document.getElementById('opCode').value = code;
-            document.getElementById('opName').value = fullName;
-            document.getElementById('opAvatar').value = avatarUrl;
-            document.getElementById('opTemplateTitle').value = templateTitle;
-          }
-          log(data, true);
-        } catch (error) {
-          log(error.message, false);
-        }
-      });
 
-      document.getElementById('btnCreateCode').addEventListener('click', async () => {
-        try {
-          const payload = {
-            code: document.getElementById('codeValue').value.trim(),
-            configId: document.getElementById('codeConfigId').value.trim(),
-          };
-          const data = await api('/admin/access-codes', {
-            method: 'POST',
-            body: JSON.stringify(payload),
+          let codeResult = null;
+          try {
+            codeResult = await api('/admin/access-codes', {
+              method: 'POST',
+              body: JSON.stringify({
+                code,
+                configId: data.id,
+              }),
+            }, true);
+          } catch (createCodeError) {
+            if (String(createCodeError.message || '') !== 'code_already_exists') {
+              throw createCodeError;
+            }
+            codeResult = await api('/admin/access-codes/bind', {
+              method: 'POST',
+              body: JSON.stringify({
+                code,
+                configId: data.id,
+              }),
+            }, true);
+          }
+
+          await loadCodes();
+          log({
+            configCreated: data,
+            codeBound: codeResult,
+            code,
           }, true);
-          log(data, true);
         } catch (error) {
           log(error.message, false);
+        } finally {
+          ui.btnCreateConfig.disabled = false;
         }
       });
 
-      document.getElementById('btnLoadCodes').addEventListener('click', async () => {
-        const holder = document.getElementById('codesList');
-        holder.innerHTML = '';
+      ui.btnLoadCodes.addEventListener('click', async () => {
         try {
-          const data = await api('/admin/access-codes', {}, true);
-          const items = Array.isArray(data.items) ? data.items : [];
-          if (!items.length) {
-            holder.innerHTML = '<div class="code-item">Нет записей</div>';
-            return;
-          }
-          items.forEach((item) => {
-            const div = document.createElement('div');
-            div.className = 'code-item';
-            div.textContent = `last4=${item.codeLast4 || ''} | status=${item.status} | template=${item.config?.templateId || '-'} | version=${item.config?.version || '-'}`;
-            holder.appendChild(div);
-          });
+          await loadCodes();
+          log('Список кодов обновлен', true);
         } catch (error) {
           log(error.message, false);
         }

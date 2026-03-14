@@ -32,8 +32,9 @@ function buildAdminRouter({ accessCodePepper }) {
     code: z.string().min(1).max(128),
     configId: z.string().min(1),
   });
-  const operatorProfileByCodeSchema = z.object({
-    code: z.string().min(1).max(128),
+  const operatorProfileUpdateSchema = z.object({
+    code: z.string().min(1).max(128).optional(),
+    accessCodeId: z.string().min(1).optional(),
     fullName: z.string().min(1).max(128),
     avatarUrl: z.string().max(2048).optional().default(''),
     templateTitle: z.string().max(128).optional(),
@@ -44,7 +45,7 @@ function buildAdminRouter({ accessCodePepper }) {
       const list = await AccessCode.find({})
         .sort({ createdAt: -1 })
         .limit(200)
-        .populate('configId', 'version templateId profile');
+        .populate('configId', 'version templateId templateName profile payload');
 
       return res.json({
         items: list.map((item) => ({
@@ -57,7 +58,10 @@ function buildAdminRouter({ accessCodePepper }) {
                 id: item.configId._id,
                 version: item.configId.version,
                 templateId: item.configId.templateId,
+                templateName: item.configId.templateName || '',
                 profileId: item.configId.profile?.id || '',
+                profileDisplayName: item.configId.profile?.displayName || '',
+                avatarUrl: item.configId.payload?.operatorProfile?.avatarUrl || '',
               }
             : null,
           createdAt: item.createdAt,
@@ -174,15 +178,25 @@ function buildAdminRouter({ accessCodePepper }) {
 
   router.post('/admin/operator-profile', async (req, res, next) => {
     try {
-      const parsed = operatorProfileByCodeSchema.safeParse(req.body);
+      const parsed = operatorProfileUpdateSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: 'invalid_payload', issues: parsed.error.issues });
       }
 
-      const normalizedCode = normalizeCode(parsed.data.code);
-      const codeHash = hashAccessCode(normalizedCode, accessCodePepper);
+      const byId = parsed.data.accessCodeId ? String(parsed.data.accessCodeId).trim() : '';
+      const byCode = parsed.data.code ? normalizeCode(parsed.data.code) : '';
+      if (!byId && !byCode) {
+        return res.status(400).json({ error: 'access_code_id_or_code_required' });
+      }
 
-      const accessCode = await AccessCode.findOne({ codeHash }).populate('configId');
+      let accessCode = null;
+      if (byId) {
+        accessCode = await AccessCode.findById(byId).populate('configId');
+      } else {
+        const codeHash = hashAccessCode(byCode, accessCodePepper);
+        accessCode = await AccessCode.findOne({ codeHash }).populate('configId');
+      }
+
       if (!accessCode) {
         return res.status(404).json({ error: 'code_not_found' });
       }
