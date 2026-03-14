@@ -191,6 +191,15 @@
         return document.getElementById('adminKey').value.trim();
       }
 
+      function ensureAdminKeyOrWarn() {
+        const key = getAdminKey();
+        if (key) return true;
+        const message = 'Введите Admin API Key в верхнем поле перед выполнением действия';
+        log(message, false);
+        window.alert(message);
+        return false;
+      }
+
       function normalizeCode(value) {
         return String(value || '').trim().toLowerCase();
       }
@@ -328,6 +337,7 @@
       }
 
       document.getElementById('btnHealth').addEventListener('click', async () => {
+        if (!ensureAdminKeyOrWarn()) return;
         try {
           const data = await api('/health');
           log(data, true);
@@ -348,6 +358,7 @@
       ui.opTemplateTitle.addEventListener('input', syncUpdateProfileButton);
 
       ui.btnUpdateProfile.addEventListener('click', async () => {
+        if (!ensureAdminKeyOrWarn()) return;
         try {
           if (!selectedAccessCodeId) throw new Error('Сначала выберите пользователя');
           const payload = {
@@ -370,6 +381,7 @@
       });
 
       ui.btnCreateConfig.addEventListener('click', async () => {
+        if (!ensureAdminKeyOrWarn()) return;
         try {
           ui.btnCreateConfig.disabled = true;
           const code = normalizeCode(document.getElementById('cfgCode').value.trim());
@@ -442,6 +454,7 @@
       });
 
       ui.btnLoadCodes.addEventListener('click', async () => {
+        if (!ensureAdminKeyOrWarn()) return;
         try {
           await loadCodes();
           log('Список кодов обновлен', true);
