@@ -37,6 +37,14 @@ function createApp(env) {
   app.use('/api', buildShowConfigRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/api', requireAdminKey(env.adminApiKey), buildAdminRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
+
+  app.use('/flash', (req, res, next) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://unpkg.com",
+    );
+    next();
+  });
   app.use('/flash', express.static(path.join(__dirname, '../../public/flash')));
   app.use('/firmware', express.static(path.join(__dirname, '../../public/firmware')));
 
