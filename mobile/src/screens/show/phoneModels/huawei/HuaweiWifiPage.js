@@ -1,10 +1,40 @@
 import React from 'react'
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
 import {
-  randomLevel,
-  useWifiBroadcastFlow,
-} from '../../shared/useWifiBroadcastFlow'
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useWifiBroadcastFlow } from '../../shared/useWifiBroadcastFlow'
+
+const WIFI_SPOT_1 = require('../../../../icons/huawei/wifispot1.png')
+const WIFI_SPOT_2 = require('../../../../icons/huawei/wifispot2.png')
+const WIFI_SPOT_3 = require('../../../../icons/huawei/wifispot3.png')
+const WIFI_SPOT_4 = require('../../../../icons/huawei/wifispot4.png')
+const WIFI_SPOT_5 = require('../../../../icons/huawei/wifispot5.png')
+const HUAWEI_BACK_ARROW = require('../../../../icons/huawei/ArrowBack.png')
+
+function clampSignalLevel(level) {
+  const parsed = Number(level)
+  if (!Number.isFinite(parsed)) return 3
+  return Math.max(1, Math.min(5, Math.round(parsed)))
+}
+
+function randomHuaweiLevel() {
+  return 1 + Math.floor(Math.random() * 5)
+}
+
+function resolveWifiSpotIcon(level) {
+  const safeLevel = clampSignalLevel(level)
+  if (safeLevel <= 1) return WIFI_SPOT_1
+  if (safeLevel === 2) return WIFI_SPOT_2
+  if (safeLevel === 3) return WIFI_SPOT_3
+  if (safeLevel === 4) return WIFI_SPOT_4
+  return WIFI_SPOT_5
+}
 
 function stableLevelFromSpot(spot, index) {
   const text = String(spot || '')
@@ -12,15 +42,15 @@ function stableLevelFromSpot(spot, index) {
   for (let i = 0; i < text.length; i += 1) {
     hash = (hash * 31 + text.charCodeAt(i)) % 9973
   }
-  return (hash % 4) + 1
+  return (hash % 5) + 1
 }
 
 function SwitchMock({ on }) {
-  const translateX = React.useRef(new Animated.Value(on ? 17 : 0)).current
+  const translateX = React.useRef(new Animated.Value(on ? 15 : 0)).current
 
   React.useEffect(() => {
     Animated.timing(translateX, {
-      toValue: on ? 17 : 0,
+      toValue: on ? 15 : 0,
       duration: 170,
       useNativeDriver: true,
     }).start()
@@ -46,17 +76,10 @@ function SwitchMock({ on }) {
 }
 
 function WifiSignal({ level = 4 }) {
-  const safeLevel = Math.max(1, Math.min(4, level))
-  const active = safeLevel >= 3 ? '#111317' : '#9498a0'
+  const icon = resolveWifiSpotIcon(level)
   return (
     <View style={styles.wifiSignalWrap}>
-      <Ionicons name="wifi" size={22} color={active} />
-      <Ionicons
-        name="lock-closed"
-        size={9}
-        color="#111317"
-        style={styles.wifiLock}
-      />
+      <Image source={icon} style={styles.wifiSignalImage} />
     </View>
   )
 }
@@ -118,12 +141,12 @@ export default function HuaweiWifiPage({
       ? animatedSpots.map((spot, index) => ({
           key: `anim-${index}`,
           text: spot.text,
-          level: spot.level || randomLevel(),
+          level: clampSignalLevel(spot.level || randomHuaweiLevel()),
         }))
       : shownSpots.map((spot, index) => ({
           key: `real-${index}-${spot}`,
           text: spot,
-          level: stableLevelFromSpot(spot, index),
+          level: clampSignalLevel(stableLevelFromSpot(spot, index)),
         }))
 
   return (
@@ -134,11 +157,11 @@ export default function HuaweiWifiPage({
           hitSlop={10}
           style={styles.headerBack}
         >
-          <Ionicons name="arrow-back" size={31} color="#111318" />
+          <Image source={HUAWEI_BACK_ARROW} style={styles.headerBackImage} />
         </Pressable>
         <Text style={styles.headerTitle}>Wi-Fi</Text>
         <Pressable hitSlop={10} style={styles.headerHelp}>
-          <Ionicons name="help-circle-outline" size={30} color="#2a2d33" />
+          <Ionicons name="help-circle-outline" size={27} color="#2a2d33" />
         </Pressable>
       </View>
 
@@ -161,7 +184,7 @@ export default function HuaweiWifiPage({
           <View style={styles.wifiRowDivider} />
           <Pressable style={styles.wifiHelperRow}>
             <Text style={styles.wifiHelperText}>Другие настройки</Text>
-            <Ionicons name="chevron-forward" size={20} color="#c3c6cc" />
+            <Ionicons name="chevron-forward" size={18} color="#c3c6cc" />
           </Pressable>
         </View>
 
@@ -197,64 +220,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#eceef1',
   },
   header: {
-    height: 60,
-    paddingHorizontal: 14,
+    height: 56,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#eceef1',
   },
   headerBack: {
-    width: 44,
+    width: 40,
     alignItems: 'flex-start',
+  },
+  headerBackImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   headerTitle: {
     flex: 1,
     color: '#181a1f',
-    fontSize: 21,
+    fontSize: 19,
     fontWeight: '500',
   },
   headerHelp: {
-    width: 38,
+    width: 34,
     alignItems: 'flex-end',
   },
   scroll: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingTop: 4,
-    paddingBottom: 14,
-    gap: 8,
+    paddingBottom: 0,
+    gap: 6,
   },
   card: {
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#f8f9fb',
   },
   wifiToggleRow: {
-    minHeight: 66,
-    paddingHorizontal: 16,
+    minHeight: 60,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   wifiToggleTitle: {
     color: '#181a1f',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '400',
   },
   wifiHelperRow: {
-    minHeight: 62,
-    paddingHorizontal: 16,
+    minHeight: 56,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   wifiHelperText: {
     color: '#1a1d22',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '400',
   },
   switchTrack: {
-    width: 40,
-    height: 24,
+    width: 36,
+    height: 22,
     borderRadius: 12,
     borderWidth: 1,
     justifyContent: 'center',
@@ -270,21 +298,21 @@ const styles = StyleSheet.create({
   switchKnob: {
     position: 'absolute',
     left: 2,
-    width: 19,
-    height: 19,
-    borderRadius: 9.5,
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
     backgroundColor: '#f7f9fe',
   },
   sectionTitle: {
     color: '#6b707a',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
-    paddingHorizontal: 16,
-    marginTop: 10,
+    paddingHorizontal: 14,
+    marginTop: 8,
   },
   wifiRow: {
-    minHeight: 78,
-    paddingHorizontal: 16,
+    minHeight: 70,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -295,8 +323,8 @@ const styles = StyleSheet.create({
   },
   wifiName: {
     color: '#1a1d22',
-    fontSize: 19,
-    fontWeight: '400',
+    fontSize: 17,
+    fontWeight: '500',
   },
   wifiNameConnected: {
     color: '#1f5eb8',
@@ -305,7 +333,7 @@ const styles = StyleSheet.create({
   wifiSubtitle: {
     marginTop: 2,
     color: '#646b76',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '400',
   },
   wifiSubtitleConnected: {
@@ -314,16 +342,16 @@ const styles = StyleSheet.create({
   wifiRowDivider: {
     borderBottomWidth: 1,
     borderBottomColor: '#dde1e7',
-    marginHorizontal: 16,
+    marginHorizontal: 14,
   },
   wifiSignalWrap: {
-    width: 28,
+    width: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  wifiLock: {
-    position: 'absolute',
-    right: 1,
-    bottom: 2,
+  wifiSignalImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
 })

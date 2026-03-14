@@ -227,7 +227,7 @@ export default function HuaweiGeneralPage({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={22} color="#8c9098" />
+          <Ionicons name="search-outline" size={20} color="#8c9098" />
           <Text style={styles.searchText}>Поиск</Text>
         </View>
 
@@ -284,10 +284,7 @@ export default function HuaweiGeneralPage({
         </Block>
 
         <Block>
-          <Row
-            title="Рабочий экран"
-            iconSource={WORKSCREEN_ICON}
-          />
+          <Row title="Рабочий экран" iconSource={WORKSCREEN_ICON} />
           <Row
             title="Экран и яркость"
             iconSource={SCREEN_LIGHT_ICON}
@@ -370,10 +367,11 @@ const styles = StyleSheet.create({
     color: '#111215',
     fontWeight: '500',
     letterSpacing: -0.5,
+    paddingLeft: 4,
   },
   searchBox: {
-    minHeight: 48,
-    borderRadius: 25,
+    minHeight: 40,
+    borderRadius: 20,
     backgroundColor: '#f8f9fb',
     flexDirection: 'row',
     alignItems: 'center',
@@ -382,7 +380,7 @@ const styles = StyleSheet.create({
   },
   searchText: {
     color: '#8b9098',
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '400',
   },
   block: {
@@ -468,7 +466,7 @@ const styles = StyleSheet.create({
     color: '#191b20',
     fontSize: 17,
     lineHeight: 24,
-    fontWeight: '400',
+    fontWeight: '500',
   },
   rowSubtitle: {
     color: '#838892',
