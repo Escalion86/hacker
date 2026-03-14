@@ -1,11 +1,41 @@
 import React, { useRef } from 'react'
-import { Animated, Pressable, StyleSheet, Text, View, Image } from 'react-native'
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+} from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
 const HEADER_HEIGHT_MAX = 112
-const HEADER_HEIGHT_MIN = 70
-const TITLE_SIZE_MAX = 54
-const TITLE_SIZE_MIN = 40
+const HEADER_HEIGHT_MIN = 60
+const TITLE_SIZE_MAX = 36
+const TITLE_SIZE_MIN = 26
+const WIFI_ICON = require('../../../../icons/huawei/wifi.png')
+const BLUETOOTH_ICON = require('../../../../icons/huawei/bluetooth.png')
+const NETWORK_ICON = require('../../../../icons/huawei/network.png')
+const SUPERDEVICE_ICON = require('../../../../icons/huawei/superdevice.png')
+const OTHER_DEVICE_ICON = require('../../../../icons/huawei/otherdevice.png')
+const WORKSCREEN_ICON = require('../../../../icons/huawei/workscreen.png')
+const SCREEN_LIGHT_ICON = require('../../../../icons/huawei/screenandlight.png')
+const SOUND_ICON = require('../../../../icons/huawei/sound.png')
+const NOTIFICATIONS_ICON = require('../../../../icons/huawei/Notifications.png')
+const BIOMETRY_ICON = require('../../../../icons/huawei/biometryandpasswords.png')
+const APPLICATIONS_ICON = require('../../../../icons/huawei/applications.png')
+const BATTERY_ICON = require('../../../../icons/huawei/battery.png')
+const MEMORY_ICON = require('../../../../icons/huawei/memory.png')
+const SAFETY_ICON = require('../../../../icons/huawei/safety.png')
+const CONFIDENTIAL_ICON = require('../../../../icons/huawei/confidential.png')
+const GPS_ICON = require('../../../../icons/huawei/gps.png')
+const DIGIT_BALANCE_ICON = require('../../../../icons/huawei/digitbalance.png')
+const HUAWEI_ASSISTANT_ICON = require('../../../../icons/huawei/huaweiassistant.png')
+const SPECIAL_ICON = require('../../../../icons/huawei/special.png')
+const ACCOUNTS_ICON = require('../../../../icons/huawei/accounts.png')
+const HMS_ICON = require('../../../../icons/huawei/hms.png')
+const SETTINGS_ICON = require('../../../../icons/huawei/settings.png')
+const ABOUT_PHONE_ICON = require('../../../../icons/huawei/aboutphone.png')
 
 function PlaceholderIcon({ color = '#57b8ff' }) {
   return (
@@ -19,6 +49,7 @@ function Row({
   title,
   subtitle,
   rightText,
+  iconSource,
   iconColor,
   onPress,
   noBorder,
@@ -58,7 +89,11 @@ function Row({
       style={styles.row}
     >
       <View style={styles.rowIconWrap}>
-        <PlaceholderIcon color={iconColor} />
+        {iconSource ? (
+          <Image source={iconSource} style={styles.huaweiIcon} />
+        ) : (
+          <PlaceholderIcon color={iconColor} />
+        )}
       </View>
       <View style={styles.rowTextWrap}>
         <Text style={styles.rowTitle}>{title}</Text>
@@ -67,7 +102,12 @@ function Row({
       {rightText ? <Text style={styles.rowRightText}>{rightText}</Text> : null}
       {rightNode}
       {withArrow ? (
-        <Ionicons name="chevron-forward" size={20} color="#b5b7bc" style={styles.rowArrow} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color="#b5b7bc"
+          style={styles.rowArrow}
+        />
       ) : null}
       {!noBorder ? <View style={styles.rowDivider} /> : null}
       {showLearnOverlay && learnOverlayLabels.length > 0 ? (
@@ -174,7 +214,9 @@ export default function HuaweiGeneralPage({
           { height: headerHeight, paddingBottom: headerPaddingBottom },
         ]}
       >
-        <Animated.Text style={[styles.headerTitle, { fontSize: titleFontSize }]}>
+        <Animated.Text
+          style={[styles.headerTitle, { fontSize: titleFontSize }]}
+        >
           Настройки
         </Animated.Text>
       </Animated.View>
@@ -202,7 +244,7 @@ export default function HuaweiGeneralPage({
         <Block>
           <Row
             title="Wi-Fi"
-            iconColor="#52b8ed"
+            iconSource={WIFI_ICON}
             onPress={() => setPage('wifi')}
             segmentCount={4}
             onSegmentTouch={setMastAndOpenWifi}
@@ -212,7 +254,7 @@ export default function HuaweiGeneralPage({
           <Row
             title="Bluetooth"
             rightText="Включено"
-            iconColor="#54b6eb"
+            iconSource={BLUETOOTH_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(4, segment)}
             showLearnOverlay={settings.learn}
@@ -220,7 +262,7 @@ export default function HuaweiGeneralPage({
           />
           <Row
             title="Мобильная сеть"
-            iconColor="#6ac667"
+            iconSource={NETWORK_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(0, segment)}
             showLearnOverlay={settings.learn}
@@ -228,55 +270,74 @@ export default function HuaweiGeneralPage({
           />
           <Row
             title="Суперустройство"
-            iconColor="#5fbde7"
+            iconSource={SUPERDEVICE_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(8, segment)}
             showLearnOverlay={settings.learn}
             learnOverlayLabels={['9', '10', 'J', 'Q']}
           />
-          <Row title="Другие соединения" iconColor="#ffb123" noBorder />
+          <Row
+            title="Другие соединения"
+            iconSource={OTHER_DEVICE_ICON}
+            noBorder
+          />
         </Block>
 
         <Block>
           <Row
             title="Рабочий экран"
-            iconColor="#66c564"
+            iconSource={WORKSCREEN_ICON}
             segmentCount={2}
             onSegmentTouch={(segment) => setRankSegment(12, segment)}
             showLearnOverlay={settings.learn}
             learnOverlayLabels={['K', 'Joker']}
           />
-          <Row title="Экран и яркость" iconColor="#66c564" noBorder />
+          <Row
+            title="Экран и яркость"
+            iconSource={SCREEN_LIGHT_ICON}
+            noBorder
+          />
         </Block>
 
         <Block>
-          <Row title="Звуки и вибрация" iconColor="#5448df" />
-          <Row title="Уведомления и строка состояния" iconColor="#f5b221" noBorder />
+          <Row title="Звуки и вибрация" iconSource={SOUND_ICON} />
+          <Row
+            title="Уведомления и строка состояния"
+            iconSource={NOTIFICATIONS_ICON}
+            noBorder
+          />
         </Block>
 
         <Block>
-          <Row title="Биометрические данные и пароли" iconColor="#66d3c5" />
-          <Row title="Приложения и службы" iconColor="#f5b221" />
-          <Row title="Батарея" iconColor="#66c564" />
-          <Row title="Память" iconColor="#2e70ee" />
-          <Row title="Безопасность" iconColor="#66d3c5" />
-          <Row title="Конфиденциальность" iconColor="#66d3c5" />
-          <Row title="Данные о местоположении" iconColor="#66d3c5" noBorder />
+          <Row
+            title="Биометрические данные и пароли"
+            iconSource={BIOMETRY_ICON}
+          />
+          <Row title="Приложения и службы" iconSource={APPLICATIONS_ICON} />
+          <Row title="Батарея" iconSource={BATTERY_ICON} />
+          <Row title="Память" iconSource={MEMORY_ICON} />
+          <Row title="Безопасность" iconSource={SAFETY_ICON} />
+          <Row title="Конфиденциальность" iconSource={CONFIDENTIAL_ICON} />
+          <Row title="Данные о местоположении" iconSource={GPS_ICON} noBorder />
         </Block>
 
         <Block>
-          <Row title="Цифровой баланс" iconColor="#4ccc58" />
-          <Row title="HUAWEI Assistant" iconColor="#80c9f4" />
-          <Row title="Специальные возможности" iconColor="#f5a41f" noBorder />
+          <Row title="Цифровой баланс" iconSource={DIGIT_BALANCE_ICON} />
+          <Row title="HUAWEI Assistant" iconSource={HUAWEI_ASSISTANT_ICON} />
+          <Row
+            title="Специальные возможности"
+            iconSource={SPECIAL_ICON}
+            noBorder
+          />
         </Block>
 
         <Block>
-          <Row title="Пользователи и аккаунты" iconColor="#f24b36" />
-          <Row title="HMS Core" iconColor="#f34d58" />
-          <Row title="Система и обновления" iconColor="#2f6ff1" />
+          <Row title="Пользователи и аккаунты" iconSource={ACCOUNTS_ICON} />
+          <Row title="HMS Core" iconSource={HMS_ICON} />
+          <Row title="Система и обновления" iconSource={SETTINGS_ICON} />
           <Row
             title="О телефоне"
-            iconColor="#868a92"
+            iconSource={ABOUT_PHONE_ICON}
             onPress={onOpenSettings}
             noBorder
           />
@@ -294,7 +355,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingTop: HEADER_HEIGHT_MAX + 6,
     paddingHorizontal: 18,
-    paddingBottom: 0,
+    paddingBottom: 18,
     gap: 14,
   },
   stickyHeader: {
@@ -317,7 +378,7 @@ const styles = StyleSheet.create({
   searchBox: {
     minHeight: 54,
     borderRadius: 27,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#f8f9fb',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -344,6 +405,11 @@ const styles = StyleSheet.create({
     width: 48,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  huaweiIcon: {
+    width: 34,
+    height: 34,
+    resizeMode: 'contain',
   },
   placeholderIcon: {
     width: 34,

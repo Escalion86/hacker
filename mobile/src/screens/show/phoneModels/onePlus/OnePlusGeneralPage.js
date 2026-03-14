@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingTop: HEADER_HEIGHT_MAX + 6,
     paddingHorizontal: 18,
-    paddingBottom: 0,
+    paddingBottom: 18,
     gap: 18,
   },
   stickyHeader: {
