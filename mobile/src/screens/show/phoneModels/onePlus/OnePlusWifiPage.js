@@ -10,7 +10,10 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import Svg, { Path } from 'react-native-svg'
-import { randomLevel, useWifiBroadcastFlow } from '../../shared/useWifiBroadcastFlow'
+import {
+  randomLevel,
+  useWifiBroadcastFlow,
+} from '../../shared/useWifiBroadcastFlow'
 
 const HAS_NATIVE_SVG =
   Boolean(UIManager.getViewManagerConfig?.('RNSVGPath')) ||
@@ -28,11 +31,11 @@ function stableLevelFromSpot(spot, index) {
 }
 
 function SwitchMock({ on }) {
-  const translateX = React.useRef(new Animated.Value(on ? 18 : 0)).current
+  const translateX = React.useRef(new Animated.Value(on ? 16 : 0)).current
 
   React.useEffect(() => {
     Animated.timing(translateX, {
-      toValue: on ? 18 : 0,
+      toValue: on ? 16 : 0,
       duration: 170,
       useNativeDriver: true,
     }).start()
@@ -205,7 +208,12 @@ export default function OnePlusWifiPage({
         <Text style={styles.sectionTitle}>Сохраненные сети</Text>
         <View style={styles.card}>
           <WifiRow title="DIREZABLe" level={0} onPress={handleWifiSpotPress} />
-          <WifiRow title="DIREZABLe-5G" level={0} noBorder onPress={handleWifiSpotPress} />
+          <WifiRow
+            title="DIREZABLe-5G"
+            level={0}
+            noBorder
+            onPress={handleWifiSpotPress}
+          />
         </View>
 
         <View style={styles.sectionHeaderRow}>
@@ -254,25 +262,25 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   headerBackImage: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     resizeMode: 'contain',
   },
   headerTitle: {
     flex: 1,
     color: '#f3f5fa',
     fontSize: 19,
-    fontWeight: '700',
+    fontWeight: '500',
     marginLeft: 6,
   },
   headerIcon: {
     width: 24,
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: 14,
   },
   headerQrImage: {
-    width: 18,
-    height: 18,
+    width: 22,
+    height: 22,
     resizeMode: 'contain',
   },
   scroll: {
@@ -287,7 +295,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#171719',
   },
   wifiToggleRow: {
-    minHeight: 56,
+    minHeight: 54,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -344,6 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     paddingHorizontal: 8,
+    marginTop: 10,
   },
   refreshText: {
     color: '#2f76ff',
@@ -352,7 +361,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   wifiRow: {
-    minHeight: 48,
+    minHeight: 60,
     paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
