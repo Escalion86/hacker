@@ -1,0 +1,28 @@
+{
+  "name": "FakeWiFi PRO (ESP32)",
+  "version": "1.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "../firmware/fakewifi-pro/bootloader.bin",
+          "offset": 4096
+        },
+        {
+          "path": "../firmware/fakewifi-pro/partitions.bin",
+          "offset": 32768
+        },
+        {
+          "path": "../firmware/fakewifi-pro/boot_app0.bin",
+          "offset": 57344
+        },
+        {
+          "path": "../firmware/fakewifi-pro/firmware.bin",
+          "offset": 65536
+        }
+      ]
+    }
+  ]
+}

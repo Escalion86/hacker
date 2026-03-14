@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FakeWiFi PRO Flasher</title>
+    <script
+      type="module"
+      src="https://unpkg.com/esp-web-tools@10.1.0/dist/web/install-button.js?module"
+    ></script>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --accent: #22c55e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Segoe UI, Arial, sans-serif;
+        background: radial-gradient(circle at top, #1e293b, var(--bg));
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .card {
+        width: min(760px, 100%);
+        background: linear-gradient(180deg, #111827, #0b1220);
+        border: 1px solid #1f2937;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+      }
+
+      p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .status {
+        margin: 14px 0 20px;
+        color: #86efac;
+      }
+
+      ol {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--text);
+      }
+
+      li {
+        margin: 8px 0;
+      }
+
+      code {
+        color: var(--accent);
+      }
+
+      .warn {
+        margin-top: 18px;
+        color: #fca5a5;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>FakeWiFi PRO Firmware Flasher</h1>
+      <p>
+        Desktop Chrome/Edge only. Connect ESP32 via USB, click install, select
+        COM port, then confirm flashing.
+      </p>
+
+      <esp-web-install-button manifest="manifest.json">
+        <button slot="activate">Install Firmware</button>
+      </esp-web-install-button>
+
+      <p class="status">Target: ESP32, no OTA partition (large APP).</p>
+
+      <ol>
+        <li>Open this page in Chrome or Edge on Windows/macOS/Linux.</li>
+        <li>Connect board with a data USB cable.</li>
+        <li>Press <code>Install Firmware</code>.</li>
+        <li>Select the correct serial port.</li>
+        <li>Wait until flashing and verification are finished.</li>
+      </ol>
+
+      <p class="warn">
+        If device is not detected, hold BOOT button while connecting or during
+        start of flash.
+      </p>
+    </main>
+  </body>
+</html>
