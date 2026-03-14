@@ -50,7 +50,7 @@
         margin-bottom: 10px;
       }
       label { font-size: 13px; color: var(--muted); }
-      input, textarea {
+      input, textarea, select {
         width: 100%;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -138,30 +138,27 @@
         </div>
 
         <div class="card">
-          <h2>Создать конфиг</h2>
+          <h2>Создать конфиг (упрощенно)</h2>
+          <p>Только 4 поля: код, модель, имя, аватар. Остальное сформируется автоматически.</p>
           <div class="row">
-            <label>Version</label>
-            <input id="cfgVersion" value="2026-03-04.1" />
+            <label>Code</label>
+            <input id="cfgCode" value="newuser01" />
           </div>
           <div class="row">
-            <label>Template ID</label>
-            <input id="cfgTemplateId" value="escalion" />
+            <label>Модель UI (Template ID)</label>
+            <select id="cfgTemplateId">
+              <option value="samsungOneUi8">Samsung OneUi 8</option>
+              <option value="onePlus">One Plus</option>
+              <option value="huawei">Huawei EMUI</option>
+            </select>
           </div>
           <div class="row">
-            <label>Template Name</label>
-            <input id="cfgTemplateName" value="Samsung OneUi 8" />
+            <label>Имя пользователя (Full Name)</label>
+            <input id="cfgFullName" value="VladMagician" />
           </div>
           <div class="row">
-            <label>Profile ID</label>
-            <input id="cfgProfileId" value="escalion" />
-          </div>
-          <div class="row">
-            <label>Profile Display Name</label>
-            <input id="cfgProfileName" value="Алексей Белинский" />
-          </div>
-          <div class="row">
-            <label>Payload JSON</label>
-            <textarea id="cfgPayload">{ "operatorProfile": { "fullName": "Алексей Белинский", "avatarUrl": "" }, "templateMeta": { "title": "Samsung OneUi 8" } }</textarea>
+            <label>Avatar URL</label>
+            <input id="cfgAvatar" placeholder="https://..." />
           </div>
           <button id="btnCreateConfig">Создать конфиг</button>
         </div>
@@ -201,6 +198,25 @@
 
       function getAdminKey() {
         return document.getElementById('adminKey').value.trim();
+      }
+
+      function normalizeCode(value) {
+        return String(value || '').trim().toLowerCase();
+      }
+
+      function buildTemplateTitle(templateId) {
+        const key = String(templateId || '').trim().toLowerCase();
+        if (key === 'oneplus' || key === 'one_plus') return 'One Plus';
+        if (key === 'huawei' || key === 'huaweiemui' || key === 'emui') return 'Huawei EMUI';
+        return 'Samsung OneUi 8';
+      }
+
+      function buildVersion() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}.1`;
       }
 
       async function api(path, options = {}, withAdmin = false) {
@@ -247,27 +263,47 @@
 
       document.getElementById('btnCreateConfig').addEventListener('click', async () => {
         try {
-          const payloadJson = document.getElementById('cfgPayload').value.trim();
-          let parsedPayload = {};
-          if (payloadJson) parsedPayload = JSON.parse(payloadJson);
+          const code = normalizeCode(document.getElementById('cfgCode').value.trim());
+          const templateId = document.getElementById('cfgTemplateId').value.trim();
+          const fullName = document.getElementById('cfgFullName').value.trim();
+          const avatarUrl = document.getElementById('cfgAvatar').value.trim();
+          const templateTitle = buildTemplateTitle(templateId);
+
+          if (!code) throw new Error('Введите code');
+          if (!fullName) throw new Error('Введите имя пользователя');
 
           const payload = {
             schemaVersion: 1,
-            version: document.getElementById('cfgVersion').value.trim(),
-            templateId: document.getElementById('cfgTemplateId').value.trim(),
-            templateName: document.getElementById('cfgTemplateName').value.trim(),
+            version: buildVersion(),
+            templateId,
+            templateName: templateTitle,
             profile: {
-              id: document.getElementById('cfgProfileId').value.trim(),
-              displayName: document.getElementById('cfgProfileName').value.trim(),
+              id: code,
+              displayName: fullName,
             },
-            payload: parsedPayload,
+            payload: {
+              operatorProfile: {
+                fullName,
+                avatarUrl,
+              },
+              templateMeta: {
+                title: templateTitle,
+              },
+            },
             isActive: true,
           };
           const data = await api('/admin/configs', {
             method: 'POST',
             body: JSON.stringify(payload),
           }, true);
-          if (data.id) document.getElementById('codeConfigId').value = data.id;
+          if (data.id) {
+            document.getElementById('codeConfigId').value = data.id;
+            document.getElementById('codeValue').value = code;
+            document.getElementById('opCode').value = code;
+            document.getElementById('opName').value = fullName;
+            document.getElementById('opAvatar').value = avatarUrl;
+            document.getElementById('opTemplateTitle').value = templateTitle;
+          }
           log(data, true);
         } catch (error) {
           log(error.message, false);
