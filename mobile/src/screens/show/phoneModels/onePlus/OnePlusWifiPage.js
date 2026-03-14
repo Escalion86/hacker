@@ -18,8 +18,8 @@ import {
 const HAS_NATIVE_SVG =
   Boolean(UIManager.getViewManagerConfig?.('RNSVGPath')) ||
   Boolean(UIManager.getViewManagerConfig?.('RCTRNSVGPath'))
-const BACK_ARROW_ICON = require('../../../../icons/vladFert/BackArrow.png')
-const QR_SCAN_ICON = require('../../../../icons/vladFert/QRScan.png')
+const BACK_ARROW_ICON = require('../../../../icons/onePlus/BackArrow.png')
+const QR_SCAN_ICON = require('../../../../icons/onePlus/QRScan.png')
 
 function stableLevelFromSpot(spot, index) {
   const text = String(spot || '')
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingHorizontal: 10,
     paddingTop: 6,
-    paddingBottom: 0,
+    paddingBottom: 14,
     gap: 10,
   },
   card: {

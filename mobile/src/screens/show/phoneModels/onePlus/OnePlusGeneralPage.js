@@ -3,25 +3,25 @@ import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons'
 import { Image } from 'react-native'
 
-const WIFI_ICON = require('../../../../icons/vladFert/WiFi.png')
-const NETWORK_ICON = require('../../../../icons/vladFert/Network.png')
-const CONNECTIONS_ICON = require('../../../../icons/vladFert/Connections.png')
-const GENERAL_SCREEN_ICON = require('../../../../icons/vladFert/GeneralScreen.png')
-const SCREEN_ICON = require('../../../../icons/vladFert/Screen.png')
-const SOUND_ICON = require('../../../../icons/vladFert/Sound.png')
-const NOTIFICATIONS_ICON = require('../../../../icons/vladFert/Notifications.png')
-const DEFEND_ICON = require('../../../../icons/vladFert/Defend.png')
-const SOS_ICON = require('../../../../icons/vladFert/SOS.png')
-const GPS_ICON = require('../../../../icons/vladFert/GPS.png')
-const PARENT_CONTROL_ICON = require('../../../../icons/vladFert/ParentControl.png')
-const BATTERY_ICON = require('../../../../icons/vladFert/Battery.png')
-const PLUS_KEY_ICON = require('../../../../icons/vladFert/PlusKey.png')
-const SPECIAL_ICON = require('../../../../icons/vladFert/Special.png')
-const ONEPLUS_ICON = require('../../../../icons/vladFert/OnePlus.png')
-const REFERENCE_ICON = require('../../../../icons/vladFert/Reference.png')
-const ABOUT_ICON = require('../../../../icons/vladFert/About.png')
-const ACCOUNTS_ICON = require('../../../../icons/vladFert/Accounts.png')
-const GOOGLE_ICON = require('../../../../icons/vladFert/Google.png')
+const WIFI_ICON = require('../../../../icons/onePlus/WiFi.png')
+const NETWORK_ICON = require('../../../../icons/onePlus/Network.png')
+const CONNECTIONS_ICON = require('../../../../icons/onePlus/Connections.png')
+const GENERAL_SCREEN_ICON = require('../../../../icons/onePlus/GeneralScreen.png')
+const SCREEN_ICON = require('../../../../icons/onePlus/Screen.png')
+const SOUND_ICON = require('../../../../icons/onePlus/Sound.png')
+const NOTIFICATIONS_ICON = require('../../../../icons/onePlus/Notifications.png')
+const DEFEND_ICON = require('../../../../icons/onePlus/Defend.png')
+const SOS_ICON = require('../../../../icons/onePlus/SOS.png')
+const GPS_ICON = require('../../../../icons/onePlus/GPS.png')
+const PARENT_CONTROL_ICON = require('../../../../icons/onePlus/ParentControl.png')
+const BATTERY_ICON = require('../../../../icons/onePlus/Battery.png')
+const PLUS_KEY_ICON = require('../../../../icons/onePlus/PlusKey.png')
+const SPECIAL_ICON = require('../../../../icons/onePlus/Special.png')
+const ONEPLUS_ICON = require('../../../../icons/onePlus/OnePlus.png')
+const REFERENCE_ICON = require('../../../../icons/onePlus/Reference.png')
+const ABOUT_ICON = require('../../../../icons/onePlus/About.png')
+const ACCOUNTS_ICON = require('../../../../icons/onePlus/Accounts.png')
+const GOOGLE_ICON = require('../../../../icons/onePlus/Google.png')
 
 const HEADER_HEIGHT_MAX = 110
 const HEADER_HEIGHT_MIN = 58
@@ -62,21 +62,9 @@ function Row({
   learnOverlayLabels = [],
 }) {
   const rowWidthRef = useRef(1)
-
-  const handleSegmentTouch = (event) => {
-    const count = showLearnOverlay
-      ? learnOverlayLabels.length || segmentCount
-      : segmentCount
-    if (!count || !onSegmentTouch) return
-
-    const width = Math.max(1, rowWidthRef.current)
-    const x = Math.max(0, Math.min(width, event.nativeEvent.locationX))
-    const segment = Math.max(
-      0,
-      Math.min(count - 1, Math.floor(x / (width / count))),
-    )
-    onSegmentTouch(segment)
-  }
+  const touchSegments = showLearnOverlay
+    ? learnOverlayLabels.length || segmentCount
+    : segmentCount
 
   return (
     <Pressable
@@ -84,9 +72,6 @@ function Row({
       onLayout={(event) => {
         rowWidthRef.current = event.nativeEvent.layout.width
       }}
-      onTouchStart={
-        segmentCount > 0 || showLearnOverlay ? handleSegmentTouch : undefined
-      }
       style={styles.row}
     >
       <View style={styles.rowIconWrap}>{icon}</View>
@@ -117,6 +102,17 @@ function Row({
             >
               <Text style={styles.learnOverlayText}>{label}</Text>
             </View>
+          ))}
+        </View>
+      ) : null}
+      {touchSegments > 0 && onSegmentTouch ? (
+        <View style={styles.segmentTouchWrap}>
+          {Array.from({ length: touchSegments }).map((_, index) => (
+            <Pressable
+              key={`${title}-touch-${index}`}
+              style={styles.segmentTouchZone}
+              onPressIn={() => onSegmentTouch(index)}
+            />
           ))}
         </View>
       ) : null}
@@ -267,17 +263,17 @@ export default function OnePlusGeneralPage({
               />
             }
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(4, segment)}
+            onSegmentTouch={(segment) => setRankSegment(0, segment)}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['5', '6', '7', '8']}
+            learnOverlayLabels={['A', '2', '3', '4']}
           />
           <Row
             title="Мобильная сеть"
             icon={<Image source={NETWORK_ICON} style={styles.onePlusIcon} />}
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(0, segment)}
+            onSegmentTouch={(segment) => setRankSegment(4, segment)}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['A', '2', '3', '4']}
+            learnOverlayLabels={['5', '6', '7', '8']}
           />
           <Row
             title="Подключение к устройствам"
@@ -413,7 +409,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingTop: HEADER_HEIGHT_MAX + 6,
     paddingHorizontal: 18,
-    paddingBottom: 18,
+    paddingBottom: 14,
     gap: 18,
   },
   stickyHeader: {
@@ -601,6 +597,18 @@ const styles = StyleSheet.create({
     color: '#d9e6ff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  segmentTouchWrap: {
+    position: 'absolute',
+    left: 14,
+    right: 14,
+    top: 4,
+    bottom: 4,
+    flexDirection: 'row',
+    zIndex: 35,
+  },
+  segmentTouchZone: {
+    flex: 1,
   },
   sosIcon: {
     color: '#ea4036',

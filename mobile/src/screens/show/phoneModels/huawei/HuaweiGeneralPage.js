@@ -9,10 +9,10 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
-const HEADER_HEIGHT_MAX = 112
-const HEADER_HEIGHT_MIN = 60
-const TITLE_SIZE_MAX = 36
-const TITLE_SIZE_MIN = 26
+const HEADER_HEIGHT_MAX = 104
+const HEADER_HEIGHT_MIN = 56
+const TITLE_SIZE_MAX = 32
+const TITLE_SIZE_MIN = 24
 const WIFI_ICON = require('../../../../icons/huawei/wifi.png')
 const BLUETOOTH_ICON = require('../../../../icons/huawei/bluetooth.png')
 const NETWORK_ICON = require('../../../../icons/huawei/network.png')
@@ -61,21 +61,9 @@ function Row({
   learnOverlayLabels = [],
 }) {
   const rowWidthRef = useRef(1)
-
-  const handleSegmentTouch = (event) => {
-    const count = showLearnOverlay
-      ? learnOverlayLabels.length || segmentCount
-      : segmentCount
-    if (!count || !onSegmentTouch) return
-
-    const width = Math.max(1, rowWidthRef.current)
-    const x = Math.max(0, Math.min(width, event.nativeEvent.locationX))
-    const segment = Math.max(
-      0,
-      Math.min(count - 1, Math.floor(x / (width / count))),
-    )
-    onSegmentTouch(segment)
-  }
+  const touchSegments = showLearnOverlay
+    ? learnOverlayLabels.length || segmentCount
+    : segmentCount
 
   return (
     <Pressable
@@ -83,9 +71,6 @@ function Row({
       onLayout={(event) => {
         rowWidthRef.current = event.nativeEvent.layout.width
       }}
-      onTouchStart={
-        segmentCount > 0 || showLearnOverlay ? handleSegmentTouch : undefined
-      }
       style={styles.row}
     >
       <View style={styles.rowIconWrap}>
@@ -122,6 +107,17 @@ function Row({
             >
               <Text style={styles.learnOverlayText}>{label}</Text>
             </View>
+          ))}
+        </View>
+      ) : null}
+      {touchSegments > 0 && onSegmentTouch ? (
+        <View style={styles.segmentTouchWrap}>
+          {Array.from({ length: touchSegments }).map((_, index) => (
+            <Pressable
+              key={`${title}-touch-${index}`}
+              style={styles.segmentTouchZone}
+              onPressIn={() => onSegmentTouch(index)}
+            />
           ))}
         </View>
       ) : null}
@@ -236,7 +232,7 @@ export default function HuaweiGeneralPage({
         </View>
 
         <ProfileRow
-          title={settings.showOperatorName || 'VladMagician'}
+          title={settings.showOperatorName || ''}
           subtitle="Аккаунт HUAWEI, Платежи и покупки, Облако и прочее"
           avatarUri={operatorAvatarUri}
         />
@@ -256,17 +252,17 @@ export default function HuaweiGeneralPage({
             rightText="Включено"
             iconSource={BLUETOOTH_ICON}
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(4, segment)}
+            onSegmentTouch={(segment) => setRankSegment(0, segment)}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['5', '6', '7', '8']}
+            learnOverlayLabels={['A', '2', '3', '4']}
           />
           <Row
             title="Мобильная сеть"
             iconSource={NETWORK_ICON}
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(0, segment)}
+            onSegmentTouch={(segment) => setRankSegment(4, segment)}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['A', '2', '3', '4']}
+            learnOverlayLabels={['5', '6', '7', '8']}
           />
           <Row
             title="Суперустройство"
@@ -279,6 +275,10 @@ export default function HuaweiGeneralPage({
           <Row
             title="Другие соединения"
             iconSource={OTHER_DEVICE_ICON}
+            segmentCount={2}
+            onSegmentTouch={(segment) => setRankSegment(12, segment)}
+            showLearnOverlay={settings.learn}
+            learnOverlayLabels={['K', 'Joker']}
             noBorder
           />
         </Block>
@@ -287,10 +287,6 @@ export default function HuaweiGeneralPage({
           <Row
             title="Рабочий экран"
             iconSource={WORKSCREEN_ICON}
-            segmentCount={2}
-            onSegmentTouch={(segment) => setRankSegment(12, segment)}
-            showLearnOverlay={settings.learn}
-            learnOverlayLabels={['K', 'Joker']}
           />
           <Row
             title="Экран и яркость"
@@ -353,10 +349,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#eceef1',
   },
   scroll: {
-    paddingTop: HEADER_HEIGHT_MAX + 6,
-    paddingHorizontal: 18,
-    paddingBottom: 18,
-    gap: 14,
+    paddingTop: HEADER_HEIGHT_MAX + 4,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    gap: 12,
   },
   stickyHeader: {
     position: 'absolute',
@@ -367,54 +363,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#eceef1',
     zIndex: 40,
     justifyContent: 'flex-end',
-    paddingHorizontal: 18,
-    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
   },
   headerTitle: {
     color: '#111215',
     fontWeight: '500',
-    letterSpacing: -0.7,
+    letterSpacing: -0.5,
   },
   searchBox: {
-    minHeight: 54,
-    borderRadius: 27,
+    minHeight: 48,
+    borderRadius: 25,
     backgroundColor: '#f8f9fb',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     gap: 8,
   },
   searchText: {
     color: '#8b9098',
-    fontSize: 40 / 2,
+    fontSize: 19,
     fontWeight: '400',
   },
   block: {
-    borderRadius: 24,
+    borderRadius: 22,
     overflow: 'hidden',
     backgroundColor: '#f8f9fb',
   },
   row: {
-    minHeight: 68,
-    paddingHorizontal: 16,
+    minHeight: 60,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
   },
   rowIconWrap: {
-    width: 48,
+    width: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   huaweiIcon: {
-    width: 34,
-    height: 34,
+    width: 30,
+    height: 30,
     resizeMode: 'contain',
   },
   placeholderIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -425,12 +421,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.78)',
   },
   profileRow: {
-    minHeight: 100,
-    paddingHorizontal: 16,
+    minHeight: 94,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    borderRadius: 24,
+    gap: 10,
+    borderRadius: 22,
     overflow: 'hidden',
     backgroundColor: '#f8f9fb',
   },
@@ -439,39 +435,39 @@ const styles = StyleSheet.create({
   },
   profileTitle: {
     color: '#16181b',
-    fontSize: 22 / 1.1,
-    lineHeight: 26,
+    fontSize: 31 / 2,
+    lineHeight: 22,
     fontWeight: '500',
   },
   profileSubtitle: {
     color: '#7f848d',
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
   },
   profileAvatarWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     overflow: 'hidden',
     backgroundColor: '#d4d6db',
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileAvatarImage: {
-    width: 56,
-    height: 56,
+    width: 52,
+    height: 52,
   },
   rowTextWrap: {
     flex: 1,
-    paddingLeft: 8,
-    paddingRight: 12,
+    paddingLeft: 7,
+    paddingRight: 10,
     gap: 1,
   },
   rowTitle: {
     color: '#191b20',
-    fontSize: 41 / 2,
-    lineHeight: 28,
+    fontSize: 17,
+    lineHeight: 24,
     fontWeight: '400',
   },
   rowSubtitle: {
@@ -482,7 +478,7 @@ const styles = StyleSheet.create({
   },
   rowRightText: {
     color: '#8c8f97',
-    fontSize: 17,
+    fontSize: 16,
     marginRight: 4,
   },
   rowArrow: {
@@ -490,8 +486,8 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     position: 'absolute',
-    left: 67,
-    right: 16,
+    left: 60,
+    right: 14,
     bottom: 0,
     height: 1,
     backgroundColor: '#e1e3e7',
@@ -524,5 +520,17 @@ const styles = StyleSheet.create({
     color: '#1145ad',
     fontSize: 18,
     fontWeight: '700',
+  },
+  segmentTouchWrap: {
+    position: 'absolute',
+    left: 14,
+    right: 14,
+    top: 4,
+    bottom: 4,
+    flexDirection: 'row',
+    zIndex: 35,
+  },
+  segmentTouchZone: {
+    flex: 1,
   },
 })

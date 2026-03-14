@@ -5,140 +5,99 @@
 
 #include <WiFi.h>
 #include <esp_wifi.h>
-#include <cstring>
 
-// BLE UUIDs (must match app)
-#define SERVICE_UUID "19b10000-e8f2-537e-4f6c-d104768a1214"
-#define WIFI_SPOTS_LIST_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
+// Timer
+unsigned long previousMillis = 0;
+unsigned long previousMillisforWifiSpots =0;
+unsigned long interval = 60000;
+
+const uint8_t networkCount = 12;
+uint8_t macs[12][6];
+uint8_t packet[12][128];
+int ssidLen = 0;
+
+BLEServer* pServer = NULL;
+BLECharacteristic* pDeviceStatusCharacteristic = NULL;
+BLECharacteristic* pWifiSpotsListCharacteristic = NULL;
+BLECharacteristic* pSpotNameCharacteristic = NULL;
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+bool wifiSpotsSended = false;
+String ssid = "";
+const int maxSafeSsidLen = 78;
+
+const char* ACK_START = "ACK_START";
+const char* ACK_STOP = "ACK_STOP";
+const char* NACK_UNSUPPORTED_VERSION = "NACK_UNSUPPORTED_VERSION";
+const char* NACK_INVALID_PAYLOAD = "NACK_INVALID_PAYLOAD";
+const char* NACK_INVALID_COMMAND = "NACK_INVALID_COMMAND";
+const char* NACK_SSID_TOO_LONG = "NACK_SSID_TOO_LONG";
+
+const int ledPin = 2; // Use the appropriate GPIO pin for your setup
+
+#define SERVICE_UUID        "19b10000-e8f2-537e-4f6c-d104768a1214"
+#define WiFi_SPOTS_LIST_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
 #define SPOT_NAME_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
 #define DEVICE_STATUS_CHARACTERISTIC_UUID "19b10003-e8f2-537e-4f6c-d104768a1214"
 
-// Device constants
-static const char *DEVICE_NAME = "Hacker";
-static const int PROTOCOL_VERSION = 1;
-static const uint8_t NETWORK_COUNT = 12;
-static const size_t PACKET_BUFFER_SIZE = 128;
-static const int LED_PIN = 2;
-static const int DEFAULT_DURATION_MIN = 3;
-static const uint8_t MAX_VISIBLE_SSID_LEN = 32;
-
-// Safety limits for payload
-static const size_t MAX_FAKE_SSID_LEN = 60;      // conservative bound for 128-byte packet
-static const size_t MAX_WIFI_LIST_PAYLOAD = 180; // BLE notify payload cap
-
-// Runtime state
-BLEServer *pServer = nullptr;
-BLECharacteristic *pDeviceStatusCharacteristic = nullptr;
-BLECharacteristic *pWifiSpotsListCharacteristic = nullptr;
-BLECharacteristic *pSpotNameCharacteristic = nullptr;
-
-bool deviceConnected = false;
-bool wifiSpotsSent = false;
-
-char currentSsid[MAX_VISIBLE_SSID_LEN + 1] = {0};
-int ssidLen = 0;
-unsigned long spamStartedAtMs = 0;
-unsigned long spamDurationMs = DEFAULT_DURATION_MIN * 60000UL;
-unsigned long wifiScanStartedAtMs = 0;
-
-uint8_t macs[NETWORK_COUNT][6];
-uint8_t packet[NETWORK_COUNT][PACKET_BUFFER_SIZE];
-
-void notifyStatus(const String &statusText) {
-  pDeviceStatusCharacteristic->setValue(statusText.c_str());
-  if (deviceConnected) {
-    pDeviceStatusCharacteristic->notify();
+String decodeStringWithCyrillic(uint8_t* pData, size_t length) {
+  String receivedData = "";
+  for (int i = 0; i < length; i++) {
+    receivedData += (char)pData[i];
   }
+  
+  return receivedData;
 }
 
-void stopSpam() {
-  currentSsid[0] = '\0';
-  ssidLen = 0;
-  digitalWrite(LED_PIN, LOW);
-  notifyStatus("Трансляция не ведется");
+String extractJsonStringField(const String& json, const String& key) {
+  String token = "\"" + key + "\"";
+  int keyPos = json.indexOf(token);
+  if (keyPos < 0) return "";
+
+  int colonPos = json.indexOf(':', keyPos + token.length());
+  if (colonPos < 0) return "";
+
+  int firstQuote = json.indexOf('"', colonPos + 1);
+  if (firstQuote < 0) return "";
+
+  int secondQuote = firstQuote + 1;
+  while (secondQuote < json.length()) {
+    if (json[secondQuote] == '"' && json[secondQuote - 1] != '\\') break;
+    secondQuote++;
+  }
+  if (secondQuote >= json.length()) return "";
+
+  String value = json.substring(firstQuote + 1, secondQuote);
+  value.replace("\\\"", "\"");
+  value.replace("\\\\", "\\");
+  return value;
 }
 
-const char *findJsonField(const char *json, const char *field) {
-  char pattern[32];
-  snprintf(pattern, sizeof(pattern), "\"%s\":", field);
-  return strstr(json, pattern);
-}
+bool extractJsonIntField(const String& json, const String& key, int& outValue) {
+  String token = "\"" + key + "\"";
+  int keyPos = json.indexOf(token);
+  if (keyPos < 0) return false;
 
-bool parseJsonIntField(const char *json, const char *field, int &outValue) {
-  const char *fieldPos = findJsonField(json, field);
-  if (!fieldPos) return false;
-  const char *valuePos = fieldPos + strlen(field) + 3; // "<field>":
-  char *endPtr = nullptr;
-  long parsed = strtol(valuePos, &endPtr, 10);
-  if (endPtr == valuePos) return false;
-  outValue = static_cast<int>(parsed);
+  int colonPos = json.indexOf(':', keyPos + token.length());
+  if (colonPos < 0) return false;
+
+  int start = colonPos + 1;
+  while (start < json.length() && (json[start] == ' ' || json[start] == '\t')) {
+    start++;
+  }
+  if (start >= json.length()) return false;
+
+  int end = start;
+  if (json[end] == '-') end++;
+  while (end < json.length() && isDigit(json[end])) end++;
+  if (end == start || (end == start + 1 && json[start] == '-')) return false;
+
+  outValue = json.substring(start, end).toInt();
   return true;
 }
 
-bool parseJsonBoolField(const char *json, const char *field, bool &outValue) {
-  const char *fieldPos = findJsonField(json, field);
-  if (!fieldPos) return false;
-  const char *valuePos = fieldPos + strlen(field) + 3; // "<field>":
-  if (strncmp(valuePos, "true", 4) == 0) {
-    outValue = true;
-    return true;
-  }
-  if (strncmp(valuePos, "false", 5) == 0) {
-    outValue = false;
-    return true;
-  }
-  return false;
-}
-
-bool parseJsonStringField(const char *json, const char *field, char *outValue, size_t outSize) {
-  if (!outValue || outSize == 0) return false;
-  const char *fieldPos = findJsonField(json, field);
-  if (!fieldPos) return false;
-  const char *valuePos = fieldPos + strlen(field) + 3; // "<field>":
-  if (*valuePos != '"') return false;
-  valuePos++;
-  const char *endQuote = strchr(valuePos, '"');
-  if (!endQuote) return false;
-  size_t len = static_cast<size_t>(endQuote - valuePos);
-  if (len >= outSize) return false;
-  memcpy(outValue, valuePos, len);
-  outValue[len] = '\0';
-  return true;
-}
-
-bool buildBroadcastSsid(const char *base, bool dot, char *out, size_t outSize) {
-  if (!base || !out || outSize == 0) return false;
-  if (!dot) {
-    size_t len = strnlen(base, outSize);
-    if (len >= outSize) return false;
-    memcpy(out, base, len);
-    out[len] = '\0';
-    return true;
-  }
-  if (outSize < 2) return false;
-  out[0] = '.';
-  size_t baseLen = strnlen(base, outSize - 1);
-  if (baseLen + 1 >= outSize) return false;
-  memcpy(out + 1, base, baseLen);
-  out[baseLen + 1] = '\0';
-  return true;
-}
-
-void fillValidRandomMac(uint8_t outMac[6]) {
-  for (int i = 0; i < 6; i++) {
-    outMac[i] = random(256);
-  }
-  // Locally administered unicast MAC:
-  // bit0=0 (unicast), bit1=1 (locally administered)
-  outMac[0] = (outMac[0] & 0xFE) | 0x02;
-}
-
-void preparePackets(const char *targetSsid, int targetSsidLen) {
-  ssidLen = targetSsidLen;
-  memcpy(currentSsid, targetSsid, static_cast<size_t>(ssidLen));
-  currentSsid[ssidLen] = '\0';
-
-  for (int j = 0; j < NETWORK_COUNT; j++) {
+void rebuildPacketsForCurrentSsid() {
+  for (int j = 0; j < 12; j++) {
     packet[j][0] = 0x80;
     packet[j][1] = packet[j][2] = packet[j][3] = packet[j][29] = packet[j][30] = packet[j][31] = packet[j][33] = packet[j][36] = 0x00;
     packet[j][4] = packet[j][5] = packet[j][6] = packet[j][7] = packet[j][8] = packet[j][9] = 0xff;
@@ -160,260 +119,326 @@ void preparePackets(const char *targetSsid, int targetSsidLen) {
     packet[j][14] = packet[j][20] = macs[j][4];
     packet[j][15] = packet[j][21] = macs[j][5];
 
-    int suffixSpaces = j;
-    if (ssidLen + suffixSpaces > MAX_VISIBLE_SSID_LEN) {
-      suffixSpaces = MAX_VISIBLE_SSID_LEN - ssidLen;
-      if (suffixSpaces < 0) {
-        suffixSpaces = 0;
-      }
-    }
+    packet[j][37] = ssidLen + j;
 
-    packet[j][37] = ssidLen + suffixSpaces;
     int packetLength = 38;
-
     for (int i = 0; i < ssidLen; i++) {
-      packet[j][packetLength + i] = targetSsid[i];
+      packet[j][packetLength + i] = ssid[i];
     }
-    packetLength += ssidLen;
+    packetLength = packetLength + ssidLen;
 
-    if (suffixSpaces > 0) {
-      for (int i = 0; i < suffixSpaces; i++) {
-        packet[j][packetLength + i] = 0x20; // space
+    if (j > 0) {
+      for (int i = 0; i < j; i++) {
+        packet[j][packetLength + i] = 0x20; // Пробел
       }
-      packetLength += suffixSpaces;
+      packetLength = packetLength + j;
     }
 
-    // DS Parameter Set IE: [id=3][len=1][channel]
-    packet[j][packetLength] = 0x03;
-    packet[j][packetLength + 1] = 0x01;
-    packet[j][packetLength + 2] = j + 1;
+    packet[j][packetLength] = j + 1; // channel
   }
 }
 
-void sendBeacon(uint8_t channel) {
-  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-  int j = channel - 1;
-
-  int suffixSpaces = j;
-  if (ssidLen + suffixSpaces > MAX_VISIBLE_SSID_LEN) {
-    suffixSpaces = MAX_VISIBLE_SSID_LEN - ssidLen;
-    if (suffixSpaces < 0) {
-      suffixSpaces = 0;
-    }
-  }
-  int packetSize = 41 + ssidLen + suffixSpaces;
-  if (packetSize > static_cast<int>(PACKET_BUFFER_SIZE)) {
-    packetSize = PACKET_BUFFER_SIZE;
-  }
-
-  esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
-  esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
+void stopBroadcastAndNotify() {
+  digitalWrite(ledPin, LOW);
+  ssid = "";
+  ssidLen = 0;
+  pDeviceStatusCharacteristic->setValue(ACK_STOP);
+  pDeviceStatusCharacteristic->notify();
 }
 
-String buildWifiListPayload() {
-  int n = WiFi.scanNetworks();
-  if (n <= 0) {
-    return "";
-  }
-
-  String out = "";
-  for (int i = 0; i < n; i++) {
-    String name = WiFi.SSID(i);
-    if (name.length() == 0) {
-      continue;
-    }
-
-    String candidate = (out.length() == 0) ? name : (out + "||" + name);
-    if (candidate.length() > static_cast<int>(MAX_WIFI_LIST_PAYLOAD)) {
-      break;
-    }
-    out = candidate;
-  }
-
-  return out;
+void startBroadcastFromValues(const String& nextSsid, unsigned long nextInterval) {
+  interval = nextInterval;
+  ssid = nextSsid;
+  ssidLen = ssid.length();
+  digitalWrite(ledPin, HIGH);
+  previousMillis = millis();
+  rebuildPacketsForCurrentSsid();
+  pDeviceStatusCharacteristic->setValue(ACK_START);
+  pDeviceStatusCharacteristic->notify();
 }
 
-class MyServerCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer *server) override {
+bool parseIncomingCommand(
+  const String& rawCommand,
+  bool& outStart,
+  bool& outStop,
+  String& outSsid,
+  unsigned long& outInterval,
+  const char*& outError
+) {
+  outStart = false;
+  outStop = false;
+  outSsid = "";
+  outInterval = 0;
+  outError = NULL;
+
+  String command = rawCommand;
+  command.trim();
+  if (command.length() == 0) {
+    outError = NACK_INVALID_PAYLOAD;
+    return false;
+  }
+
+  // v1 JSON protocol only:
+  // {"v":1,"cmd":"start","ssid":"TEXT","durationMin":3}
+  // {"v":1,"cmd":"stop"}
+  if (!command.startsWith("{")) {
+    outError = NACK_INVALID_PAYLOAD;
+    return false;
+  }
+
+  int version = 0;
+  if (!extractJsonIntField(command, "v", version)) {
+    outError = NACK_INVALID_PAYLOAD;
+    return false;
+  }
+  if (version != 1) {
+    outError = NACK_UNSUPPORTED_VERSION;
+    return false;
+  }
+
+  String cmd = extractJsonStringField(command, "cmd");
+  cmd.toLowerCase();
+  if (cmd == "stop") {
+    outStop = true;
+    return true;
+  }
+  if (cmd != "start") {
+    outError = NACK_INVALID_COMMAND;
+    return false;
+  }
+
+  String parsedSsid = extractJsonStringField(command, "ssid");
+  if (parsedSsid.length() == 0) parsedSsid = "Hacked";
+  if (parsedSsid.length() > maxSafeSsidLen) {
+    outError = NACK_SSID_TOO_LONG;
+    return false;
+  }
+
+  int durationMin = 3;
+  if (extractJsonIntField(command, "durationMin", durationMin)) {
+    if (durationMin < 0) durationMin = 0;
+  }
+
+  outStart = true;
+  outSsid = parsedSsid;
+  outInterval = (unsigned long)durationMin * 60000UL;
+  return true;
+}
+
+class MyServerCallbacks: public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) {
     deviceConnected = true;
-    wifiSpotsSent = false;
-    wifiScanStartedAtMs = millis();
-    notifyStatus("Трансляция не ведется");
+    wifiSpotsSended = false;
+    previousMillisforWifiSpots = millis();
+    pDeviceStatusCharacteristic->setValue("Трансляция не ведется");
+    pDeviceStatusCharacteristic->notify();
   }
-
-  void onDisconnect(BLEServer *server) override {
+  void onDisconnect(BLEServer* pServer) {
     deviceConnected = false;
-    wifiSpotsSent = false;
-    wifiScanStartedAtMs = 0;
-    stopSpam();
-    server->startAdvertising();
-    notifyStatus("Отключено");
+    wifiSpotsSended= false;
+    previousMillisforWifiSpots = 0;
+    pDeviceStatusCharacteristic->setValue("Отключено");
+    pDeviceStatusCharacteristic->notify();
   }
 };
 
 class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *spotNameChar) override {
-    if (!deviceConnected) {
-      return;
-    }
+    void onWrite(BLECharacteristic* pSpotNameCharacteristic) {
+      if (deviceConnected) {
+        if (pSpotNameCharacteristic->getValue().length() > 0) {
+          String command = decodeStringWithCyrillic((uint8_t*)pSpotNameCharacteristic->getValue().c_str(), pSpotNameCharacteristic->getValue().length());
+          bool isStart = false;
+          bool isStop = false;
+          String nextSsid = "";
+          unsigned long nextInterval = 0;
+          const char* errorCode = NULL;
 
-    String command = spotNameChar->getValue();
-    if (command.length() == 0) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
-    }
+          if (!parseIncomingCommand(command, isStart, isStop, nextSsid, nextInterval, errorCode)) {
+            pDeviceStatusCharacteristic->setValue(errorCode ? errorCode : NACK_INVALID_PAYLOAD);
+            pDeviceStatusCharacteristic->notify();
+            return;
+          }
 
-    const char *payload = command.c_str();
-    int version = 0;
-    char cmd[16] = {0};
+          if (isStop) {
+            stopBroadcastAndNotify();
+            return;
+          }
 
-    if (!parseJsonIntField(payload, "v", version)) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
+          if (isStart) {
+            startBroadcastFromValues(nextSsid, nextInterval);
+          }
+        }
+      }
     }
-    if (version != PROTOCOL_VERSION) {
-      notifyStatus("NACK_UNSUPPORTED_VERSION");
-      return;
-    }
-    if (!parseJsonStringField(payload, "cmd", cmd, sizeof(cmd))) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
-    }
-
-    if (strcmp(cmd, "stop") == 0) {
-      notifyStatus("ACK_STOP");
-      stopSpam();
-      return;
-    }
-
-    if (strcmp(cmd, "start") != 0) {
-      notifyStatus("NACK_INVALID_COMMAND");
-      return;
-    }
-
-    char parsedSsid[MAX_FAKE_SSID_LEN + 1] = {0};
-    int parsedDurationMin = DEFAULT_DURATION_MIN;
-    bool parsedDot = false;
-
-    if (!parseJsonStringField(payload, "ssid", parsedSsid, sizeof(parsedSsid))) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
-    }
-    parseJsonIntField(payload, "durationMin", parsedDurationMin);
-    parseJsonBoolField(payload, "dot", parsedDot);
-
-    char broadcastSsid[MAX_VISIBLE_SSID_LEN + 1] = {0};
-    if (!buildBroadcastSsid(parsedSsid, parsedDot, broadcastSsid, sizeof(broadcastSsid))) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
-    }
-    size_t broadcastLen = strnlen(broadcastSsid, sizeof(broadcastSsid));
-    if (broadcastLen == 0) {
-      notifyStatus("NACK_INVALID_PAYLOAD");
-      return;
-    }
-    if (
-        broadcastLen > static_cast<size_t>(MAX_FAKE_SSID_LEN) ||
-        broadcastLen > static_cast<size_t>(MAX_VISIBLE_SSID_LEN)
-    ) {
-      notifyStatus("NACK_SSID_TOO_LONG");
-      return;
-    }
-    if (parsedDurationMin <= 0) {
-      parsedDurationMin = DEFAULT_DURATION_MIN;
-    }
-
-    notifyStatus("ACK_START");
-    spamDurationMs = static_cast<unsigned long>(parsedDurationMin) * 60000UL;
-    spamStartedAtMs = millis();
-    preparePackets(broadcastSsid, static_cast<int>(broadcastLen));
-
-    digitalWrite(LED_PIN, HIGH);
-    notifyStatus(String("Идет трансляция: ") + String(currentSsid));
-  }
 };
 
 void setup() {
   Serial.begin(115200);
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
+  pinMode(ledPin, OUTPUT);
 
-  // Prepare radio for both scan and raw beacon tx
-  WiFi.mode(WIFI_MODE_APSTA);
+  // +Fake Wi-Fi
+  WiFi.mode(WIFI_AP);
   esp_wifi_set_promiscuous(true);
-
-  randomSeed(esp_random());
-  for (int i = 0; i < NETWORK_COUNT; i++) {
-    fillValidRandomMac(macs[i]);
+  for (int i = 0; i < 12; i++) {
+    for (int j = 0; j < 6; j++) {
+      macs[i][j] = random(256);
+    }
   }
 
-  BLEDevice::init(DEVICE_NAME);
+  // Create the BLE Device
+  BLEDevice::init("Hacker");
 
+  // Create the BLE Server
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-
+  // Create the BLE Service
+  // BLEService *pService = pServer->createService(SERVICE_UUID);
   BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID));
-
+  // Create a BLE Characteristic
   pDeviceStatusCharacteristic = pService->createCharacteristic(
-      BLEUUID(DEVICE_STATUS_CHARACTERISTIC_UUID),
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
-
+    BLEUUID(DEVICE_STATUS_CHARACTERISTIC_UUID),
+    BLECharacteristic::PROPERTY_READ   |
+    // BLECharacteristic::PROPERTY_WRITE  |
+    BLECharacteristic::PROPERTY_NOTIFY |
+    BLECharacteristic::PROPERTY_INDICATE
+  );
   pWifiSpotsListCharacteristic = pService->createCharacteristic(
-      BLEUUID(WIFI_SPOTS_LIST_CHARACTERISTIC_UUID),
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+    BLEUUID(WiFi_SPOTS_LIST_CHARACTERISTIC_UUID),
+    BLECharacteristic::PROPERTY_READ   |
+    BLECharacteristic::PROPERTY_WRITE  |
+    BLECharacteristic::PROPERTY_NOTIFY |
+    BLECharacteristic::PROPERTY_INDICATE
+  );
+  // pWifiSpotsListCharacteristic = pService->createCharacteristic(
+  //                     WiFi_SPOTS_LIST_CHARACTERISTIC_UUID,
+  //                     BLECharacteristic::PROPERTY_READ   |
+  //                     BLECharacteristic::PROPERTY_WRITE  |
+  //                     BLECharacteristic::PROPERTY_NOTIFY |
+  //                     BLECharacteristic::PROPERTY_INDICATE
+  //                   );
 
+  // Create the ON button Characteristic
   pSpotNameCharacteristic = pService->createCharacteristic(
-      BLEUUID(SPOT_NAME_CHARACTERISTIC_UUID),
-      BLECharacteristic::PROPERTY_WRITE);
-
+    BLEUUID(SPOT_NAME_CHARACTERISTIC_UUID),
+    BLECharacteristic::PROPERTY_WRITE
+  );
+  // Register the callback for the ON button characteristic
   pSpotNameCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
 
+  // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
+  // Create a BLE Descriptor
   pDeviceStatusCharacteristic->addDescriptor(new BLE2902());
   pWifiSpotsListCharacteristic->addDescriptor(new BLE2902());
   pSpotNameCharacteristic->addDescriptor(new BLE2902());
-
+  // Start the service
   pService->start();
-
+  // Start advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
   pAdvertising->setScanResponse(false);
-  pAdvertising->setMinPreferred(0x00);
+  pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
-
-  notifyStatus("Отключено");
+ // Serial.println(F("Waiting a client connection to notify..."));
 }
 
 void loop() {
-  // On initial connect: send nearby Wi-Fi list once within 3 seconds.
-  if (deviceConnected && ssidLen == 0 && !wifiSpotsSent) {
-    unsigned long now = millis();
-    if (now - wifiScanStartedAtMs <= 3000UL) {
-      String spots = buildWifiListPayload();
-      pWifiSpotsListCharacteristic->setValue(spots.c_str());
-      pWifiSpotsListCharacteristic->notify();
-      wifiSpotsSent = true;
-    }
-  }
-
-  // Spam beacons while active.
-  if (ssidLen > 0) {
-    unsigned long now = millis();
-    if (now - spamStartedAtMs <= spamDurationMs) {
-      uint8_t channel = 1;
-      for (int i = 0; i < NETWORK_COUNT; i++) {
-        sendBeacon(channel);
-        channel++;
-        if (channel > 12) {
-          channel = 1;
+    // notify changed value
+    if (deviceConnected && ssid == "" && !wifiSpotsSended) {
+      unsigned long currentMillis = millis();
+      if (currentMillis - previousMillisforWifiSpots <= 3000) {
+        // previousMillisforWifiSpots = currentMillis;    
+        // Serial.println("scan start");
+        // WiFi.scanNetworks will return the number of networks found
+        int n = WiFi.scanNetworks();
+        // Serial.println("scan done");
+        if (n == 0) {
+            // Serial.println("no networks found");
+            pWifiSpotsListCharacteristic->setValue({});
+        } else {
+          // Serial.print(n);
+          // Serial.println(" networks found");
+          String results = "";
+          for (int i = 0; i < n; ++i) {
+            if (i == 0) 
+              results = WiFi.SSID(i);
+            else
+              results += "||" + WiFi.SSID(i);
+            // Print SSID and RSSI for each network found
+            // Serial.print(i + 1);
+            // Serial.print(": ");
+            // Serial.print(WiFi.SSID(i));
+            // Serial.print(" (");
+            // Serial.print(WiFi.RSSI(i));
+            // Serial.print(")");
+            // Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+            // delay(10);
+          }
+          pWifiSpotsListCharacteristic->setValue({ results.c_str() });   
         }
+        pWifiSpotsListCharacteristic->notify();
+        wifiSpotsSended = true;
+        // Serial.println("");
+      }
+        // pWifiSpotsListCharacteristic->setValue(String(value).c_str());
+        // pWifiSpotsListCharacteristic->notify();
+        // value++;
+        // Serial.print(F("New value notified: "));
+        // Serial.println(value);
+        // delay(3000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    }
+    // disconnecting
+    if (!deviceConnected && oldDeviceConnected) {
+      // Serial.println(F("Device disconnected."));
+      // delay(500); // give the bluetooth stack the chance to get things ready
+      pServer->startAdvertising(); // restart advertising
+      // Serial.println(F("Start advertising"));
+      oldDeviceConnected = deviceConnected;
+    }
+    // connecting
+    if (deviceConnected && !oldDeviceConnected) {
+      // do stuff here on connecting
+      oldDeviceConnected = deviceConnected;
+      // Serial.println(F("Device Connected"));
+    }
+
+  uint8_t channel = 1;
+  
+  if (ssid != "") {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis <= interval) {
+      for (int i = 1; i < networkCount; i++) {
+        if (channel == 12) {
+          channel = 1;
+        } else {
+          channel++;
+        }
+        sendBeacon(channel);
       }
     } else {
-      stopSpam();
+      ssid = "";
+      ssidLen = 0;
+      digitalWrite(ledPin, LOW);
     }
   }
 }
+
+  void sendBeacon(uint8_t channel) {
+    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+
+    int j = channel - 1;
+
+    // Set MAC Address
+    packet[j][10] = packet[j][16] = random(256);
+    packet[j][11] = packet[j][17] = random(256);
+    packet[j][12] = packet[j][18] = random(256);
+    packet[j][13] = packet[j][19] = random(256);
+    packet[j][14] = packet[j][20] = random(256);
+    packet[j][15] = packet[j][21] = random(256);
+   
+    int packetSize = 39 + ssidLen + j;  
+
+    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
+    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
+    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
+    // delay(1);
+  }

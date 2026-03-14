@@ -1,13 +1,13 @@
 # Hacker 2.0 Config Server (MongoDB)
 
-Готовый backend для динамической загрузки экранов по access code.
+Backend для динамической загрузки экранов по access code.
 
 ## Что умеет
 - `GET /api/show-config?code=...` для мобильного приложения
-- коды доступа в MongoDB (храним только hash, не plaintext)
+- хранение access-code только в hash виде (без plaintext)
 - привязка кода к версии конфигурации
 - админ API с `x-admin-key`
-- rate limit на публичный API
+- встроенная админ-страница `/admin/`
 
 ## 1. Установка
 ```bash
@@ -20,7 +20,7 @@ cp .env.example .env
 - `MONGODB_URI`
 - `ADMIN_API_KEY`
 - `ACCESS_CODE_PEPPER`
-- `CORS_ORIGIN=https://hacker20.escalion.ru`
+- `CORS_ORIGIN=https://your-domain.example`
 
 ## 2. Запуск
 ```bash
@@ -34,42 +34,34 @@ curl http://127.0.0.1:8080/api/health
 
 ## 3. Seed стартовых данных
 ```bash
-npm run seed -- escalion
+npm run seed -- demo-code
 ```
 
-Это создаст:
-- конфиг `templateId=escalion`
-- код `escalion` (hashed) привязанный к этому конфигу
-
-Для профиля Fert:
-```bash
-npm run seed -- fertVlad
-```
-Создаст конфиг `templateId=fertVlad` с `templateName=One Plus`.
+Это создаст тестовый конфиг и привязанный к нему тестовый код.
 
 ## 4. Публичный API
 
-### `GET /api/show-config?code=escalion`
+### `GET /api/show-config?code=demo-code`
 
 Успех (`200`):
 ```json
 {
   "schemaVersion": 1,
-  "version": "2026-03-04.1",
-  "updatedAt": "2026-03-04T10:45:00.000Z",
+  "version": "2026-03-14.1",
+  "updatedAt": "2026-03-14T10:45:00.000Z",
   "profile": {
-    "id": "escalion",
-    "displayName": "Алексей Белинский"
+    "id": "demo-code",
+    "displayName": "Demo User"
   },
-  "templateId": "escalion",
-  "templateName": "Samsung OneUi 8",
+  "templateId": "onePlus",
+  "templateName": "One Plus",
   "payload": {
     "operatorProfile": {
-      "fullName": "Алексей Белинский",
-      "avatarUrl": "https://..."
+      "fullName": "Demo User",
+      "avatarUrl": "https://example.com/avatar.png"
     },
     "templateMeta": {
-      "title": "Samsung OneUi 8"
+      "title": "One Plus"
     }
   }
 }
@@ -84,10 +76,19 @@ npm run seed -- fertVlad
 ```json
 {
   "schemaVersion": 1,
-  "version": "2026-03-05.1",
-  "templateId": "escalion",
-  "profile": { "id": "escalion", "displayName": "Алексей Белинский" },
-  "payload": {}
+  "version": "2026-03-14.1",
+  "templateId": "onePlus",
+  "templateName": "One Plus",
+  "profile": { "id": "demo-code", "displayName": "Demo User" },
+  "payload": {
+    "operatorProfile": {
+      "fullName": "Demo User",
+      "avatarUrl": "https://example.com/avatar.png"
+    },
+    "templateMeta": {
+      "title": "One Plus"
+    }
+  }
 }
 ```
 
@@ -95,7 +96,7 @@ npm run seed -- fertVlad
 `POST /api/admin/access-codes`
 ```json
 {
-  "code": "my-secret-code",
+  "code": "demo-code",
   "configId": "OBJECT_ID_FROM_CONFIG"
 }
 ```
@@ -104,7 +105,7 @@ npm run seed -- fertVlad
 `POST /api/admin/access-codes/bind`
 ```json
 {
-  "code": "my-secret-code",
+  "code": "demo-code",
   "configId": "OBJECT_ID_FROM_CONFIG"
 }
 ```
@@ -113,77 +114,39 @@ npm run seed -- fertVlad
 `POST /api/admin/access-codes/revoke`
 ```json
 {
-  "code": "my-secret-code"
+  "code": "demo-code"
 }
 ```
 
-### Обновить ФИО/аватар по коду (без Mongo)
+### Обновить ФИО/аватар по accessCodeId или code
 `POST /api/admin/operator-profile`
 ```json
 {
-  "code": "escalion",
-  "fullName": "Алексей Белинский",
-  "avatarUrl": "https://hacker20.escalion.ru/static/alex.jpg",
-  "templateTitle": "Samsung OneUi 8"
+  "accessCodeId": "OBJECT_ID_FROM_ACCESS_CODES",
+  "fullName": "Demo User Updated",
+  "avatarUrl": "https://example.com/new-avatar.png",
+  "templateTitle": "One Plus"
 }
 ```
 
 ### Список кодов
 `GET /api/admin/access-codes`
 
-## 6. Деплой на `hacker20.escalion.ru`
-
-### DNS
-- создайте `A` запись:
-  - `hacker20.escalion.ru -> <IP вашего VPS>`
-
-### Reverse proxy (Nginx)
-Пример конфига:
-```nginx
-server {
-  listen 80;
-  server_name hacker20.escalion.ru;
-
-  location / {
-    proxy_pass http://127.0.0.1:8080;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
-}
-```
-
-### SSL
-```bash
-sudo certbot --nginx -d hacker20.escalion.ru
-```
-
-### PM2 (опционально)
-```bash
-npm i -g pm2
-pm2 start src/index.js --name hacker20-api
-pm2 save
-pm2 startup
-```
+## 6. Встроенная мини-админка
+- URL: `https://your-domain.example/admin/`
+- Вверху страницы нужно ввести `ADMIN_API_KEY`.
+- Ключевые действия:
+  - создать конфиг и автоматически привязать code
+  - обновить профиль пользователя через dropdown
+  - посмотреть список активных кодов
 
 ## 7. Подключение мобильного приложения
 В `mobile/.env`:
 ```bash
-EXPO_PUBLIC_CONFIG_API_BASE_URL=https://hacker20.escalion.ru/api
+EXPO_PUBLIC_CONFIG_API_BASE_URL=https://your-domain.example/api
 ```
-
-## 8. Встроенная мини-админка
-- URL: `https://hacker20.escalion.ru/admin/`
-- Вверху страницы вставьте `ADMIN_API_KEY`.
-- Доступные действия:
-  - обновление ФИО/аватара по коду
-  - создание `ShowConfig`
-  - создание `AccessCode`
-  - просмотр списка кодов
 
 ## Безопасность (минимум)
 - используйте длинные `ADMIN_API_KEY` и `ACCESS_CODE_PEPPER`
-- ограничьте доступ к админ API по IP (через Nginx)
-- не логируйте plaintext коды доступа
+- ограничьте доступ к `/api/admin/*` по IP (через reverse proxy)
+- не логируйте plaintext access-codes

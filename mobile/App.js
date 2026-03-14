@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform, SafeAreaView, StatusBar as RNStatusBar, StyleSheet, Text, View } from 'react-native';
+import { Platform, SafeAreaView, StatusBar as RNStatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import BottomTabs from './src/components/BottomTabs';
 import AccessCodeGateScreen from './src/screens/AccessCodeGateScreen';
@@ -12,11 +12,13 @@ import { cacheAvatarLocally } from './src/services/config/avatarCache';
 import { SettingsProvider, useSettings } from './src/state/SettingsContext';
 import { colors } from './src/theme/tokens';
 import {
+  buildCardCode,
   resolvePhoneModelByAccessCode,
   resolvePhoneModelByTemplateId,
 } from './src/show/accessProfiles';
 
 function AppContent() {
+  const systemScheme = useColorScheme();
   const [tab, setTab] = useState('show');
   const [bleConnected, setBleConnected] = useState(bleService.isConnected());
   const [bluetoothOn, setBluetoothOn] = useState(bleService.isBluetoothPoweredOn());
@@ -35,11 +37,22 @@ function AppContent() {
     (settings.phoneModel || '').trim() ||
     resolvePhoneModelByAccessCode(effectiveAccessCode);
   const hasValidCode = Boolean(effectiveAccessCode && effectivePhoneModel);
+  const learnCardCode = buildCardCode(settings.cardRankIndex, settings.cardMastIndex);
   const showScreenBottomPadding =
     tab === 'show' &&
     (effectivePhoneModel === 'onePlus' || effectivePhoneModel === 'huawei')
       ? 0
       : bottomInset;
+  const showScreenBg = effectivePhoneModel === 'huawei' ? '#eceef1' : '#000';
+  const appSurfaceBg = tab === 'show' ? showScreenBg : colors.bg;
+  const statusBarStyle =
+    tab === 'show'
+      ? effectivePhoneModel === 'huawei'
+        ? 'dark'
+        : 'light'
+      : systemScheme === 'dark'
+        ? 'light'
+        : 'dark';
 
   const getBleDotColor = () => {
     if (!bluetoothOn) return '#2f76ff';
@@ -206,7 +219,7 @@ function AppContent() {
 
   if (!hasValidCode) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: '#000' }]}>
         <StatusBar style="light" />
         <View style={[styles.main, { paddingTop: topInset, backgroundColor: '#000' }]}>
           <AccessCodeGateScreen
@@ -225,13 +238,13 @@ function AppContent() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+    <SafeAreaView style={[styles.safe, { backgroundColor: appSurfaceBg }]}>
+      <StatusBar style={statusBarStyle} />
       <View
         style={[
           styles.main,
           {
-            backgroundColor: tab === 'show' ? '#000' : colors.bg,
+            backgroundColor: appSurfaceBg,
             paddingTop: topInset,
             paddingBottom: tab === 'show' ? showScreenBottomPadding : 0,
           },
@@ -248,6 +261,14 @@ function AppContent() {
               },
             ]}
           />
+        ) : null}
+        {tab === 'show' && settings.learn ? (
+          <View
+            pointerEvents="none"
+            style={[styles.learnCodeBadge, { top: topInset + 8 }]}
+          >
+            <Text style={styles.learnCodeText}>Код: {learnCardCode}</Text>
+          </View>
         ) : null}
         {tab === 'control' ? (
           <ControlScreen settings={{ ...settings, accessCode: effectiveAccessCode }} />
@@ -306,5 +327,23 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#8a8a8a',
     zIndex: 9999,
+  },
+  learnCodeBadge: {
+    position: 'absolute',
+    left: 8,
+    paddingHorizontal: 8,
+    minHeight: 22,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(12,15,22,0.72)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    zIndex: 10000,
+  },
+  learnCodeText: {
+    color: '#f6f8ff',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
