@@ -55,7 +55,7 @@ function NavRow({ title, noBorder }) {
   )
 }
 
-export default function EscalionConnectionsPage({
+export default function SamsungOneUi8ConnectionsPage({
   setPage,
   scrollY,
   cardCode,

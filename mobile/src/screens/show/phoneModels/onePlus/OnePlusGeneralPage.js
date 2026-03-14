@@ -1,12 +1,31 @@
 import React, { useRef } from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-  Feather,
-} from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons'
 import { Image } from 'react-native'
+
+const NETWORK_ICON = require('../../../../icons/vladFert/Network.png')
+const CONNECTIONS_ICON = require('../../../../icons/vladFert/Connections.png')
+const GENERAL_SCREEN_ICON = require('../../../../icons/vladFert/GeneralScreen.png')
+const SCREEN_ICON = require('../../../../icons/vladFert/Screen.png')
+const SOUND_ICON = require('../../../../icons/vladFert/Sound.png')
+const NOTIFICATIONS_ICON = require('../../../../icons/vladFert/Notifications.png')
+const DEFEND_ICON = require('../../../../icons/vladFert/Defend.png')
+const SOS_ICON = require('../../../../icons/vladFert/SOS.png')
+const GPS_ICON = require('../../../../icons/vladFert/GPS.png')
+const PARENT_CONTROL_ICON = require('../../../../icons/vladFert/ParentControl.png')
+const BATTERY_ICON = require('../../../../icons/vladFert/Battery.png')
+const PLUS_KEY_ICON = require('../../../../icons/vladFert/PlusKey.png')
+const SPECIAL_ICON = require('../../../../icons/vladFert/Special.png')
+const ONEPLUS_ICON = require('../../../../icons/vladFert/OnePlus.png')
+const REFERENCE_ICON = require('../../../../icons/vladFert/Reference.png')
+const ABOUT_ICON = require('../../../../icons/vladFert/About.png')
+const ACCOUNTS_ICON = require('../../../../icons/vladFert/Accounts.png')
+const GOOGLE_ICON = require('../../../../icons/vladFert/Google.png')
+
+const HEADER_HEIGHT_MAX = 110
+const HEADER_HEIGHT_MIN = 66
+const TITLE_SIZE_MAX = 34
+const TITLE_SIZE_MIN = 22
 
 function SwitchMock({ on }) {
   return (
@@ -142,7 +161,7 @@ function ProfileRow({ title, subtitle, avatarUri }) {
   )
 }
 
-export default function FertVladGeneralPage({
+export default function OnePlusGeneralPage({
   settings,
   onChange,
   setPage,
@@ -150,6 +169,21 @@ export default function FertVladGeneralPage({
   onOpenSettings,
 }) {
   const hasManualRankSelectionRef = useRef(false)
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [HEADER_HEIGHT_MAX, HEADER_HEIGHT_MIN],
+    extrapolate: 'clamp',
+  })
+  const headerPaddingBottom = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [12, 8],
+    extrapolate: 'clamp',
+  })
+  const titleFontSize = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [TITLE_SIZE_MAX, TITLE_SIZE_MIN],
+    extrapolate: 'clamp',
+  })
 
   const setRankSegment = (base, segment) => {
     hasManualRankSelectionRef.current = true
@@ -172,19 +206,29 @@ export default function FertVladGeneralPage({
 
   return (
     <View style={styles.page}>
+      <Animated.View
+        style={[
+          styles.stickyHeader,
+          { height: headerHeight, paddingBottom: headerPaddingBottom },
+        ]}
+      >
+        <Animated.Text
+          style={[styles.headerTitle, { fontSize: titleFontSize }]}
+        >
+          Настройки
+        </Animated.Text>
+      </Animated.View>
       <Animated.ScrollView
         contentContainerStyle={styles.scroll}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true },
+          { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headerTitle}>Настройки</Text>
-
         <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={21} color="#777c84" />
+          <Ionicons name="search-outline" size={20} color="#777c84" />
           <Text style={styles.searchText}>Поиск</Text>
         </View>
 
@@ -228,13 +272,7 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Мобильная сеть"
-            icon={
-              <MaterialCommunityIcons
-                name="signal-cellular-2"
-                size={22}
-                color="#32c244"
-              />
-            }
+            icon={<Image source={NETWORK_ICON} style={styles.onePlusIcon} />}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(0, segment)}
             showLearnOverlay={settings.learn}
@@ -243,11 +281,7 @@ export default function FertVladGeneralPage({
           <Row
             title="Подключение к устройствам"
             icon={
-              <MaterialCommunityIcons
-                name="access-point-network"
-                size={21}
-                color="#1e6cff"
-              />
+              <Image source={CONNECTIONS_ICON} style={styles.onePlusIcon} />
             }
             noBorder
             segmentCount={4}
@@ -261,11 +295,7 @@ export default function FertVladGeneralPage({
           <Row
             title="Главный экран, экран блокировки и стиль"
             icon={
-              <MaterialCommunityIcons
-                name="gesture-swipe"
-                size={20}
-                color="#ff971d"
-              />
+              <Image source={GENERAL_SCREEN_ICON} style={styles.onePlusIcon} />
             }
             segmentCount={2}
             onSegmentTouch={(segment) => setRankSegment(12, segment)}
@@ -274,13 +304,7 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Экран и яркость"
-            icon={
-              <MaterialCommunityIcons
-                name="white-balance-sunny"
-                size={20}
-                color="#f0ba08"
-              />
-            }
+            icon={<Image source={SCREEN_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
@@ -288,16 +312,12 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="Звуки и вибрация"
-            icon={<Feather name="bell" size={20} color="#29bf37" />}
+            icon={<Image source={SOUND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Уведомления и быстрые настройки"
             icon={
-              <MaterialIcons
-                name="notifications-none"
-                size={21}
-                color="#2a72ff"
-              />
+              <Image source={NOTIFICATIONS_ICON} style={styles.onePlusIcon} />
             }
             noBorder
           />
@@ -306,32 +326,20 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="Защита и конфиденциальность"
-            icon={
-              <MaterialCommunityIcons
-                name="shield-outline"
-                size={20}
-                color="#2b6aff"
-              />
-            }
+            icon={<Image source={DEFEND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Безопасность и экстренные случаи"
-            icon={<Text style={styles.sosIcon}>SOS</Text>}
+            icon={<Image source={SOS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Местоположение"
-            icon={
-              <Ionicons name="location-outline" size={20} color="#f8bb19" />
-            }
+            icon={<Image source={GPS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Цифровое благополучие и родительский контроль"
             icon={
-              <MaterialCommunityIcons
-                name="account-group-outline"
-                size={20}
-                color="#2a72ff"
-              />
+              <Image source={PARENT_CONTROL_ICON} style={styles.onePlusIcon} />
             }
             noBorder
           />
@@ -344,27 +352,15 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Батарея"
-            icon={<Ionicons name="battery-half" size={20} color="#1ec843" />}
+            icon={<Image source={BATTERY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Plus Key"
-            icon={
-              <MaterialCommunityIcons
-                name="plus-circle-outline"
-                size={20}
-                color="#2b77ff"
-              />
-            }
+            icon={<Image source={PLUS_KEY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Специальные возможности и удобство"
-            icon={
-              <MaterialCommunityIcons
-                name="human-male-board"
-                size={20}
-                color="#ff9b17"
-              />
-            }
+            icon={<Image source={SPECIAL_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
@@ -372,7 +368,7 @@ export default function FertVladGeneralPage({
         <Block>
           <Row
             title="OnePlus AI"
-            icon={<Text style={styles.aiIcon}>1+</Text>}
+            icon={<Image source={ONEPLUS_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
@@ -386,37 +382,19 @@ export default function FertVladGeneralPage({
           />
           <Row
             title="Об устройстве"
-            icon={
-              <Ionicons
-                name="phone-portrait-outline"
-                size={20}
-                color="#20c346"
-              />
-            }
+            icon={<Image source={ABOUT_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Пользователи и аккаунты"
-            icon={<Ionicons name="person-outline" size={20} color="#2471ff" />}
+            icon={<Image source={ACCOUNTS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Google"
-            icon={
-              <MaterialCommunityIcons
-                name="google-circles"
-                size={20}
-                color="#1d68ff"
-              />
-            }
+            icon={<Image source={GOOGLE_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             title="Справка и отзывы"
-            icon={
-              <MaterialCommunityIcons
-                name="message-outline"
-                size={20}
-                color="#f0851d"
-              />
-            }
+            icon={<Image source={REFERENCE_ICON} style={styles.onePlusIcon} />}
             onPress={onOpenSettings}
             noBorder
           />
@@ -432,24 +410,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   scroll: {
-    paddingTop: 80,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 14,
+    paddingTop: HEADER_HEIGHT_MAX + 6,
+    paddingHorizontal: 18,
+    paddingBottom: 0,
+    gap: 18,
+  },
+  stickyHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: HEADER_HEIGHT_MAX,
+    backgroundColor: '#000',
+    zIndex: 40,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 18,
+    paddingBottom: 12,
   },
   headerTitle: {
     color: '#ebedf1',
-    fontSize: 38,
     fontWeight: '600',
-    marginBottom: 14,
     letterSpacing: -0.5,
   },
   searchBox: {
-    minHeight: 46,
-    borderRadius: 23,
-    backgroundColor: '#1a1c22',
-    borderWidth: 1,
-    borderColor: '#22262f',
+    minHeight: 40,
+    borderRadius: 20,
+    backgroundColor: '#1a1a1a',
+    // borderWidth: 1,
+    // borderColor: '#22262f',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -457,16 +445,16 @@ const styles = StyleSheet.create({
   },
   searchText: {
     color: '#7f848e',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '400',
   },
   block: {
     borderRadius: 26,
     overflow: 'hidden',
-    backgroundColor: '#17191f',
+    backgroundColor: '#1a1a1a',
   },
   row: {
-    minHeight: 64,
+    minHeight: 54,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -477,43 +465,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  onePlusIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
   profileRow: {
-    minHeight: 80,
+    minHeight: 70,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    borderRadius: 36,
+    borderRadius: 35,
     overflow: 'hidden',
-    backgroundColor: '#17191f',
+    backgroundColor: '#1a1a1a',
   },
   profileTextWrap: {
     flex: 1,
   },
   profileTitle: {
     color: '#f2f4f8',
-    fontSize: 17,
+    fontSize: 16,
     lineHeight: 22,
     fontWeight: '500',
   },
   profileSubtitle: {
     color: '#9ea4af',
-    fontSize: 12,
-    lineHeight: 19,
-    marginTop: 2,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 1,
   },
   profileAvatarWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     overflow: 'hidden',
     backgroundColor: '#4a4a4a',
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileAvatarImage: {
-    width: 52,
-    height: 52,
+    width: 50,
+    height: 50,
   },
   profileArrow: {
     // marginLeft: 2,
@@ -550,7 +543,7 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 0,
     height: 1,
-    backgroundColor: '#2a2e37',
+    backgroundColor: '#313131',
   },
   switchTrack: {
     width: 42,

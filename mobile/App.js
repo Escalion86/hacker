@@ -11,7 +11,10 @@ import configService from './src/services/config/configService';
 import { cacheAvatarLocally } from './src/services/config/avatarCache';
 import { SettingsProvider, useSettings } from './src/state/SettingsContext';
 import { colors } from './src/theme/tokens';
-import { resolveProfile } from './src/show/accessProfiles';
+import {
+  resolvePhoneModelByAccessCode,
+  resolvePhoneModelByTemplateId,
+} from './src/show/accessProfiles';
 
 function AppContent() {
   const [tab, setTab] = useState('show');
@@ -28,7 +31,15 @@ function AppContent() {
   const bottomInset = Platform.OS === 'android' ? 56 : 0;
   const normalizedCode = (settings.accessCode || '').trim().toLowerCase();
   const effectiveAccessCode = resolvedAccessCode || normalizedCode;
-  const hasValidCode = !!resolveProfile(effectiveAccessCode);
+  const effectivePhoneModel =
+    (settings.phoneModel || '').trim() ||
+    resolvePhoneModelByAccessCode(effectiveAccessCode);
+  const hasValidCode = Boolean(effectiveAccessCode && effectivePhoneModel);
+  const showScreenBottomPadding =
+    tab === 'show' &&
+    (effectivePhoneModel === 'onePlus' || effectivePhoneModel === 'huawei')
+      ? 0
+      : bottomInset;
 
   const getBleDotColor = () => {
     if (!bluetoothOn) return '#2f76ff';
@@ -53,9 +64,12 @@ function AppContent() {
 
     try {
       const result = await configService.resolveConfigByCode(code);
-      const profileId = String(result?.config?.profile?.id || '').trim().toLowerCase();
       const templateId = String(result?.config?.templateId || '').trim().toLowerCase();
-      const targetCode = profileId || templateId || code;
+      const targetCode = code;
+      const phoneModel =
+        resolvePhoneModelByTemplateId(templateId) ||
+        resolvePhoneModelByAccessCode(targetCode) ||
+        resolvePhoneModelByAccessCode(code);
       const operatorName = String(result?.config?.ui?.operatorName || '').trim();
       const operatorAvatarRemote = String(result?.config?.ui?.operatorAvatarUrl || '').trim();
       const templateTitle = String(result?.config?.ui?.templateTitle || '').trim();
@@ -78,13 +92,14 @@ function AppContent() {
         operatorAvatar = operatorAvatarRemote;
       }
 
-      if (!resolveProfile(targetCode)) {
-        throw new Error(`Профиль "${targetCode}" не поддерживается в текущей сборке`);
+      if (!phoneModel) {
+        throw new Error(`Модель UI для кода "${targetCode}" не поддерживается в текущей сборке`);
       }
 
       setResolvedAccessCode(targetCode);
       updateSettings({
         accessCode: targetCode,
+        phoneModel,
         showOperatorName: operatorName,
         showOperatorAvatar: operatorAvatar,
         showOperatorAvatarRemote: operatorAvatarRemote,
@@ -116,6 +131,7 @@ function AppContent() {
     } catch {}
     updateSettings({
       accessCode: '',
+      phoneModel: '',
       showOperatorName: '',
       showOperatorAvatar: '',
       showOperatorAvatarRemote: '',
@@ -217,7 +233,7 @@ function AppContent() {
           {
             backgroundColor: tab === 'show' ? '#000' : colors.bg,
             paddingTop: topInset,
-            paddingBottom: tab === 'show' ? bottomInset : 0,
+            paddingBottom: tab === 'show' ? showScreenBottomPadding : 0,
           },
         ]}
       >

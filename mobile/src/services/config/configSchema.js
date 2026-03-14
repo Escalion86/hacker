@@ -1,5 +1,17 @@
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPPORTED_TEMPLATE_IDS = new Set(['escalion', 'fertVlad', 'fertvlad']);
+const SUPPORTED_TEMPLATE_IDS = new Set([
+  'escalion',
+  'fertVlad',
+  'fertvlad',
+  'samsungOneUi8',
+  'samsungoneui8',
+  'onePlus',
+  'oneplus',
+  'huawei',
+  'huaweiEmui',
+  'huaweiemui',
+  'emui',
+]);
 
 function asObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : null;

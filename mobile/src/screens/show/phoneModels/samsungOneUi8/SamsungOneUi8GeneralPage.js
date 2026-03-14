@@ -114,7 +114,7 @@ function Row({
   )
 }
 
-export default function EscalionGeneralPage({
+export default function SamsungOneUi8GeneralPage({
   settings,
   onChange,
   onOpenSettings,

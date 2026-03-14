@@ -13,6 +13,12 @@ export default function SettingsScreen({
   refreshStatus,
   onResetActivation,
 }) {
+  const parseNonNegativeInt = (value, fallback = 0) => {
+    const parsed = Number.parseInt(String(value || '').trim(), 10);
+    if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+    return parsed;
+  };
+
   const formatCardPreview = (rawCode) => {
     const text = String(rawCode || '').trim();
     const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/);
@@ -91,6 +97,56 @@ export default function SettingsScreen({
 
       <Toggle label="Добавлять точку в начале SSID" value={settings.dot} onToggle={() => onChange({ dot: !settings.dot })} />
       <Toggle
+        label="Добавить второе слово"
+        value={Boolean(settings.secondWordEnabled)}
+        onToggle={() => onChange({ secondWordEnabled: !settings.secondWordEnabled })}
+      />
+
+      {settings.secondWordEnabled ? (
+        <View style={styles.card}>
+          <Text style={styles.label}>Второе слово</Text>
+          <TextInput
+            value={settings.secondWord}
+            onChangeText={(secondWord) => onChange({ secondWord })}
+            placeholder="SECOND"
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+          />
+          <Text style={styles.label}>Когда менять слово</Text>
+          <View style={styles.rowButtons}>
+            <Text
+              style={[
+                styles.chip,
+                settings.secondWordTrigger === 'tap' ? styles.chipActive : styles.chipIdle,
+              ]}
+              onPress={() => onChange({ secondWordTrigger: 'tap' })}
+            >
+              По нажатию на Wi-Fi
+            </Text>
+            <Text
+              style={[
+                styles.chip,
+                settings.secondWordTrigger === 'afterDelay' ? styles.chipActive : styles.chipIdle,
+              ]}
+              onPress={() => onChange({ secondWordTrigger: 'afterDelay' })}
+            >
+              После трансляции
+            </Text>
+          </View>
+
+          <Text style={styles.label}>Задержка перед вторым словом (сек)</Text>
+          <TextInput
+            keyboardType="number-pad"
+            value={String(settings.secondWordDelaySec ?? 0)}
+            onChangeText={(text) =>
+              onChange({ secondWordDelaySec: parseNonNegativeInt(text, 0) })
+            }
+            style={styles.input}
+          />
+        </View>
+      ) : null}
+
+      <Toggle
         label="Автозапуск при входе в Wi-Fi экран"
         value={settings.startOnSetWiFiPage}
         onToggle={() => onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })}
@@ -147,6 +203,7 @@ const styles = StyleSheet.create({
   rowButtons: {
     flexDirection: 'row',
     gap: spacing.sm,
+    flexWrap: 'wrap',
   },
   chip: {
     borderRadius: 999,

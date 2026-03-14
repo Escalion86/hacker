@@ -4,8 +4,13 @@ export const SETTINGS_KEY = 'hacker.settings.v1';
 
 export const defaultSettings = {
   accessCode: '',
+  phoneModel: '',
   mode: 'word',
   wifi: 'Hacked',
+  secondWordEnabled: false,
+  secondWord: '',
+  secondWordTrigger: 'tap',
+  secondWordDelaySec: 0,
   cardRankIndex: 0,
   cardMastIndex: 0,
   delay: 3,

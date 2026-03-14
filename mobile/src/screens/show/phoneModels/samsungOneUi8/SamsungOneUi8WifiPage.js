@@ -1,32 +1,12 @@
 import React from 'react'
 import { Animated, Pressable, StyleSheet, Text, UIManager, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import bleService from '../../../services/ble/bleService'
 import Svg, { Path } from 'react-native-svg'
+import { randomLevel, useWifiBroadcastFlow } from '../../shared/useWifiBroadcastFlow'
 
-const MAX_ANIMATED_SPOTS = 12
-const NOISE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*+-?'
 const HAS_NATIVE_SVG =
   Boolean(UIManager.getViewManagerConfig?.('RNSVGPath')) ||
   Boolean(UIManager.getViewManagerConfig?.('RCTRNSVGPath'))
-
-function toNumber(value, fallback = 0) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : fallback
-}
-
-function randomNoise() {
-  const size = Math.max(5, Math.min(8, 5 + Math.floor(Math.random() * 4)))
-  let out = ''
-  for (let i = 0; i < size; i += 1) {
-    out += NOISE_CHARS.charAt(Math.floor(Math.random() * NOISE_CHARS.length))
-  }
-  return out
-}
-
-function randomLevel() {
-  return 1 + Math.floor(Math.random() * 4)
-}
 
 function stableLevelFromSpot(spot, index) {
   const text = String(spot || '')
@@ -63,26 +43,6 @@ function parseCardLikeSpot(rawText) {
     dot: hasDot,
     rank: match[1],
     suitSymbol,
-  }
-}
-
-function toSuitSymbolCode(rawCode) {
-  const text = String(rawCode || '').trim()
-  const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD♠♥♣♦])$/)
-  if (!match) return text
-  const suitSymbol = SUIT_CHAR_TO_SYMBOL[match[2]]
-  if (!suitSymbol) return text
-  return `${match[1]}${suitSymbol}`
-}
-
-function buildTargetSsid({ settings, cardCode }) {
-  const base =
-    settings.mode === 'card'
-      ? toSuitSymbolCode(cardCode)
-      : settings.wifi || 'Hacked'
-  return {
-    withDot: settings.dot ? `.${base}` : base,
-    withoutDot: base,
   }
 }
 
@@ -162,10 +122,13 @@ function SwitchMock({ on }) {
   )
 }
 
-function WifiRow({ title, level = 4, noBorder = false }) {
+function WifiRow({ title, level = 4, noBorder = false, onPress }) {
   const parsed = parseCardLikeSpot(title)
   return (
-    <View style={[styles.wifiRow, !noBorder && styles.wifiRowDivider]}>
+    <Pressable
+      style={[styles.wifiRow, !noBorder && styles.wifiRowDivider]}
+      onPress={onPress}
+    >
       <WifiSignal level={level} />
       {parsed ? (
         <View style={styles.cardCodeWrap}>
@@ -176,11 +139,11 @@ function WifiRow({ title, level = 4, noBorder = false }) {
       ) : (
         <Text style={styles.wifiName}>{title}</Text>
       )}
-    </View>
+    </Pressable>
   )
 }
 
-export default function EscalionWifiPage({
+export default function SamsungOneUi8WifiPage({
   setPage,
   scrollY,
   wifiSpots,
@@ -189,164 +152,14 @@ export default function EscalionWifiPage({
   wifiEnabled,
   onWifiEnabledChange,
 }) {
-  const mountedRef = React.useRef(true)
-  const startTimeoutRef = React.useRef(null)
-  const animationIntervalRef = React.useRef(null)
-  const flowIdRef = React.useRef(0)
-
-  const [waitingStart, setWaitingStart] = React.useState(false)
-  const [running, setRunning] = React.useState(false)
-  const [animatedSpots, setAnimatedSpots] = React.useState([])
-
-  const clearStartTimeout = React.useCallback(() => {
-    if (startTimeoutRef.current) {
-      clearTimeout(startTimeoutRef.current)
-      startTimeoutRef.current = null
-    }
-  }, [])
-
-  const clearAnimation = React.useCallback(() => {
-    if (animationIntervalRef.current) {
-      clearInterval(animationIntervalRef.current)
-      animationIntervalRef.current = null
-    }
-  }, [])
-
-  React.useEffect(() => {
-    return () => {
-      mountedRef.current = false
-      clearStartTimeout()
-      clearAnimation()
-    }
-  }, [clearAnimation, clearStartTimeout])
-
-  const startWifiAnimation = React.useCallback(
-    (targetSsid) => {
-      clearAnimation()
-      let ticks = 0
-      setAnimatedSpots([])
-
-      animationIntervalRef.current = setInterval(() => {
-        ticks += 1
-        setAnimatedSpots((prev) => {
-          const next = [...prev]
-          if (next.length < MAX_ANIMATED_SPOTS) {
-            next.push({
-              stage: 0,
-              settleAt: 4 + next.length,
-              level: randomLevel(),
-              text: randomNoise(),
-            })
-          }
-
-          for (let i = 0; i < next.length; i += 1) {
-            const row = next[i]
-            const nextStage = row.stage + 1
-            const settled = nextStage >= row.settleAt
-            next[i] = {
-              ...row,
-              stage: nextStage,
-              text: settled ? targetSsid : randomNoise(),
-            }
-          }
-
-          return next
-        })
-
-        if (ticks >= 34) {
-          clearAnimation()
-          setAnimatedSpots(
-            Array.from({ length: MAX_ANIMATED_SPOTS }, () => ({
-              stage: 999,
-              settleAt: 0,
-              level: randomLevel(),
-              text: targetSsid,
-            })),
-          )
-        }
-      }, 190)
-    },
-    [clearAnimation],
-  )
-
-  const runStart = React.useCallback(
-    async (flowId) => {
-      const target = buildTargetSsid({ settings, cardCode })
-      try {
-        if (!bleService.isConnected()) {
-          await bleService.connect()
-        }
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-
-        await bleService.sendStart({
-          ssid: target.withoutDot,
-          dot: settings.dot,
-          minutes: settings.minutesBeforeStop,
-        })
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-
-        setRunning(true)
-        setWaitingStart(false)
-        startWifiAnimation(target.withDot)
-      } catch {
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-        setRunning(false)
-        setWaitingStart(false)
-        onWifiEnabledChange(false)
-      }
-    },
-    [cardCode, settings, startWifiAnimation, onWifiEnabledChange],
-  )
-
-  const triggerStartFlow = React.useCallback(() => {
-    const flowId = flowIdRef.current + 1
-    flowIdRef.current = flowId
-    clearStartTimeout()
-    setWaitingStart(true)
-
-    const delaySec = Math.max(0, toNumber(settings.delay, 0))
-    if (delaySec <= 0) {
-      runStart(flowId)
-      return
-    }
-
-    startTimeoutRef.current = setTimeout(() => {
-      runStart(flowId)
-    }, delaySec * 1000)
-  }, [clearStartTimeout, runStart, settings.delay])
-
-  const handleDisable = React.useCallback(async () => {
-    flowIdRef.current += 1
-    clearStartTimeout()
-    clearAnimation()
-    setWaitingStart(false)
-    setRunning(false)
-    setAnimatedSpots([])
-    try {
-      await bleService.sendStop()
-    } catch {}
-  }, [clearAnimation, clearStartTimeout])
-
-  React.useEffect(() => {
-    if (settings.startOnSetWiFiPage) {
-      onWifiEnabledChange(true)
-      triggerStartFlow()
-      return
-    }
-
-    onWifiEnabledChange(false)
-    clearStartTimeout()
-    clearAnimation()
-    setWaitingStart(false)
-    setRunning(false)
-    setAnimatedSpots([])
-  }, [
-    settings.startOnSetWiFiPage,
-    triggerStartFlow,
-    clearStartTimeout,
-    clearAnimation,
-    onWifiEnabledChange,
-  ])
+  const { animatedSpots, onSwitchPress, handleWifiSpotPress } =
+    useWifiBroadcastFlow({
+      settings,
+      cardCode,
+      wifiSpots,
+      wifiEnabled,
+      onWifiEnabledChange,
+    })
 
   const shownSpots = wifiSpots.filter((spot) => spot && spot.trim() !== '')
   const spotsForView =
@@ -361,17 +174,6 @@ export default function EscalionWifiPage({
           text: spot,
           level: stableLevelFromSpot(spot, index),
         }))
-
-  const onSwitchPress = async () => {
-    if (wifiEnabled) {
-      onWifiEnabledChange(false)
-      await handleDisable()
-      return
-    }
-
-    onWifiEnabledChange(true)
-    triggerStartFlow()
-  }
 
   return (
     <View style={styles.page}>
@@ -425,6 +227,7 @@ export default function EscalionWifiPage({
                   title={spot.text}
                   level={spot.level}
                   noBorder={index === spotsForView.length - 1}
+                  onPress={handleWifiSpotPress}
                 />
               ))}
             </View>

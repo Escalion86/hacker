@@ -1,11 +1,15 @@
 import React, { useMemo, useState } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
-import bleService from '../../../services/ble/bleService'
-import { buildCardCode } from '../../../show/accessProfiles'
-import FertVladGeneralPage from './FertVladGeneralPage'
-import FertVladWifiPage from './FertVladWifiPage'
+import bleService from '../../../../services/ble/bleService'
+import { buildCardCode } from '../../../../show/accessProfiles'
+import HuaweiGeneralPage from './HuaweiGeneralPage'
+import HuaweiWifiPage from './HuaweiWifiPage'
 
-export default function FertVladShowScreen({ settings, onChange, onOpenSettings }) {
+export default function HuaweiModelShowScreen({
+  settings,
+  onChange,
+  onOpenSettings,
+}) {
   const [page, setPage] = useState('general')
   const [wifiSpots, setWifiSpots] = useState([])
   const [wifiEnabled, setWifiEnabled] = useState(
@@ -29,7 +33,7 @@ export default function FertVladShowScreen({ settings, onChange, onOpenSettings 
   return (
     <View style={styles.screen}>
       {page === 'general' ? (
-        <FertVladGeneralPage
+        <HuaweiGeneralPage
           settings={settings}
           onChange={onChange}
           setPage={setPage}
@@ -37,7 +41,7 @@ export default function FertVladShowScreen({ settings, onChange, onOpenSettings 
           onOpenSettings={onOpenSettings}
         />
       ) : (
-        <FertVladWifiPage
+        <HuaweiWifiPage
           setPage={setPage}
           scrollY={wifiScrollY}
           wifiSpots={wifiSpots}
@@ -54,6 +58,6 @@ export default function FertVladShowScreen({ settings, onChange, onOpenSettings 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#eceef1',
   },
 })

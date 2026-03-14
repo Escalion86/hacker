@@ -9,11 +9,16 @@ import {
 } from 'react-native'
 import bleService from '../services/ble/bleService'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import { buildCardCode, resolveProfile } from '../show/accessProfiles'
+import {
+  buildCardCode,
+  resolvePhoneModelByAccessCode,
+  resolveProfile,
+} from '../show/accessProfiles'
 import { resolveTemplate } from '../show/templates'
 import { colors, spacing } from '../theme/tokens'
-import EscalionShowScreen from './show/escalion/EscalionShowScreen'
-import FertVladShowScreen from './show/fertVlad/FertVladShowScreen'
+import SamsungOneUi8ModelShowScreen from './show/phoneModels/samsungOneUi8/SamsungOneUi8ModelShowScreen'
+import OnePlusModelShowScreen from './show/phoneModels/onePlus/OnePlusModelShowScreen'
+import HuaweiModelShowScreen from './show/phoneModels/huawei/HuaweiModelShowScreen'
 
 function RowIcon({ kind, color }) {
   const tint = color || '#7f8aa3'
@@ -119,30 +124,6 @@ export default function ShowSettingsScreen({
   onChange,
   onOpenSettings,
 }) {
-  if (settings.accessCode === 'escalion') {
-    return (
-      <View style={styles.escalionWrap}>
-        <EscalionShowScreen
-          settings={settings}
-          onChange={onChange}
-          onOpenSettings={onOpenSettings}
-        />
-      </View>
-    )
-  }
-
-  if (settings.accessCode === 'fertVlad' || settings.accessCode === 'fertvlad') {
-    return (
-      <View style={styles.escalionWrap}>
-        <FertVladShowScreen
-          settings={settings}
-          onChange={onChange}
-          onOpenSettings={onOpenSettings}
-        />
-      </View>
-    )
-  }
-
   const [accessCodeInput, setAccessCodeInput] = useState(
     settings.accessCode || '',
   )
@@ -151,14 +132,17 @@ export default function ShowSettingsScreen({
   const [wifiSpots, setWifiSpots] = useState([])
   const swipeStartY = useRef(0)
   const swipeRowMeta = useRef(null)
+  const phoneModel =
+    String(settings.phoneModel || '').trim() ||
+    resolvePhoneModelByAccessCode(settings.accessCode)
 
   const profile = useMemo(
     () => resolveProfile(settings.accessCode),
     [settings.accessCode],
   )
   const template = useMemo(
-    () => resolveTemplate(settings.accessCode),
-    [settings.accessCode],
+    () => resolveTemplate(phoneModel || settings.accessCode),
+    [phoneModel, settings.accessCode],
   )
   const currentPage = template?.pages?.[page]
   const ui = template?.ui || {
@@ -183,19 +167,68 @@ export default function ShowSettingsScreen({
   )
 
   React.useEffect(() => {
+    if (
+      phoneModel === 'samsungOneUi8' ||
+      phoneModel === 'onePlus' ||
+      phoneModel === 'huawei'
+    ) {
+      return () => {}
+    }
+
     const unsub = bleService.subscribeWifiSpots((spots) =>
       setWifiSpots(spots.slice(0, 12)),
     )
     return () => unsub()
-  }, [])
+  }, [phoneModel])
+
+  if (phoneModel === 'samsungOneUi8') {
+    return (
+      <View style={styles.escalionWrap}>
+        <SamsungOneUi8ModelShowScreen
+          settings={settings}
+          onChange={onChange}
+          onOpenSettings={onOpenSettings}
+        />
+      </View>
+    )
+  }
+
+  if (phoneModel === 'onePlus') {
+    return (
+      <View style={styles.escalionWrap}>
+        <OnePlusModelShowScreen
+          settings={settings}
+          onChange={onChange}
+          onOpenSettings={onOpenSettings}
+        />
+      </View>
+    )
+  }
+
+  if (phoneModel === 'huawei') {
+    return (
+      <View style={styles.escalionWrap}>
+        <HuaweiModelShowScreen
+          settings={settings}
+          onChange={onChange}
+          onOpenSettings={onOpenSettings}
+        />
+      </View>
+    )
+  }
 
   const applyAccessCode = () => {
     const normalized = accessCodeInput.trim()
-    if (!resolveProfile(normalized)) {
+    const profile = resolveProfile(normalized)
+    if (!profile) {
       setWrongCode(true)
       return
     }
-    onChange({ accessCode: normalized, mode: 'card' })
+    onChange({
+      accessCode: normalized,
+      phoneModel: profile.phoneModel || '',
+      mode: 'card',
+    })
     setWrongCode(false)
     setPage('general')
   }

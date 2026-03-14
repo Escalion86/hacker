@@ -9,7 +9,7 @@ const commonSavedRows = [
 ];
 
 export const SHOW_TEMPLATES = {
-  fertVlad: {
+  onePlus: {
     generalTitle: 'Настройки',
     ui: {
       titleSize: 34,
@@ -62,7 +62,7 @@ export const SHOW_TEMPLATES = {
       },
     },
   },
-  escalion: {
+  samsungOneUi8: {
     generalTitle: 'Настройки',
     ui: {
       titleSize: 36,
@@ -125,16 +125,19 @@ export const SHOW_TEMPLATES = {
     },
   },
   denjoker: {
-    extends: 'escalion',
+    extends: 'samsungOneUi8',
   },
   ShmidtVL: {
-    extends: 'escalion',
+    extends: 'samsungOneUi8',
   },
   enkD83Js: {
-    extends: 'fertVlad',
+    extends: 'onePlus',
   },
   mihRogin: {
-    extends: 'fertVlad',
+    extends: 'onePlus',
+  },
+  huawei: {
+    extends: 'onePlus',
   },
 };
 
@@ -148,5 +151,21 @@ function resolveExtendedTemplate(key) {
 }
 
 export function resolveTemplate(accessCode) {
-  return resolveExtendedTemplate(accessCode);
+  if (!accessCode) return null;
+  const key = String(accessCode).trim();
+  const lowered = key.toLowerCase();
+  if (SHOW_TEMPLATES[key]) return resolveExtendedTemplate(key);
+  if (SHOW_TEMPLATES[lowered]) return resolveExtendedTemplate(lowered);
+
+  // Backward compatibility with old user-driven keys.
+  if (lowered === 'escalion' || lowered === 'denjoker' || lowered === 'shmidtvl') {
+    return resolveExtendedTemplate('samsungOneUi8');
+  }
+  if (lowered === 'fertvlad' || lowered === 'enkd83js' || lowered === 'mihrogin') {
+    return resolveExtendedTemplate('onePlus');
+  }
+  if (lowered === 'huawei' || lowered === 'huaweiemui' || lowered === 'emui') {
+    return resolveExtendedTemplate('huawei');
+  }
+  return null;
 }

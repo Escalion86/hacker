@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native'
-import bleService from '../../../services/ble/bleService'
-import { buildCardCode } from '../../../show/accessProfiles'
-import EscalionGeneralPage from './EscalionGeneralPage'
-import EscalionConnectionsPage from './EscalionConnectionsPage'
-import EscalionWifiPage from './EscalionWifiPage'
+import bleService from '../../../../services/ble/bleService'
+import { buildCardCode } from '../../../../show/accessProfiles'
+import SamsungOneUi8GeneralPage from './SamsungOneUi8GeneralPage'
+import SamsungOneUi8ConnectionsPage from './SamsungOneUi8ConnectionsPage'
+import SamsungOneUi8WifiPage from './SamsungOneUi8WifiPage'
 
-export default function EscalionShowScreen({
+export default function SamsungOneUi8ModelShowScreen({
   settings,
   onChange,
   onOpenSettings,
@@ -36,7 +36,7 @@ export default function EscalionShowScreen({
   return (
     <View style={[styles.screen]}>
       {page === 'general' && (
-        <EscalionGeneralPage
+        <SamsungOneUi8GeneralPage
           settings={settings}
           onChange={onChange}
           onOpenSettings={onOpenSettings}
@@ -46,7 +46,7 @@ export default function EscalionShowScreen({
         />
       )}
       {page === 'connections' && (
-        <EscalionConnectionsPage
+        <SamsungOneUi8ConnectionsPage
           setPage={setPage}
           scrollY={connectionsScrollY}
           cardCode={cardCode}
@@ -54,7 +54,7 @@ export default function EscalionShowScreen({
         />
       )}
       {page === 'wifi' && (
-        <EscalionWifiPage
+        <SamsungOneUi8WifiPage
           setPage={setPage}
           scrollY={wifiScrollY}
           wifiSpots={wifiSpots}

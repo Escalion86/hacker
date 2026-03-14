@@ -1,6 +1,7 @@
 import React from 'react'
 import {
   Animated,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -8,32 +9,14 @@ import {
   View,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import bleService from '../../../services/ble/bleService'
 import Svg, { Path } from 'react-native-svg'
+import { randomLevel, useWifiBroadcastFlow } from '../../shared/useWifiBroadcastFlow'
 
-const MAX_ANIMATED_SPOTS = 12
-const NOISE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*+-?'
 const HAS_NATIVE_SVG =
   Boolean(UIManager.getViewManagerConfig?.('RNSVGPath')) ||
   Boolean(UIManager.getViewManagerConfig?.('RCTRNSVGPath'))
-
-function toNumber(value, fallback = 0) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : fallback
-}
-
-function randomNoise() {
-  const size = Math.max(5, Math.min(8, 5 + Math.floor(Math.random() * 4)))
-  let out = ''
-  for (let i = 0; i < size; i += 1) {
-    out += NOISE_CHARS.charAt(Math.floor(Math.random() * NOISE_CHARS.length))
-  }
-  return out
-}
-
-function randomLevel() {
-  return 1 + Math.floor(Math.random() * 4)
-}
+const BACK_ARROW_ICON = require('../../../../icons/vladFert/BackArrow.png')
+const QR_SCAN_ICON = require('../../../../icons/vladFert/QRScan.png')
 
 function stableLevelFromSpot(spot, index) {
   const text = String(spot || '')
@@ -42,37 +25,6 @@ function stableLevelFromSpot(spot, index) {
     hash = (hash * 31 + text.charCodeAt(i)) % 9973
   }
   return (hash % 4) + 1
-}
-
-const SUIT_CHAR_TO_SYMBOL = {
-  S: '♠',
-  H: '♥',
-  C: '♣',
-  D: '♦',
-  '♠': '♠',
-  '♥': '♥',
-  '♣': '♣',
-  '♦': '♦',
-}
-
-function toSuitSymbolCode(rawCode) {
-  const text = String(rawCode || '').trim()
-  const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD♠♥♣♦])$/)
-  if (!match) return text
-  const suitSymbol = SUIT_CHAR_TO_SYMBOL[match[2]]
-  if (!suitSymbol) return text
-  return `${match[1]}${suitSymbol}`
-}
-
-function buildTargetSsid({ settings, cardCode }) {
-  const base =
-    settings.mode === 'card'
-      ? toSuitSymbolCode(cardCode)
-      : settings.wifi || 'Hacked'
-  return {
-    withDot: settings.dot ? `.${base}` : base,
-    withoutDot: base,
-  }
 }
 
 function SwitchMock({ on }) {
@@ -163,20 +115,20 @@ function WifiSignal({ level = 4 }) {
   )
 }
 
-function WifiRow({ title, level = 4, noBorder = false }) {
+function WifiRow({ title, level = 4, noBorder = false, onPress }) {
   return (
-    <View>
+    <Pressable onPress={onPress}>
       <View style={[styles.wifiRow]}>
         <WifiSignal level={level} />
         <Text style={styles.wifiName}>{title}</Text>
         <Ionicons name="information-circle-outline" size={22} color="#e7ebf2" />
       </View>
       <View style={!noBorder && styles.wifiRowDivider} />
-    </View>
+    </Pressable>
   )
 }
 
-export default function FertVladWifiPage({
+export default function OnePlusWifiPage({
   setPage,
   scrollY,
   wifiSpots,
@@ -185,159 +137,14 @@ export default function FertVladWifiPage({
   wifiEnabled,
   onWifiEnabledChange,
 }) {
-  const mountedRef = React.useRef(true)
-  const startTimeoutRef = React.useRef(null)
-  const animationIntervalRef = React.useRef(null)
-  const flowIdRef = React.useRef(0)
-
-  const [waitingStart, setWaitingStart] = React.useState(false)
-  const [animatedSpots, setAnimatedSpots] = React.useState([])
-
-  const clearStartTimeout = React.useCallback(() => {
-    if (startTimeoutRef.current) {
-      clearTimeout(startTimeoutRef.current)
-      startTimeoutRef.current = null
-    }
-  }, [])
-
-  const clearAnimation = React.useCallback(() => {
-    if (animationIntervalRef.current) {
-      clearInterval(animationIntervalRef.current)
-      animationIntervalRef.current = null
-    }
-  }, [])
-
-  React.useEffect(() => {
-    return () => {
-      mountedRef.current = false
-      clearStartTimeout()
-      clearAnimation()
-    }
-  }, [clearAnimation, clearStartTimeout])
-
-  const startWifiAnimation = React.useCallback(
-    (targetSsid) => {
-      clearAnimation()
-      let ticks = 0
-      setAnimatedSpots([])
-
-      animationIntervalRef.current = setInterval(() => {
-        ticks += 1
-        setAnimatedSpots((prev) => {
-          const next = [...prev]
-          if (next.length < MAX_ANIMATED_SPOTS) {
-            next.push({
-              stage: 0,
-              settleAt: 4 + next.length,
-              level: randomLevel(),
-              text: randomNoise(),
-            })
-          }
-
-          for (let i = 0; i < next.length; i += 1) {
-            const row = next[i]
-            const nextStage = row.stage + 1
-            const settled = nextStage >= row.settleAt
-            next[i] = {
-              ...row,
-              stage: nextStage,
-              text: settled ? targetSsid : randomNoise(),
-            }
-          }
-
-          return next
-        })
-
-        if (ticks >= 34) {
-          clearAnimation()
-          setAnimatedSpots(
-            Array.from({ length: MAX_ANIMATED_SPOTS }, () => ({
-              stage: 999,
-              settleAt: 0,
-              level: randomLevel(),
-              text: targetSsid,
-            })),
-          )
-        }
-      }, 190)
-    },
-    [clearAnimation],
-  )
-
-  const runStart = React.useCallback(
-    async (flowId) => {
-      const target = buildTargetSsid({ settings, cardCode })
-      try {
-        if (!bleService.isConnected()) {
-          await bleService.connect()
-        }
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-
-        await bleService.sendStart({
-          ssid: target.withoutDot,
-          dot: settings.dot,
-          minutes: settings.minutesBeforeStop,
-        })
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-
-        setWaitingStart(false)
-        startWifiAnimation(target.withDot)
-      } catch {
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-        setWaitingStart(false)
-        onWifiEnabledChange(false)
-      }
-    },
-    [cardCode, settings, startWifiAnimation, onWifiEnabledChange],
-  )
-
-  const triggerStartFlow = React.useCallback(() => {
-    const flowId = flowIdRef.current + 1
-    flowIdRef.current = flowId
-    clearStartTimeout()
-    setWaitingStart(true)
-
-    const delaySec = Math.max(0, toNumber(settings.delay, 0))
-    if (delaySec <= 0) {
-      runStart(flowId)
-      return
-    }
-
-    startTimeoutRef.current = setTimeout(() => {
-      runStart(flowId)
-    }, delaySec * 1000)
-  }, [clearStartTimeout, runStart, settings.delay])
-
-  const handleDisable = React.useCallback(async () => {
-    flowIdRef.current += 1
-    clearStartTimeout()
-    clearAnimation()
-    setWaitingStart(false)
-    setAnimatedSpots([])
-    try {
-      await bleService.sendStop()
-    } catch {}
-  }, [clearAnimation, clearStartTimeout])
-
-  React.useEffect(() => {
-    if (settings.startOnSetWiFiPage) {
-      onWifiEnabledChange(true)
-      triggerStartFlow()
-      return
-    }
-
-    onWifiEnabledChange(false)
-    clearStartTimeout()
-    clearAnimation()
-    setWaitingStart(false)
-    setAnimatedSpots([])
-  }, [
-    settings.startOnSetWiFiPage,
-    triggerStartFlow,
-    clearStartTimeout,
-    clearAnimation,
-    onWifiEnabledChange,
-  ])
+  const { animatedSpots, onSwitchPress, handleWifiSpotPress } =
+    useWifiBroadcastFlow({
+      settings,
+      cardCode,
+      wifiSpots,
+      wifiEnabled,
+      onWifiEnabledChange,
+    })
 
   const shownSpots = wifiSpots.filter((spot) => spot && spot.trim() !== '')
   const spotsForView =
@@ -353,17 +160,6 @@ export default function FertVladWifiPage({
           level: stableLevelFromSpot(spot, index),
         }))
 
-  const onSwitchPress = async () => {
-    if (wifiEnabled) {
-      onWifiEnabledChange(false)
-      await handleDisable()
-      return
-    }
-
-    onWifiEnabledChange(true)
-    triggerStartFlow()
-  }
-
   return (
     <View style={styles.page}>
       <View style={styles.header}>
@@ -372,11 +168,11 @@ export default function FertVladWifiPage({
           hitSlop={10}
           style={styles.headerBack}
         >
-          <Ionicons name="arrow-back" size={22} color="#f2f5fb" />
+          <Image source={BACK_ARROW_ICON} style={styles.headerBackImage} />
         </Pressable>
         <Text style={styles.headerTitle}>Wi-Fi</Text>
         <Pressable hitSlop={10} style={styles.headerIcon}>
-          <Ionicons name="barcode-outline" size={20} color="#f2f5fb" />
+          <Image source={QR_SCAN_ICON} style={styles.headerQrImage} />
         </Pressable>
         <Pressable hitSlop={10} style={styles.headerIcon}>
           <Ionicons name="ellipsis-vertical" size={20} color="#f2f5fb" />
@@ -408,8 +204,8 @@ export default function FertVladWifiPage({
 
         <Text style={styles.sectionTitle}>Сохраненные сети</Text>
         <View style={styles.card}>
-          <WifiRow title="DIREZABLe" level={0} />
-          <WifiRow title="DIREZABLe-5G" level={0} noBorder />
+          <WifiRow title="DIREZABLe" level={0} onPress={handleWifiSpotPress} />
+          <WifiRow title="DIREZABLe-5G" level={0} noBorder onPress={handleWifiSpotPress} />
         </View>
 
         <View style={styles.sectionHeaderRow}>
@@ -424,6 +220,7 @@ export default function FertVladWifiPage({
               title={spot.text}
               level={spot.level}
               noBorder={index === spotsForView.length - 1}
+              onPress={handleWifiSpotPress}
             />
           ))}
           <Pressable
@@ -456,6 +253,11 @@ const styles = StyleSheet.create({
     width: 30,
     alignItems: 'flex-start',
   },
+  headerBackImage: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
   headerTitle: {
     flex: 1,
     color: '#f3f5fa',
@@ -468,10 +270,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 8,
   },
+  headerQrImage: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+  },
   scroll: {
     paddingHorizontal: 10,
     paddingTop: 6,
-    paddingBottom: 20,
+    paddingBottom: 0,
     gap: 10,
   },
   card: {
