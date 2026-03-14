@@ -37,6 +37,8 @@ function createApp(env) {
   app.use('/api', buildShowConfigRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/api', requireAdminKey(env.adminApiKey), buildAdminRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
+  app.use('/flash', express.static(path.join(__dirname, '../../public/flash')));
+  app.use('/firmware', express.static(path.join(__dirname, '../../public/firmware')));
 
   app.use(notFoundHandler);
   app.use(errorHandler);
