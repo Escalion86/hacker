@@ -45,8 +45,8 @@ function createApp(env) {
     );
     next();
   });
-  app.use('/flash', express.static(path.join(__dirname, '../../public/flash')));
-  app.use('/firmware', express.static(path.join(__dirname, '../../public/firmware')));
+  app.use('/flash', express.static(path.join(__dirname, '../public/flash')));
+  app.use('/firmware', express.static(path.join(__dirname, '../public/firmware')));
 
   app.use(notFoundHandler);
   app.use(errorHandler);
