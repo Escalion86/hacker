@@ -118,15 +118,19 @@ function WifiSignal({ level = 4 }) {
   )
 }
 
-function WifiRow({ title, level = 4, noBorder = false, onPress }) {
+function WifiRow({ title, level = 4, noBorder = false, onPress, palette }) {
   return (
     <Pressable onPress={onPress}>
       <View style={[styles.wifiRow]}>
         <WifiSignal level={level} />
-        <Text style={styles.wifiName}>{title}</Text>
-        <Ionicons name="information-circle-outline" size={22} color="#e7ebf2" />
+        <Text style={[styles.wifiName, { color: palette.textPrimary }]}>{title}</Text>
+        <Ionicons
+          name="information-circle-outline"
+          size={22}
+          color={palette.textSecondary}
+        />
       </View>
-      <View style={!noBorder && styles.wifiRowDivider} />
+      <View style={!noBorder && [styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
     </Pressable>
   )
 }
@@ -139,7 +143,29 @@ export default function OnePlusWifiPage({
   cardCode,
   wifiEnabled,
   onWifiEnabledChange,
+  isLightTheme = false,
 }) {
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        textPrimary: '#181a1f',
+        textSecondary: '#666d79',
+        cardBg: '#f8f9fb',
+        divider: '#dde1e7',
+        headerIcon: '#2a2d33',
+        refresh: '#1f6df7',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        textPrimary: '#f3f5fa',
+        textSecondary: '#7e8593',
+        cardBg: '#171719',
+        divider: '#2a2d36',
+        headerIcon: '#f2f5fb',
+        refresh: '#2f76ff',
+      }
   const { animatedSpots, onSwitchPress, handleWifiSpotPress } =
     useWifiBroadcastFlow({
       settings,
@@ -164,8 +190,8 @@ export default function OnePlusWifiPage({
         }))
 
   return (
-    <View style={styles.page}>
-      <View style={styles.header}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
+      <View style={[styles.header, { backgroundColor: palette.headerBg }]}>
         <Pressable
           onPress={() => setPage('general')}
           hitSlop={10}
@@ -173,12 +199,12 @@ export default function OnePlusWifiPage({
         >
           <Image source={BACK_ARROW_ICON} style={styles.headerBackImage} />
         </Pressable>
-        <Text style={styles.headerTitle}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
         <Pressable hitSlop={10} style={styles.headerIcon}>
           <Image source={QR_SCAN_ICON} style={styles.headerQrImage} />
         </Pressable>
         <Pressable hitSlop={10} style={styles.headerIcon}>
-          <Ionicons name="ellipsis-vertical" size={20} color="#f2f5fb" />
+          <Ionicons name="ellipsis-vertical" size={20} color={palette.headerIcon} />
         </Pressable>
       </View>
 
@@ -191,37 +217,43 @@ export default function OnePlusWifiPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <View style={styles.wifiToggleRow}>
-            <Text style={styles.wifiToggleTitle}>Wi-Fi</Text>
+            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
             <Pressable onPress={onSwitchPress} hitSlop={10}>
               <SwitchMock on={wifiEnabled} />
             </Pressable>
           </View>
-          <View style={styles.wifiRowDivider} />
+          <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
           <Pressable style={[styles.wifiHelperRow]}>
-            <Text style={styles.wifiHelperText}>Помощник по Wi-Fi</Text>
-            <Ionicons name="chevron-forward" size={18} color="#9097a6" />
+            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>Помощник по Wi-Fi</Text>
+            <Ionicons name="chevron-forward" size={18} color={palette.textSecondary} />
           </Pressable>
         </View>
 
-        <Text style={styles.sectionTitle}>Сохраненные сети</Text>
-        <View style={styles.card}>
-          <WifiRow title="DIREZABLe" level={0} onPress={handleWifiSpotPress} />
+        <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Сохраненные сети</Text>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
+          <WifiRow
+            title="DIREZABLe"
+            level={0}
+            onPress={handleWifiSpotPress}
+            palette={palette}
+          />
           <WifiRow
             title="DIREZABLe-5G"
             level={0}
             noBorder
             onPress={handleWifiSpotPress}
+            palette={palette}
           />
         </View>
 
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Доступные сети</Text>
-          <Text style={styles.refreshText}>Обновить</Text>
+          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Доступные сети</Text>
+          <Text style={[styles.refreshText, { color: palette.refresh }]}>Обновить</Text>
         </View>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           {spotsForView.map((spot, index) => (
             <WifiRow
               key={spot.key}
@@ -229,6 +261,7 @@ export default function OnePlusWifiPage({
               level={spot.level}
               noBorder={index === spotsForView.length - 1}
               onPress={handleWifiSpotPress}
+              palette={palette}
             />
           ))}
           <Pressable

@@ -27,30 +27,35 @@ function ConnectionRow({
   onPress,
   noBorder,
   rightDivider = false,
+  palette,
 }) {
   return (
     <Pressable onPress={onPress} style={styles.row}>
       <View style={styles.rowTextWrap}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { color: palette.textPrimary }]}>{title}</Text>
+        {subtitle ? (
+          <Text style={[styles.rowSubtitle, { color: palette.textSecondary }]}>{subtitle}</Text>
+        ) : null}
       </View>
       <View style={styles.rowRight}>{right}</View>
-      {rightDivider ? <View style={styles.rowRightDivider} /> : null}
-      {!noBorder ? <View style={styles.rowDividerLine} /> : null}
+      {rightDivider ? (
+        <View style={[styles.rowRightDivider, { backgroundColor: palette.dividerStrong }]} />
+      ) : null}
+      {!noBorder ? <View style={[styles.rowDividerLine, { backgroundColor: palette.divider }]} /> : null}
     </Pressable>
   )
 }
 
-function NavRow({ title, noBorder }) {
+function NavRow({ title, noBorder, palette }) {
   return (
     <Pressable style={styles.row}>
       <View style={styles.rowTextWrap}>
-        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={[styles.rowTitle, { color: palette.textPrimary }]}>{title}</Text>
       </View>
       <View style={styles.rowRight}>
-        <Ionicons name="chevron-forward" size={20} color="#757b87" />
+        <Ionicons name="chevron-forward" size={20} color={palette.textSecondary} />
       </View>
-      {!noBorder ? <View style={styles.rowDividerLine} /> : null}
+      {!noBorder ? <View style={[styles.rowDividerLine, { backgroundColor: palette.divider }]} /> : null}
     </Pressable>
   )
 }
@@ -58,39 +63,43 @@ function NavRow({ title, noBorder }) {
 export default function SamsungOneUi8ConnectionsPage({
   setPage,
   scrollY,
-  cardCode,
   wifiEnabled,
+  isLightTheme = false,
 }) {
-  const formatCardCode = (raw) => {
-    const text = String(raw || '').trim()
-    const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/)
-    if (!match) return text
-    const suit =
-      match[2] === 'S'
-        ? '♠'
-        : match[2] === 'H'
-          ? '♥'
-          : match[2] === 'C'
-            ? '♣'
-            : match[2] === 'D'
-              ? '♦'
-              : match[2]
-    return `${match[1]}${suit}`
-  }
-
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        textPrimary: '#181a1f',
+        textSecondary: '#666d79',
+        cardBg: '#f8f9fb',
+        divider: '#dde1e7',
+        dividerStrong: '#cfd4dd',
+        suggestBg: '#f2f5fb',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        textPrimary: '#f3f5fa',
+        textSecondary: '#757b87',
+        cardBg: '#171719',
+        divider: '#343741',
+        dividerStrong: '#3f424a',
+        suggestBg: '#081327',
+      }
   return (
-    <View style={styles.page}>
-      <View style={styles.header}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
+      <View style={[styles.header, { backgroundColor: palette.headerBg }]}>
         <Pressable
           onPress={() => setPage('general')}
           hitSlop={10}
           style={styles.headerBack}
         >
-          <Ionicons name="chevron-back" size={24} color="#f2f5fb" />
+          <Ionicons name="chevron-back" size={24} color={palette.textPrimary} />
         </Pressable>
-        <Text style={styles.headerTitle}>Подключения</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Подключения</Text>
         <View style={styles.headerSearch}>
-          <Ionicons name="search" size={24} color="#f2f5fb" />
+          <Ionicons name="search" size={24} color={palette.textPrimary} />
         </View>
       </View>
 
@@ -103,29 +112,34 @@ export default function SamsungOneUi8ConnectionsPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <ConnectionRow
+            palette={palette}
             title="Wi-Fi"
             right={<SwitchMock on={Boolean(wifiEnabled)} />}
             onPress={() => setPage('wifi')}
             rightDivider
           />
           <ConnectionRow
+            palette={palette}
             title="Вызовы по Wi-Fi"
             right={<SwitchMock on={false} />}
             rightDivider
           />
           <ConnectionRow
+            palette={palette}
             title="Bluetooth"
             right={<SwitchMock on />}
             rightDivider
           />
           <ConnectionRow
+            palette={palette}
             title="NFC и бесконтактные платежи"
             right={<SwitchMock on />}
             rightDivider
           />
           <ConnectionRow
+            palette={palette}
             title="Сверхширокая полоса (UWB)"
             subtitle="Определение точного местоположения устройства поблизости."
             right={<SwitchMock on={false} />}
@@ -133,8 +147,9 @@ export default function SamsungOneUi8ConnectionsPage({
           />
         </View>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <ConnectionRow
+            palette={palette}
             title="Авиарежим"
             right={<SwitchMock on={false} />}
             noBorder
@@ -142,23 +157,23 @@ export default function SamsungOneUi8ConnectionsPage({
           />
         </View>
 
-        <View style={styles.card}>
-          <NavRow title="Диспетчер SIM-карт" />
-          <NavRow title="Мобильные сети" />
-          <NavRow title="Использование данных" />
-          <NavRow title="Мобильная точка доступа и модем" noBorder />
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
+          <NavRow title="Диспетчер SIM-карт" palette={palette} />
+          <NavRow title="Мобильные сети" palette={palette} />
+          <NavRow title="Использование данных" palette={palette} />
+          <NavRow title="Мобильная точка доступа и модем" noBorder palette={palette} />
         </View>
 
-        <View style={styles.card}>
-          <NavRow title="Другие настройки" noBorder />
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
+          <NavRow title="Другие настройки" noBorder palette={palette} />
         </View>
 
-        <View style={styles.suggestCard}>
-          <Text style={styles.suggestTitle}>Ищете что-то другое?</Text>
-          <Text style={styles.suggestItem}>Samsung Cloud</Text>
-          <Text style={styles.suggestItem}>Связь с Windows</Text>
-          <Text style={styles.suggestItem}>Android Auto</Text>
-          <Text style={styles.suggestItem}>Быстрая отправка</Text>
+        <View style={[styles.suggestCard, { backgroundColor: palette.suggestBg }]}>
+          <Text style={[styles.suggestTitle, { color: palette.textPrimary }]}>Ищете что-то другое?</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Samsung Cloud</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Связь с Windows</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Android Auto</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Быстрая отправка</Text>
         </View>
       </Animated.ScrollView>
     </View>

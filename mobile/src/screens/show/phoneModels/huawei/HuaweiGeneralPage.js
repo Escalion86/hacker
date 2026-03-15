@@ -59,6 +59,7 @@ function Row({
   onSegmentTouch,
   showLearnOverlay = false,
   learnOverlayLabels = [],
+  palette,
 }) {
   const rowWidthRef = useRef(1)
   const touchSegments = showLearnOverlay
@@ -81,20 +82,24 @@ function Row({
         )}
       </View>
       <View style={styles.rowTextWrap}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { color: palette.textPrimary }]}>{title}</Text>
+        {subtitle ? (
+          <Text style={[styles.rowSubtitle, { color: palette.textSecondary }]}>{subtitle}</Text>
+        ) : null}
       </View>
-      {rightText ? <Text style={styles.rowRightText}>{rightText}</Text> : null}
+      {rightText ? (
+        <Text style={[styles.rowRightText, { color: palette.textSecondary }]}>{rightText}</Text>
+      ) : null}
       {rightNode}
       {withArrow ? (
         <Ionicons
           name="chevron-forward"
           size={20}
-          color="#b5b7bc"
+          color={palette.arrow}
           style={styles.rowArrow}
         />
       ) : null}
-      {!noBorder ? <View style={styles.rowDivider} /> : null}
+      {!noBorder ? <View style={[styles.rowDivider, { borderBottomColor: palette.divider }]} /> : null}
       {showLearnOverlay && learnOverlayLabels.length > 0 ? (
         <View style={styles.learnOverlayWrap} pointerEvents="none">
           {learnOverlayLabels.map((label, index) => (
@@ -125,8 +130,8 @@ function Row({
   )
 }
 
-function Block({ children }) {
-  return <View style={styles.block}>{children}</View>
+function Block({ children, palette }) {
+  return <View style={[styles.block, { backgroundColor: palette.cardBg }]}>{children}</View>
 }
 
 function ProfileAvatar({ uri }) {
@@ -146,15 +151,15 @@ function ProfileAvatar({ uri }) {
   )
 }
 
-function ProfileRow({ title, subtitle, avatarUri }) {
+function ProfileRow({ title, subtitle, avatarUri, palette }) {
   return (
-    <Pressable style={styles.profileRow}>
+    <Pressable style={[styles.profileRow, { backgroundColor: palette.cardBg }]}>
       <ProfileAvatar uri={avatarUri} />
       <View style={styles.profileTextWrap}>
-        <Text style={styles.profileTitle}>{title}</Text>
-        <Text style={styles.profileSubtitle}>{subtitle}</Text>
+        <Text style={[styles.profileTitle, { color: palette.textPrimary }]}>{title}</Text>
+        <Text style={[styles.profileSubtitle, { color: palette.textSecondary }]}>{subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#b5b7bc" />
+      <Ionicons name="chevron-forward" size={20} color={palette.arrow} />
     </Pressable>
   )
 }
@@ -165,7 +170,31 @@ export default function HuaweiGeneralPage({
   setPage,
   scrollY,
   onOpenSettings,
+  isLightTheme = true,
 }) {
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        textPrimary: '#111215',
+        textSecondary: '#6b707a',
+        cardBg: '#f8f9fb',
+        searchBg: '#f8f9fb',
+        searchText: '#8b9098',
+        divider: '#dde1e7',
+        arrow: '#b5b7bc',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        textPrimary: '#f3f5fa',
+        textSecondary: '#8f949e',
+        cardBg: '#171719',
+        searchBg: '#171719',
+        searchText: '#7a818e',
+        divider: '#2a2d36',
+        arrow: '#565b64',
+      }
   const hasManualRankSelectionRef = useRef(false)
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 80],
@@ -203,15 +232,16 @@ export default function HuaweiGeneralPage({
     (settings.showOperatorAvatarRemote || '').trim()
 
   return (
-    <View style={styles.page}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
       <Animated.View
         style={[
           styles.stickyHeader,
+          { backgroundColor: palette.headerBg },
           { height: headerHeight, paddingBottom: headerPaddingBottom },
         ]}
       >
         <Animated.Text
-          style={[styles.headerTitle, { fontSize: titleFontSize }]}
+          style={[styles.headerTitle, { fontSize: titleFontSize, color: palette.textPrimary }]}
         >
           Настройки
         </Animated.Text>
@@ -226,19 +256,21 @@ export default function HuaweiGeneralPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={20} color="#8c9098" />
-          <Text style={styles.searchText}>Поиск</Text>
+        <View style={[styles.searchBox, { backgroundColor: palette.searchBg }]}>
+          <Ionicons name="search-outline" size={20} color={palette.searchText} />
+          <Text style={[styles.searchText, { color: palette.searchText }]}>Поиск</Text>
         </View>
 
         <ProfileRow
           title={settings.showOperatorName || ''}
           subtitle="Аккаунт HUAWEI, Платежи и покупки, Облако и прочее"
           avatarUri={operatorAvatarUri}
+          palette={palette}
         />
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Wi-Fi"
             iconSource={WIFI_ICON}
             onPress={() => setPage('wifi')}
@@ -248,6 +280,7 @@ export default function HuaweiGeneralPage({
             learnOverlayLabels={['♠️', '♥️', '♣️', '♦️']}
           />
           <Row
+            palette={palette}
             title="Bluetooth"
             rightText="Включено"
             iconSource={BLUETOOTH_ICON}
@@ -257,6 +290,7 @@ export default function HuaweiGeneralPage({
             learnOverlayLabels={['A', '2', '3', '4']}
           />
           <Row
+            palette={palette}
             title="Мобильная сеть"
             iconSource={NETWORK_ICON}
             segmentCount={4}
@@ -265,6 +299,7 @@ export default function HuaweiGeneralPage({
             learnOverlayLabels={['5', '6', '7', '8']}
           />
           <Row
+            palette={palette}
             title="Суперустройство"
             iconSource={SUPERDEVICE_ICON}
             segmentCount={4}
@@ -273,6 +308,7 @@ export default function HuaweiGeneralPage({
             learnOverlayLabels={['9', '10', 'J', 'Q']}
           />
           <Row
+            palette={palette}
             title="Другие соединения"
             iconSource={OTHER_DEVICE_ICON}
             segmentCount={2}
@@ -283,52 +319,57 @@ export default function HuaweiGeneralPage({
           />
         </Block>
 
-        <Block>
-          <Row title="Рабочий экран" iconSource={WORKSCREEN_ICON} />
+        <Block palette={palette}>
+          <Row palette={palette} title="Рабочий экран" iconSource={WORKSCREEN_ICON} />
           <Row
+            palette={palette}
             title="Экран и яркость"
             iconSource={SCREEN_LIGHT_ICON}
             noBorder
           />
         </Block>
 
-        <Block>
-          <Row title="Звуки и вибрация" iconSource={SOUND_ICON} />
+        <Block palette={palette}>
+          <Row palette={palette} title="Звуки и вибрация" iconSource={SOUND_ICON} />
           <Row
+            palette={palette}
             title="Уведомления и строка состояния"
             iconSource={NOTIFICATIONS_ICON}
             noBorder
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Биометрические данные и пароли"
             iconSource={BIOMETRY_ICON}
           />
-          <Row title="Приложения и службы" iconSource={APPLICATIONS_ICON} />
-          <Row title="Батарея" iconSource={BATTERY_ICON} />
-          <Row title="Память" iconSource={MEMORY_ICON} />
-          <Row title="Безопасность" iconSource={SAFETY_ICON} />
-          <Row title="Конфиденциальность" iconSource={CONFIDENTIAL_ICON} />
-          <Row title="Данные о местоположении" iconSource={GPS_ICON} noBorder />
+          <Row palette={palette} title="Приложения и службы" iconSource={APPLICATIONS_ICON} />
+          <Row palette={palette} title="Батарея" iconSource={BATTERY_ICON} />
+          <Row palette={palette} title="Память" iconSource={MEMORY_ICON} />
+          <Row palette={palette} title="Безопасность" iconSource={SAFETY_ICON} />
+          <Row palette={palette} title="Конфиденциальность" iconSource={CONFIDENTIAL_ICON} />
+          <Row palette={palette} title="Данные о местоположении" iconSource={GPS_ICON} noBorder />
         </Block>
 
-        <Block>
-          <Row title="Цифровой баланс" iconSource={DIGIT_BALANCE_ICON} />
-          <Row title="HUAWEI Assistant" iconSource={HUAWEI_ASSISTANT_ICON} />
+        <Block palette={palette}>
+          <Row palette={palette} title="Цифровой баланс" iconSource={DIGIT_BALANCE_ICON} />
+          <Row palette={palette} title="HUAWEI Assistant" iconSource={HUAWEI_ASSISTANT_ICON} />
           <Row
+            palette={palette}
             title="Специальные возможности"
             iconSource={SPECIAL_ICON}
             noBorder
           />
         </Block>
 
-        <Block>
-          <Row title="Пользователи и аккаунты" iconSource={ACCOUNTS_ICON} />
-          <Row title="HMS Core" iconSource={HMS_ICON} />
-          <Row title="Система и обновления" iconSource={SETTINGS_ICON} />
+        <Block palette={palette}>
+          <Row palette={palette} title="Пользователи и аккаунты" iconSource={ACCOUNTS_ICON} />
+          <Row palette={palette} title="HMS Core" iconSource={HMS_ICON} />
+          <Row palette={palette} title="Система и обновления" iconSource={SETTINGS_ICON} />
           <Row
+            palette={palette}
             title="О телефоне"
             iconSource={ABOUT_PHONE_ICON}
             onPress={onOpenSettings}

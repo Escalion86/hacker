@@ -27,6 +27,13 @@ const HEADER_HEIGHT_MAX = 110
 const HEADER_HEIGHT_MIN = 58
 const TITLE_SIZE_MAX = 34
 const TITLE_SIZE_MIN = 20
+const DEFAULT_PALETTE = {
+  textPrimary: '#f4f6fb',
+  textSecondary: '#8f95a2',
+  divider: '#2a2d36',
+  arrow: '#565b64',
+  cardBg: '#171719',
+}
 
 function SwitchMock({ on }) {
   return (
@@ -60,6 +67,7 @@ function Row({
   onSegmentTouch,
   showLearnOverlay = false,
   learnOverlayLabels = [],
+  palette = DEFAULT_PALETTE,
 }) {
   const rowWidthRef = useRef(1)
   const touchSegments = showLearnOverlay
@@ -76,20 +84,24 @@ function Row({
     >
       <View style={styles.rowIconWrap}>{icon}</View>
       <View style={styles.rowTextWrap}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.rowSubtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { color: palette.textPrimary }]}>{title}</Text>
+        {subtitle ? (
+          <Text style={[styles.rowSubtitle, { color: palette.textSecondary }]}>{subtitle}</Text>
+        ) : null}
       </View>
-      {rightText ? <Text style={styles.rowRightText}>{rightText}</Text> : null}
+      {rightText ? (
+        <Text style={[styles.rowRightText, { color: palette.textSecondary }]}>{rightText}</Text>
+      ) : null}
       {rightNode}
       {withArrow ? (
         <Ionicons
           name="chevron-forward"
           size={19}
-          color={iconColor || '#565b64'}
+          color={iconColor || palette.arrow}
           style={styles.rowArrow}
         />
       ) : null}
-      {!noBorder ? <View style={styles.rowDivider} /> : null}
+      {!noBorder ? <View style={[styles.rowDivider, { backgroundColor: palette.divider }]} /> : null}
       {showLearnOverlay && learnOverlayLabels.length > 0 ? (
         <View style={styles.learnOverlayWrap} pointerEvents="none">
           {learnOverlayLabels.map((label, index) => (
@@ -120,8 +132,8 @@ function Row({
   )
 }
 
-function Block({ children }) {
-  return <View style={styles.block}>{children}</View>
+function Block({ children, palette }) {
+  return <View style={[styles.block, { backgroundColor: palette.cardBg }]}>{children}</View>
 }
 
 function ProfileAvatar({ uri }) {
@@ -140,18 +152,18 @@ function ProfileAvatar({ uri }) {
   )
 }
 
-function ProfileRow({ title, subtitle, avatarUri }) {
+function ProfileRow({ title, subtitle, avatarUri, palette = DEFAULT_PALETTE }) {
   return (
-    <Pressable style={styles.profileRow}>
+    <Pressable style={[styles.profileRow, { backgroundColor: palette.cardBg }]}>
       <ProfileAvatar uri={avatarUri} />
       <View style={styles.profileTextWrap}>
-        <Text style={styles.profileTitle}>{title}</Text>
-        <Text style={styles.profileSubtitle}>{subtitle}</Text>
+        <Text style={[styles.profileTitle, { color: palette.textPrimary }]}>{title}</Text>
+        <Text style={[styles.profileSubtitle, { color: palette.textSecondary }]}>{subtitle}</Text>
       </View>
       <Ionicons
         name="chevron-forward"
         size={19}
-        color="#565b64"
+        color={palette.arrow}
         style={styles.profileArrow}
       />
     </Pressable>
@@ -164,7 +176,31 @@ export default function OnePlusGeneralPage({
   setPage,
   scrollY,
   onOpenSettings,
+  isLightTheme = false,
 }) {
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        textPrimary: '#181a1f',
+        textSecondary: '#666d79',
+        cardBg: '#f8f9fb',
+        searchBg: '#f8f9fb',
+        searchText: '#8b9098',
+        divider: '#dde1e7',
+        arrow: '#b5b7bc',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        textPrimary: '#f4f6fb',
+        textSecondary: '#8f95a2',
+        cardBg: '#171719',
+        searchBg: '#171719',
+        searchText: '#777c84',
+        divider: '#2a2d36',
+        arrow: '#565b64',
+      }
   const hasManualRankSelectionRef = useRef(false)
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 80],
@@ -202,15 +238,16 @@ export default function OnePlusGeneralPage({
     (settings.showOperatorAvatarRemote || '').trim()
 
   return (
-    <View style={styles.page}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
       <Animated.View
         style={[
           styles.stickyHeader,
+          { backgroundColor: palette.headerBg },
           { height: headerHeight, paddingBottom: headerPaddingBottom },
         ]}
       >
         <Animated.Text
-          style={[styles.headerTitle, { fontSize: titleFontSize }]}
+          style={[styles.headerTitle, { fontSize: titleFontSize, color: palette.textPrimary }]}
         >
           Настройки
         </Animated.Text>
@@ -224,25 +261,28 @@ export default function OnePlusGeneralPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={20} color="#777c84" />
-          <Text style={styles.searchText}>Поиск</Text>
+        <View style={[styles.searchBox, { backgroundColor: palette.searchBg }]}>
+          <Ionicons name="search-outline" size={20} color={palette.searchText} />
+          <Text style={[styles.searchText, { color: palette.searchText }]}>Поиск</Text>
         </View>
 
         <ProfileRow
           title={settings.showOperatorName || 'Magfert'}
           subtitle="Управляйте сведениями об аккаунте и его безопасностью."
           avatarUri={operatorAvatarUri}
+          palette={palette}
         />
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Авиарежим"
             icon={<Ionicons name="airplane" size={21} color="#ffad17" />}
             rightNode={<SwitchMock on={false} />}
             withArrow={false}
           />
           <Row
+            palette={palette}
             title="Wi-Fi"
             // rightText="DIREZABLe"
             icon={<Image source={WIFI_ICON} style={styles.onePlusIcon} />}
@@ -253,6 +293,7 @@ export default function OnePlusGeneralPage({
             learnOverlayLabels={['♠️', '♥️', '♣️', '♦️']}
           />
           <Row
+            palette={palette}
             title="Bluetooth"
             rightText="Подключено"
             icon={
@@ -268,6 +309,7 @@ export default function OnePlusGeneralPage({
             learnOverlayLabels={['A', '2', '3', '4']}
           />
           <Row
+            palette={palette}
             title="Мобильная сеть"
             icon={<Image source={NETWORK_ICON} style={styles.onePlusIcon} />}
             segmentCount={4}
@@ -276,6 +318,7 @@ export default function OnePlusGeneralPage({
             learnOverlayLabels={['5', '6', '7', '8']}
           />
           <Row
+            palette={palette}
             title="Подключение к устройствам"
             icon={
               <Image source={CONNECTIONS_ICON} style={styles.onePlusIcon} />
@@ -288,8 +331,9 @@ export default function OnePlusGeneralPage({
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Главный экран, экран блокировки и стиль"
             icon={
               <Image source={GENERAL_SCREEN_ICON} style={styles.onePlusIcon} />
@@ -300,18 +344,21 @@ export default function OnePlusGeneralPage({
             learnOverlayLabels={['K', 'Joker']}
           />
           <Row
+            palette={palette}
             title="Экран и яркость"
             icon={<Image source={SCREEN_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Звуки и вибрация"
             icon={<Image source={SOUND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Уведомления и быстрые настройки"
             icon={
               <Image source={NOTIFICATIONS_ICON} style={styles.onePlusIcon} />
@@ -320,20 +367,24 @@ export default function OnePlusGeneralPage({
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Защита и конфиденциальность"
             icon={<Image source={DEFEND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Безопасность и экстренные случаи"
             icon={<Image source={SOS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Местоположение"
             icon={<Image source={GPS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Цифровое благополучие и родительский контроль"
             icon={
               <Image source={PARENT_CONTROL_ICON} style={styles.onePlusIcon} />
@@ -342,54 +393,64 @@ export default function OnePlusGeneralPage({
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Приложения"
             icon={<Feather name="grid" size={20} color="#22be3f" />}
           />
           <Row
+            palette={palette}
             title="Батарея"
             icon={<Image source={BATTERY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Plus Key"
             icon={<Image source={PLUS_KEY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Специальные возможности и удобство"
             icon={<Image source={SPECIAL_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="OnePlus AI"
             icon={<Image source={ONEPLUS_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
         </Block>
 
-        <Block>
+        <Block palette={palette}>
           <Row
+            palette={palette}
             title="Система и обновление"
             icon={
               <Ionicons name="settings-outline" size={20} color="#818792" />
             }
           />
           <Row
+            palette={palette}
             title="Об устройстве"
             icon={<Image source={ABOUT_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Пользователи и аккаунты"
             icon={<Image source={ACCOUNTS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Google"
             icon={<Image source={GOOGLE_ICON} style={styles.onePlusIcon} />}
           />
           <Row
+            palette={palette}
             title="Справка и отзывы"
             icon={<Image source={REFERENCE_ICON} style={styles.onePlusIcon} />}
             onPress={onOpenSettings}
@@ -621,3 +682,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 })
+
+

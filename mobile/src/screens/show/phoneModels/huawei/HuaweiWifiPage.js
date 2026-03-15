@@ -91,19 +91,25 @@ function WifiRow({
   noBorder = false,
   onPress,
   connected = false,
+  palette,
 }) {
   return (
     <Pressable onPress={onPress}>
       <View style={styles.wifiRow}>
         <View style={styles.wifiTextWrap}>
           <Text
-            style={[styles.wifiName, connected && styles.wifiNameConnected]}
+            style={[
+              styles.wifiName,
+              { color: connected ? palette.link : palette.textPrimary },
+              connected && styles.wifiNameConnected,
+            ]}
           >
             {title}
           </Text>
           <Text
             style={[
               styles.wifiSubtitle,
+              { color: palette.textSecondary },
               connected && styles.wifiSubtitleConnected,
             ]}
           >
@@ -112,7 +118,9 @@ function WifiRow({
         </View>
         <WifiSignal level={level} />
       </View>
-      {!noBorder ? <View style={styles.wifiRowDivider} /> : null}
+      {!noBorder ? (
+        <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
+      ) : null}
     </Pressable>
   )
 }
@@ -125,7 +133,31 @@ export default function HuaweiWifiPage({
   cardCode,
   wifiEnabled,
   onWifiEnabledChange,
+  isLightTheme = true,
 }) {
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        cardBg: '#f8f9fb',
+        textPrimary: '#1a1d22',
+        textSecondary: '#646b76',
+        section: '#6b707a',
+        divider: '#dde1e7',
+        icon: '#2a2d33',
+        link: '#1f5eb8',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        cardBg: '#171719',
+        textPrimary: '#f3f5fa',
+        textSecondary: '#8f949e',
+        section: '#8f949e',
+        divider: '#2a2d36',
+        icon: '#f3f5fa',
+        link: '#4d86ff',
+      }
   const { animatedSpots, onSwitchPress, handleWifiSpotPress } =
     useWifiBroadcastFlow({
       settings,
@@ -150,8 +182,8 @@ export default function HuaweiWifiPage({
         }))
 
   return (
-    <View style={styles.page}>
-      <View style={styles.header}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
+      <View style={[styles.header, { backgroundColor: palette.headerBg }]}>
         <Pressable
           onPress={() => setPage('general')}
           hitSlop={10}
@@ -159,9 +191,9 @@ export default function HuaweiWifiPage({
         >
           <Image source={HUAWEI_BACK_ARROW} style={styles.headerBackImage} />
         </Pressable>
-        <Text style={styles.headerTitle}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
         <Pressable hitSlop={10} style={styles.headerHelp}>
-          <Ionicons name="help-circle-outline" size={27} color="#2a2d33" />
+          <Ionicons name="help-circle-outline" size={27} color={palette.icon} />
         </Pressable>
       </View>
 
@@ -174,22 +206,22 @@ export default function HuaweiWifiPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <View style={styles.wifiToggleRow}>
-            <Text style={styles.wifiToggleTitle}>Wi-Fi</Text>
+            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
             <Pressable onPress={onSwitchPress} hitSlop={10}>
               <SwitchMock on={wifiEnabled} />
             </Pressable>
           </View>
-          <View style={styles.wifiRowDivider} />
+          <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
           <Pressable style={styles.wifiHelperRow}>
-            <Text style={styles.wifiHelperText}>Другие настройки</Text>
-            <Ionicons name="chevron-forward" size={18} color="#c3c6cc" />
+            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>Другие настройки</Text>
+            <Ionicons name="chevron-forward" size={18} color={palette.section} />
           </Pressable>
         </View>
 
-        <Text style={styles.sectionTitle}>ДОСТУПНО</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: palette.section }]}>ДОСТУПНО</Text>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           {spotsForView.length > 0 ? (
             spotsForView.map((spot, index, arr) => (
               <WifiRow
@@ -198,14 +230,15 @@ export default function HuaweiWifiPage({
                 level={spot.level}
                 noBorder={index === arr.length - 1}
                 onPress={handleWifiSpotPress}
+                palette={palette}
               />
             ))
           ) : (
             <>
-              <WifiRow title="Beeline_2G_A0AA0C" />
-              <WifiRow title="TP-Link_1456" />
-              <WifiRow title="WIFI" />
-              <WifiRow title="Beeline_5G_F17476" noBorder />
+              <WifiRow title="Beeline_2G_A0AA0C" palette={palette} />
+              <WifiRow title="TP-Link_1456" palette={palette} />
+              <WifiRow title="WIFI" palette={palette} />
+              <WifiRow title="Beeline_5G_F17476" noBorder palette={palette} />
             </>
           )}
         </View>

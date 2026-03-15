@@ -1,9 +1,9 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
-import Toggle from '../components/Toggle';
-import { buildCardCode } from '../show/accessProfiles';
-import { colors, spacing } from '../theme/tokens';
+import React from 'react'
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import PrimaryButton from '../components/PrimaryButton'
+import Toggle from '../components/Toggle'
+import { buildCardCode } from '../show/accessProfiles'
+import { colors, spacing } from '../theme/tokens'
 
 export default function SettingsScreen({
   settings,
@@ -14,22 +14,27 @@ export default function SettingsScreen({
   onResetActivation,
 }) {
   const parseNonNegativeInt = (value, fallback = 0) => {
-    const parsed = Number.parseInt(String(value || '').trim(), 10);
-    if (!Number.isFinite(parsed) || parsed < 0) return fallback;
-    return parsed;
-  };
+    const parsed = Number.parseInt(String(value || '').trim(), 10)
+    if (!Number.isFinite(parsed) || parsed < 0) return fallback
+    return parsed
+  }
 
   const formatCardPreview = (rawCode) => {
-    const text = String(rawCode || '').trim();
-    const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/);
-    if (!match) return text;
+    const text = String(rawCode || '').trim()
+    const match = text.match(/^(A|[2-9]|10|J|Q|K)([SHCD])$/)
+    if (!match) return text
     const suit =
-      match[2] === 'S' ? '♠' :
-      match[2] === 'H' ? '♥' :
-      match[2] === 'C' ? '♣' :
-      match[2] === 'D' ? '♦' : match[2];
-    return `${match[1]} ${suit}`;
-  };
+      match[2] === 'S'
+        ? '♠'
+        : match[2] === 'H'
+          ? '♥'
+          : match[2] === 'C'
+            ? '♣'
+            : match[2] === 'D'
+              ? '♦'
+              : match[2]
+    return `${match[1]} ${suit}`
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -39,13 +44,19 @@ export default function SettingsScreen({
         <Text style={styles.label}>Режим</Text>
         <View style={styles.rowButtons}>
           <Text
-            style={[styles.chip, settings.mode === 'word' ? styles.chipActive : styles.chipIdle]}
+            style={[
+              styles.chip,
+              settings.mode === 'word' ? styles.chipActive : styles.chipIdle,
+            ]}
             onPress={() => onChange({ mode: 'word' })}
           >
             Слово
           </Text>
           <Text
-            style={[styles.chip, settings.mode === 'card' ? styles.chipActive : styles.chipIdle]}
+            style={[
+              styles.chip,
+              settings.mode === 'card' ? styles.chipActive : styles.chipIdle,
+            ]}
             onPress={() => onChange({ mode: 'card' })}
           >
             Карта
@@ -70,7 +81,9 @@ export default function SettingsScreen({
         <View style={styles.card}>
           <Text style={styles.label}>Карта (из Show экрана)</Text>
           <Text style={styles.preview}>
-            {formatCardPreview(buildCardCode(settings.cardRankIndex, settings.cardMastIndex))}
+            {formatCardPreview(
+              buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
+            )}
           </Text>
         </View>
       )}
@@ -90,16 +103,24 @@ export default function SettingsScreen({
         <TextInput
           keyboardType="number-pad"
           value={String(settings.minutesBeforeStop)}
-          onChangeText={(text) => onChange({ minutesBeforeStop: Number(text || 0) })}
+          onChangeText={(text) =>
+            onChange({ minutesBeforeStop: Number(text || 0) })
+          }
           style={styles.input}
         />
       </View>
 
-      <Toggle label="Добавлять точку в начале SSID" value={settings.dot} onToggle={() => onChange({ dot: !settings.dot })} />
+      <Toggle
+        label="Добавлять точку в начале SSID"
+        value={settings.dot}
+        onToggle={() => onChange({ dot: !settings.dot })}
+      />
       <Toggle
         label="Добавить второе слово"
         value={Boolean(settings.secondWordEnabled)}
-        onToggle={() => onChange({ secondWordEnabled: !settings.secondWordEnabled })}
+        onToggle={() =>
+          onChange({ secondWordEnabled: !settings.secondWordEnabled })
+        }
       />
 
       {settings.secondWordEnabled ? (
@@ -117,7 +138,9 @@ export default function SettingsScreen({
             <Text
               style={[
                 styles.chip,
-                settings.secondWordTrigger === 'tap' ? styles.chipActive : styles.chipIdle,
+                settings.secondWordTrigger === 'tap'
+                  ? styles.chipActive
+                  : styles.chipIdle,
               ]}
               onPress={() => onChange({ secondWordTrigger: 'tap' })}
             >
@@ -126,7 +149,9 @@ export default function SettingsScreen({
             <Text
               style={[
                 styles.chip,
-                settings.secondWordTrigger === 'afterDelay' ? styles.chipActive : styles.chipIdle,
+                settings.secondWordTrigger === 'afterDelay'
+                  ? styles.chipActive
+                  : styles.chipIdle,
               ]}
               onPress={() => onChange({ secondWordTrigger: 'afterDelay' })}
             >
@@ -149,12 +174,55 @@ export default function SettingsScreen({
       <Toggle
         label="Автозапуск при входе в Wi-Fi экран"
         value={settings.startOnSetWiFiPage}
-        onToggle={() => onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })}
+        onToggle={() =>
+          onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })
+        }
       />
-      <Toggle label="Режим обучения" value={settings.learn} onToggle={() => onChange({ learn: !settings.learn })} />
+      <Toggle
+        label="Режим обучения"
+        value={settings.learn}
+        onToggle={() => onChange({ learn: !settings.learn })}
+      />
 
       <View style={styles.card}>
-        <Text style={styles.label}>Синхронизация Show UI</Text>
+        <Text style={styles.label}>Show UI</Text>
+        <Text style={styles.label}>Тема</Text>
+        <View style={styles.rowButtons}>
+          <Text
+            style={[
+              styles.chip,
+              settings.uiThemeMode === 'model'
+                ? styles.chipActive
+                : styles.chipIdle,
+            ]}
+            onPress={() => onChange({ uiThemeMode: 'model' })}
+          >
+            Системная
+          </Text>
+          <Text
+            style={[
+              styles.chip,
+              settings.uiThemeMode === 'dark'
+                ? styles.chipActive
+                : styles.chipIdle,
+            ]}
+            onPress={() => onChange({ uiThemeMode: 'dark' })}
+          >
+            Тёмная
+          </Text>
+          <Text
+            style={[
+              styles.chip,
+              settings.uiThemeMode === 'light'
+                ? styles.chipActive
+                : styles.chipIdle,
+            ]}
+            onPress={() => onChange({ uiThemeMode: 'light' })}
+          >
+            Светлая
+          </Text>
+        </View>
+        <Text style={styles.label}>Синхронизация</Text>
         <PrimaryButton
           title={refreshInProgress ? 'Обновление...' : 'Обновить Show UI'}
           onPress={onRefreshShowUi}
@@ -177,7 +245,7 @@ export default function SettingsScreen({
         </Text>
       </View>
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -211,6 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     overflow: 'hidden',
     color: colors.text,
+    maxHeight: 40,
   },
   chipActive: {
     backgroundColor: colors.accent,
@@ -242,4 +311,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
-});
+})

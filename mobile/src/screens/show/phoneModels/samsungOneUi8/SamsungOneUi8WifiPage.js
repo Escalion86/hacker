@@ -122,11 +122,15 @@ function SwitchMock({ on }) {
   )
 }
 
-function WifiRow({ title, level = 4, noBorder = false, onPress }) {
+function WifiRow({ title, level = 4, noBorder = false, onPress, palette }) {
   const parsed = parseCardLikeSpot(title)
   return (
     <Pressable
-      style={[styles.wifiRow, !noBorder && styles.wifiRowDivider]}
+      style={[
+        styles.wifiRow,
+        !noBorder && styles.wifiRowDivider,
+        !noBorder && { borderBottomColor: palette.divider },
+      ]}
       onPress={onPress}
     >
       <WifiSignal level={level} />
@@ -137,7 +141,7 @@ function WifiRow({ title, level = 4, noBorder = false, onPress }) {
           <Text style={styles.suitSymbol}>{parsed.suitSymbol}</Text>
         </View>
       ) : (
-        <Text style={styles.wifiName}>{title}</Text>
+        <Text style={[styles.wifiName, { color: palette.textPrimary }]}>{title}</Text>
       )}
     </Pressable>
   )
@@ -151,7 +155,25 @@ export default function SamsungOneUi8WifiPage({
   cardCode,
   wifiEnabled,
   onWifiEnabledChange,
+  isLightTheme = false,
 }) {
+  const palette = isLightTheme
+    ? {
+        pageBg: '#eceef1',
+        headerBg: '#eceef1',
+        textPrimary: '#181a1f',
+        textSecondary: '#666d79',
+        cardBg: '#f8f9fb',
+        divider: '#dde1e7',
+      }
+    : {
+        pageBg: '#000',
+        headerBg: '#000',
+        textPrimary: '#f3f5fa',
+        textSecondary: '#8f949e',
+        cardBg: '#171719',
+        divider: '#23252c',
+      }
   const { animatedSpots, onSwitchPress, handleWifiSpotPress } =
     useWifiBroadcastFlow({
       settings,
@@ -176,21 +198,21 @@ export default function SamsungOneUi8WifiPage({
         }))
 
   return (
-    <View style={styles.page}>
-      <View style={styles.header}>
+    <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
+      <View style={[styles.header, { backgroundColor: palette.headerBg }]}>
         <Pressable
           onPress={() => setPage('connections')}
           hitSlop={10}
           style={styles.headerBack}
         >
-          <Ionicons name="chevron-back" size={24} color="#f2f5fb" />
+          <Ionicons name="chevron-back" size={24} color={palette.textPrimary} />
         </Pressable>
-        <Text style={styles.headerTitle}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
         <Pressable hitSlop={10} style={styles.headerIcon}>
-          <Ionicons name="qr-code-outline" size={22} color="#f2f5fb" />
+          <Ionicons name="qr-code-outline" size={22} color={palette.textPrimary} />
         </Pressable>
         <Pressable hitSlop={10} style={styles.headerIcon}>
-          <Ionicons name="ellipsis-vertical" size={22} color="#f2f5fb" />
+          <Ionicons name="ellipsis-vertical" size={22} color={palette.textPrimary} />
         </Pressable>
       </View>
 
@@ -203,10 +225,13 @@ export default function SamsungOneUi8WifiPage({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <View style={styles.enabledRow}>
             <Text
-              style={[styles.enabledTitle, !wifiEnabled && styles.enabledTitleOff]}
+              style={[
+                styles.enabledTitle,
+                { color: wifiEnabled ? '#4d86ff' : palette.textSecondary },
+              ]}
             >
               {wifiEnabled ? 'Включено' : 'Выключено'}
             </Text>
@@ -217,12 +242,13 @@ export default function SamsungOneUi8WifiPage({
         </View>
 
         <View style={{ gap: 8 }}>
-          <Text style={styles.sectionTitle}>Доступные сети</Text>
+          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Доступные сети</Text>
 
           {spotsForView.length === 0 ? null : (
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
               {spotsForView.map((spot, index) => (
                 <WifiRow
+                  palette={palette}
                   key={spot.key}
                   title={spot.text}
                   level={spot.level}
@@ -233,10 +259,10 @@ export default function SamsungOneUi8WifiPage({
             </View>
           )}
 
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <View style={styles.addRow}>
               <Ionicons name="add" size={34} color="#2fc35b" />
-              <Text style={styles.addText}>Добавить сеть</Text>
+              <Text style={[styles.addText, { color: palette.textPrimary }]}>Добавить сеть</Text>
             </View>
           </View>
 

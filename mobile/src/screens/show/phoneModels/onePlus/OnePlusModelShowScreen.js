@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
 import bleService from '../../../../services/ble/bleService'
 import { buildCardCode } from '../../../../show/accessProfiles'
+import { isShowThemeLight } from '../../shared/themeMode'
 import OnePlusGeneralPage from './OnePlusGeneralPage'
 import OnePlusWifiPage from './OnePlusWifiPage'
 
@@ -17,6 +18,7 @@ export default function OnePlusModelShowScreen({
   )
   const generalScrollY = React.useRef(new Animated.Value(0)).current
   const wifiScrollY = React.useRef(new Animated.Value(0)).current
+  const lightTheme = isShowThemeLight(settings, 'onePlus')
 
   const cardCode = useMemo(
     () => buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
@@ -31,7 +33,9 @@ export default function OnePlusModelShowScreen({
   }, [])
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[styles.screen, { backgroundColor: lightTheme ? '#eceef1' : '#000' }]}
+    >
       {page === 'general' ? (
         <OnePlusGeneralPage
           settings={settings}
@@ -39,6 +43,7 @@ export default function OnePlusModelShowScreen({
           setPage={setPage}
           scrollY={generalScrollY}
           onOpenSettings={onOpenSettings}
+          isLightTheme={lightTheme}
         />
       ) : (
         <OnePlusWifiPage
@@ -49,6 +54,7 @@ export default function OnePlusModelShowScreen({
           cardCode={cardCode}
           wifiEnabled={wifiEnabled}
           onWifiEnabledChange={setWifiEnabled}
+          isLightTheme={lightTheme}
         />
       )}
     </View>

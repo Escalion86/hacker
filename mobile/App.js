@@ -16,6 +16,7 @@ import {
   resolvePhoneModelByAccessCode,
   resolvePhoneModelByTemplateId,
 } from './src/show/accessProfiles';
+import { resolveShowTheme } from './src/screens/show/shared/themeMode';
 
 function AppContent() {
   const systemScheme = useColorScheme();
@@ -43,11 +44,12 @@ function AppContent() {
     (effectivePhoneModel === 'onePlus' || effectivePhoneModel === 'huawei')
       ? 0
       : bottomInset;
-  const showScreenBg = effectivePhoneModel === 'huawei' ? '#eceef1' : '#000';
+  const showTheme = resolveShowTheme(settings, effectivePhoneModel);
+  const showScreenBg = showTheme === 'light' ? '#eceef1' : '#000';
   const appSurfaceBg = tab === 'show' ? showScreenBg : colors.bg;
   const statusBarStyle =
     tab === 'show'
-      ? effectivePhoneModel === 'huawei'
+      ? showTheme === 'light'
         ? 'dark'
         : 'light'
       : systemScheme === 'dark'

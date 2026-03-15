@@ -5,6 +5,7 @@ export const SETTINGS_KEY = 'hacker.settings.v1';
 export const defaultSettings = {
   accessCode: '',
   phoneModel: '',
+  uiThemeMode: 'model',
   mode: 'word',
   wifi: 'Hacked',
   secondWordEnabled: false,
