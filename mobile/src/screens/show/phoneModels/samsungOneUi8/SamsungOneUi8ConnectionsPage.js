@@ -65,7 +65,9 @@ export default function SamsungOneUi8ConnectionsPage({
   scrollY,
   wifiEnabled,
   isLightTheme = false,
+  copy,
 }) {
+  const text = copy?.connections || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -97,7 +99,7 @@ export default function SamsungOneUi8ConnectionsPage({
         >
           <Ionicons name="chevron-back" size={24} color={palette.textPrimary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Подключения</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>{text.headerTitle}</Text>
         <View style={styles.headerSearch}>
           <Ionicons name="search" size={24} color={palette.textPrimary} />
         </View>
@@ -115,33 +117,33 @@ export default function SamsungOneUi8ConnectionsPage({
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <ConnectionRow
             palette={palette}
-            title="Wi-Fi"
+            title={text.wifiTitle}
             right={<SwitchMock on={Boolean(wifiEnabled)} />}
             onPress={() => setPage('wifi')}
             rightDivider
           />
           <ConnectionRow
             palette={palette}
-            title="Вызовы по Wi-Fi"
+            title={text.wifiCallingTitle}
             right={<SwitchMock on={false} />}
             rightDivider
           />
           <ConnectionRow
             palette={palette}
-            title="Bluetooth"
+            title={text.bluetoothTitle}
             right={<SwitchMock on />}
             rightDivider
           />
           <ConnectionRow
             palette={palette}
-            title="NFC и бесконтактные платежи"
+            title={text.nfcTitle}
             right={<SwitchMock on />}
             rightDivider
           />
           <ConnectionRow
             palette={palette}
-            title="Сверхширокая полоса (UWB)"
-            subtitle="Определение точного местоположения устройства поблизости."
+            title={text.uwbTitle}
+            subtitle={text.uwbSubtitle}
             right={<SwitchMock on={false} />}
             noBorder
           />
@@ -150,7 +152,7 @@ export default function SamsungOneUi8ConnectionsPage({
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <ConnectionRow
             palette={palette}
-            title="Авиарежим"
+            title={text.airplaneModeTitle}
             right={<SwitchMock on={false} />}
             noBorder
             rightDivider
@@ -158,22 +160,22 @@ export default function SamsungOneUi8ConnectionsPage({
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
-          <NavRow title="Диспетчер SIM-карт" palette={palette} />
-          <NavRow title="Мобильные сети" palette={palette} />
-          <NavRow title="Использование данных" palette={palette} />
-          <NavRow title="Мобильная точка доступа и модем" noBorder palette={palette} />
+          <NavRow title={text.simManagerTitle} palette={palette} />
+          <NavRow title={text.mobileNetworksTitle} palette={palette} />
+          <NavRow title={text.dataUsageTitle} palette={palette} />
+          <NavRow title={text.hotspotTitle} noBorder palette={palette} />
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
-          <NavRow title="Другие настройки" noBorder palette={palette} />
+          <NavRow title={text.otherSettingsTitle} noBorder palette={palette} />
         </View>
 
         <View style={[styles.suggestCard, { backgroundColor: palette.suggestBg }]}>
-          <Text style={[styles.suggestTitle, { color: palette.textPrimary }]}>Ищете что-то другое?</Text>
-          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Samsung Cloud</Text>
-          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Связь с Windows</Text>
-          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Android Auto</Text>
-          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>Быстрая отправка</Text>
+          <Text style={[styles.suggestTitle, { color: palette.textPrimary }]}>{text.suggestTitle}</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>{text.suggestSamsungCloud}</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>{text.suggestLinkToWindows}</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>{text.suggestAndroidAuto}</Text>
+          <Text style={[styles.suggestItem, { color: palette.textSecondary }]}>{text.suggestQuickShare}</Text>
         </View>
       </Animated.ScrollView>
     </View>

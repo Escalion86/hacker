@@ -144,7 +144,9 @@ export default function OnePlusWifiPage({
   wifiEnabled,
   onWifiEnabledChange,
   isLightTheme = false,
+  copy,
 }) {
+  const text = copy?.wifi || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -199,7 +201,7 @@ export default function OnePlusWifiPage({
         >
           <Image source={BACK_ARROW_ICON} style={styles.headerBackImage} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>{text.headerTitle}</Text>
         <Pressable hitSlop={10} style={styles.headerIcon}>
           <Image source={QR_SCAN_ICON} style={styles.headerQrImage} />
         </Pressable>
@@ -219,19 +221,19 @@ export default function OnePlusWifiPage({
       >
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <View style={styles.wifiToggleRow}>
-            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
+            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>{text.toggleTitle}</Text>
             <Pressable onPress={onSwitchPress} hitSlop={10}>
               <SwitchMock on={wifiEnabled} />
             </Pressable>
           </View>
           <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
           <Pressable style={[styles.wifiHelperRow]}>
-            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>Помощник по Wi-Fi</Text>
+            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>{text.helperTitle}</Text>
             <Ionicons name="chevron-forward" size={18} color={palette.textSecondary} />
           </Pressable>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Сохраненные сети</Text>
+        <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>{text.savedNetworksTitle}</Text>
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <WifiRow
             title="DIREZABLe"
@@ -249,8 +251,8 @@ export default function OnePlusWifiPage({
         </View>
 
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Доступные сети</Text>
-          <Text style={[styles.refreshText, { color: palette.refresh }]}>Обновить</Text>
+          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>{text.availableNetworksTitle}</Text>
+          <Text style={[styles.refreshText, { color: palette.refresh }]}>{text.refreshLabel}</Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
@@ -270,7 +272,7 @@ export default function OnePlusWifiPage({
               spotsForView.length > 0 && styles.addRowBorder,
             ]}
           >
-            <Text style={styles.addNetworkText}>Добавить сеть</Text>
+            <Text style={styles.addNetworkText}>{text.addNetworkTitle}</Text>
           </Pressable>
         </View>
       </Animated.ScrollView>

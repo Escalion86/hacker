@@ -177,7 +177,9 @@ export default function OnePlusGeneralPage({
   scrollY,
   onOpenSettings,
   isLightTheme = false,
+  copy,
 }) {
+  const text = copy?.general || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -249,7 +251,7 @@ export default function OnePlusGeneralPage({
         <Animated.Text
           style={[styles.headerTitle, { fontSize: titleFontSize, color: palette.textPrimary }]}
         >
-          Настройки
+          {text.headerSettings}
         </Animated.Text>
       </Animated.View>
       <Animated.ScrollView
@@ -263,12 +265,12 @@ export default function OnePlusGeneralPage({
       >
         <View style={[styles.searchBox, { backgroundColor: palette.searchBg }]}>
           <Ionicons name="search-outline" size={20} color={palette.searchText} />
-          <Text style={[styles.searchText, { color: palette.searchText }]}>Поиск</Text>
+          <Text style={[styles.searchText, { color: palette.searchText }]}>{text.searchPlaceholder}</Text>
         </View>
 
         <ProfileRow
           title={settings.showOperatorName || 'Magfert'}
-          subtitle="Управляйте сведениями об аккаунте и его безопасностью."
+          subtitle={text.profileSubtitle}
           avatarUri={operatorAvatarUri}
           palette={palette}
         />
@@ -276,14 +278,14 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Авиарежим"
+            title={text.airplaneModeTitle}
             icon={<Ionicons name="airplane" size={21} color="#ffad17" />}
             rightNode={<SwitchMock on={false} />}
             withArrow={false}
           />
           <Row
             palette={palette}
-            title="Wi-Fi"
+            title={text.wifiTitle}
             // rightText="DIREZABLe"
             icon={<Image source={WIFI_ICON} style={styles.onePlusIcon} />}
             onPress={() => setPage('wifi')}
@@ -294,8 +296,8 @@ export default function OnePlusGeneralPage({
           />
           <Row
             palette={palette}
-            title="Bluetooth"
-            rightText="Подключено"
+            title={text.bluetoothTitle}
+            rightText={text.bluetoothConnected}
             icon={
               <MaterialCommunityIcons
                 name="bluetooth"
@@ -310,7 +312,7 @@ export default function OnePlusGeneralPage({
           />
           <Row
             palette={palette}
-            title="Мобильная сеть"
+            title={text.mobileNetworkTitle}
             icon={<Image source={NETWORK_ICON} style={styles.onePlusIcon} />}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(4, segment)}
@@ -319,7 +321,7 @@ export default function OnePlusGeneralPage({
           />
           <Row
             palette={palette}
-            title="Подключение к устройствам"
+            title={text.deviceConnectionsTitle}
             icon={
               <Image source={CONNECTIONS_ICON} style={styles.onePlusIcon} />
             }
@@ -334,7 +336,7 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Главный экран, экран блокировки и стиль"
+            title={text.homeLockStyleTitle}
             icon={
               <Image source={GENERAL_SCREEN_ICON} style={styles.onePlusIcon} />
             }
@@ -345,7 +347,7 @@ export default function OnePlusGeneralPage({
           />
           <Row
             palette={palette}
-            title="Экран и яркость"
+            title={text.screenBrightnessTitle}
             icon={<Image source={SCREEN_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
@@ -354,12 +356,12 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Звуки и вибрация"
+            title={text.soundVibrationTitle}
             icon={<Image source={SOUND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Уведомления и быстрые настройки"
+            title={text.notificationsQuickTitle}
             icon={
               <Image source={NOTIFICATIONS_ICON} style={styles.onePlusIcon} />
             }
@@ -370,22 +372,22 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Защита и конфиденциальность"
+            title={text.securityPrivacyTitle}
             icon={<Image source={DEFEND_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Безопасность и экстренные случаи"
+            title={text.safetyEmergencyTitle}
             icon={<Image source={SOS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Местоположение"
+            title={text.locationTitle}
             icon={<Image source={GPS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Цифровое благополучие и родительский контроль"
+            title={text.wellbeingTitle}
             icon={
               <Image source={PARENT_CONTROL_ICON} style={styles.onePlusIcon} />
             }
@@ -396,22 +398,22 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Приложения"
+            title={text.appsTitle}
             icon={<Feather name="grid" size={20} color="#22be3f" />}
           />
           <Row
             palette={palette}
-            title="Батарея"
+            title={text.batteryTitle}
             icon={<Image source={BATTERY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Plus Key"
+            title={text.plusKeyTitle}
             icon={<Image source={PLUS_KEY_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Специальные возможности и удобство"
+            title={text.accessibilityTitle}
             icon={<Image source={SPECIAL_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
@@ -420,7 +422,7 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="OnePlus AI"
+            title={text.oneplusAiTitle}
             icon={<Image source={ONEPLUS_ICON} style={styles.onePlusIcon} />}
             noBorder
           />
@@ -429,29 +431,29 @@ export default function OnePlusGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Система и обновление"
+            title={text.systemUpdateTitle}
             icon={
               <Ionicons name="settings-outline" size={20} color="#818792" />
             }
           />
           <Row
             palette={palette}
-            title="Об устройстве"
+            title={text.aboutDeviceTitle}
             icon={<Image source={ABOUT_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Пользователи и аккаунты"
+            title={text.usersAccountsTitle}
             icon={<Image source={ACCOUNTS_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Google"
+            title={text.googleTitle}
             icon={<Image source={GOOGLE_ICON} style={styles.onePlusIcon} />}
           />
           <Row
             palette={palette}
-            title="Справка и отзывы"
+            title={text.helpFeedbackTitle}
             icon={<Image source={REFERENCE_ICON} style={styles.onePlusIcon} />}
             onPress={onOpenSettings}
             noBorder

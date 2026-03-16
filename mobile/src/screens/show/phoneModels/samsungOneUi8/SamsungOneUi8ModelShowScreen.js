@@ -3,9 +3,11 @@ import { Animated, Platform, StyleSheet, Text, View } from 'react-native'
 import bleService from '../../../../services/ble/bleService'
 import { buildCardCode } from '../../../../show/accessProfiles'
 import { isShowThemeLight } from '../../shared/themeMode'
+import { resolveModelLocale } from '../../shared/modelLocale'
 import SamsungOneUi8GeneralPage from './SamsungOneUi8GeneralPage'
 import SamsungOneUi8ConnectionsPage from './SamsungOneUi8ConnectionsPage'
 import SamsungOneUi8WifiPage from './SamsungOneUi8WifiPage'
+import { getSamsungOneUi8Copy } from './localization'
 
 export default function SamsungOneUi8ModelShowScreen({
   settings,
@@ -22,6 +24,8 @@ export default function SamsungOneUi8ModelShowScreen({
   const connectionsScrollY = React.useRef(new Animated.Value(0)).current
   const wifiScrollY = React.useRef(new Animated.Value(0)).current
   const lightTheme = isShowThemeLight(settings, 'samsungOneUi8')
+  const locale = resolveModelLocale(settings, 'samsungOneUi8')
+  const copy = React.useMemo(() => getSamsungOneUi8Copy(locale), [locale])
 
   const cardCode = useMemo(
     () => buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
@@ -46,6 +50,7 @@ export default function SamsungOneUi8ModelShowScreen({
           scrollY={generalScrollY}
           cardCode={cardCode}
           isLightTheme={lightTheme}
+          copy={copy}
         />
       )}
       {page === 'connections' && (
@@ -54,6 +59,7 @@ export default function SamsungOneUi8ModelShowScreen({
           scrollY={connectionsScrollY}
           wifiEnabled={wifiEnabled}
           isLightTheme={lightTheme}
+          copy={copy}
         />
       )}
       {page === 'wifi' && (
@@ -66,6 +72,7 @@ export default function SamsungOneUi8ModelShowScreen({
           wifiEnabled={wifiEnabled}
           onWifiEnabledChange={setWifiEnabled}
           isLightTheme={lightTheme}
+          copy={copy}
         />
       )}
 
@@ -81,8 +88,7 @@ export default function SamsungOneUi8ModelShowScreen({
           ]}
         >
           <Text style={[styles.learnHintText, { color: lightTheme ? '#3b4354' : '#d8dde9' }]}>
-            Свайп по "Подключения" меняет масть. Номинал задается тапами по
-            скрытым сегментам строк ниже.
+            {copy.learnHint}
           </Text>
         </View>
       )}

@@ -2,7 +2,9 @@ import React from 'react'
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import PrimaryButton from '../components/PrimaryButton'
 import Toggle from '../components/Toggle'
-import { buildCardCode } from '../show/accessProfiles'
+import { buildCardCode, resolvePhoneModelByAccessCode } from '../show/accessProfiles'
+import { getSettingsCopy } from './localization/settingsLocalization'
+import { resolveModelLocale } from './show/shared/modelLocale'
 import { colors, spacing } from '../theme/tokens'
 
 export default function SettingsScreen({
@@ -35,13 +37,42 @@ export default function SettingsScreen({
               : match[2]
     return `${match[1]} ${suit}`
   }
+  const phoneModel =
+    String(settings.phoneModel || '').trim() ||
+    resolvePhoneModelByAccessCode(settings.accessCode)
+  const locale = resolveModelLocale(settings, phoneModel || 'samsungOneUi8')
+  const copy = getSettingsCopy(locale)
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Настройки Hacker</Text>
+      <Text style={styles.title}>{copy.title}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Режим</Text>
+        <Text style={styles.label}>{copy.languageLabel}</Text>
+        <View style={styles.rowButtons}>
+          <Text
+            style={[styles.chip, locale === 'ru' ? styles.chipActive : styles.chipIdle]}
+            onPress={() => onChange({ showLocale: 'ru' })}
+          >
+            RU
+          </Text>
+          <Text
+            style={[styles.chip, locale === 'de' ? styles.chipActive : styles.chipIdle]}
+            onPress={() => onChange({ showLocale: 'de' })}
+          >
+            DE
+          </Text>
+          <Text
+            style={[styles.chip, locale === 'en' ? styles.chipActive : styles.chipIdle]}
+            onPress={() => onChange({ showLocale: 'en' })}
+          >
+            EN
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.label}>{copy.modeLabel}</Text>
         <View style={styles.rowButtons}>
           <Text
             style={[
@@ -50,7 +81,7 @@ export default function SettingsScreen({
             ]}
             onPress={() => onChange({ mode: 'word' })}
           >
-            Слово
+            {copy.modeWord}
           </Text>
           <Text
             style={[
@@ -59,14 +90,14 @@ export default function SettingsScreen({
             ]}
             onPress={() => onChange({ mode: 'card' })}
           >
-            Карта
+            {copy.modeCard}
           </Text>
         </View>
       </View>
 
       {settings.mode === 'word' && (
         <View style={styles.card}>
-          <Text style={styles.label}>Название точки</Text>
+          <Text style={styles.label}>{copy.wifiNameLabel}</Text>
           <TextInput
             value={settings.wifi}
             onChangeText={(wifi) => onChange({ wifi })}
@@ -79,7 +110,7 @@ export default function SettingsScreen({
 
       {settings.mode === 'card' && (
         <View style={styles.card}>
-          <Text style={styles.label}>Карта (из Show экрана)</Text>
+          <Text style={styles.label}>{copy.cardLabel}</Text>
           <Text style={styles.preview}>
             {formatCardPreview(
               buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
@@ -89,7 +120,7 @@ export default function SettingsScreen({
       )}
 
       <View style={styles.card}>
-        <Text style={styles.label}>Задержка до старта (сек)</Text>
+        <Text style={styles.label}>{copy.delayLabel}</Text>
         <TextInput
           keyboardType="number-pad"
           value={String(settings.delay)}
@@ -99,7 +130,7 @@ export default function SettingsScreen({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Автостоп (мин)</Text>
+        <Text style={styles.label}>{copy.autostopLabel}</Text>
         <TextInput
           keyboardType="number-pad"
           value={String(settings.minutesBeforeStop)}
@@ -111,12 +142,12 @@ export default function SettingsScreen({
       </View>
 
       <Toggle
-        label="Добавлять точку в начале SSID"
+        label={copy.dotToggle}
         value={settings.dot}
         onToggle={() => onChange({ dot: !settings.dot })}
       />
       <Toggle
-        label="Добавить второе слово"
+        label={copy.secondWordToggle}
         value={Boolean(settings.secondWordEnabled)}
         onToggle={() =>
           onChange({ secondWordEnabled: !settings.secondWordEnabled })
@@ -125,7 +156,7 @@ export default function SettingsScreen({
 
       {settings.secondWordEnabled ? (
         <View style={styles.card}>
-          <Text style={styles.label}>Второе слово</Text>
+          <Text style={styles.label}>{copy.secondWordLabel}</Text>
           <TextInput
             value={settings.secondWord}
             onChangeText={(secondWord) => onChange({ secondWord })}
@@ -133,7 +164,7 @@ export default function SettingsScreen({
             placeholderTextColor={colors.muted}
             style={styles.input}
           />
-          <Text style={styles.label}>Когда менять слово</Text>
+          <Text style={styles.label}>{copy.secondWordWhenLabel}</Text>
           <View style={styles.rowButtons}>
             <Text
               style={[
@@ -144,7 +175,7 @@ export default function SettingsScreen({
               ]}
               onPress={() => onChange({ secondWordTrigger: 'tap' })}
             >
-              По нажатию на Wi-Fi
+              {copy.secondWordWhenTap}
             </Text>
             <Text
               style={[
@@ -155,11 +186,11 @@ export default function SettingsScreen({
               ]}
               onPress={() => onChange({ secondWordTrigger: 'afterDelay' })}
             >
-              После трансляции
+              {copy.secondWordWhenAfter}
             </Text>
           </View>
 
-          <Text style={styles.label}>Задержка перед вторым словом (сек)</Text>
+          <Text style={styles.label}>{copy.secondWordDelayLabel}</Text>
           <TextInput
             keyboardType="number-pad"
             value={String(settings.secondWordDelaySec ?? 0)}
@@ -172,21 +203,21 @@ export default function SettingsScreen({
       ) : null}
 
       <Toggle
-        label="Автозапуск при входе в Wi-Fi экран"
+        label={copy.startOnWifiToggle}
         value={settings.startOnSetWiFiPage}
         onToggle={() =>
           onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })
         }
       />
       <Toggle
-        label="Режим обучения"
+        label={copy.learnToggle}
         value={settings.learn}
         onToggle={() => onChange({ learn: !settings.learn })}
       />
 
       <View style={styles.card}>
-        <Text style={styles.label}>Show UI</Text>
-        <Text style={styles.label}>Тема</Text>
+        <Text style={styles.label}>{copy.showUiLabel}</Text>
+        <Text style={styles.label}>{copy.themeLabel}</Text>
         <View style={styles.rowButtons}>
           <Text
             style={[
@@ -197,7 +228,7 @@ export default function SettingsScreen({
             ]}
             onPress={() => onChange({ uiThemeMode: 'model' })}
           >
-            Системная
+            {copy.themeModel}
           </Text>
           <Text
             style={[
@@ -208,7 +239,7 @@ export default function SettingsScreen({
             ]}
             onPress={() => onChange({ uiThemeMode: 'dark' })}
           >
-            Тёмная
+            {copy.themeDark}
           </Text>
           <Text
             style={[
@@ -219,12 +250,12 @@ export default function SettingsScreen({
             ]}
             onPress={() => onChange({ uiThemeMode: 'light' })}
           >
-            Светлая
+            {copy.themeLight}
           </Text>
         </View>
-        <Text style={styles.label}>Синхронизация</Text>
+        <Text style={styles.label}>{copy.syncLabel}</Text>
         <PrimaryButton
-          title={refreshInProgress ? 'Обновление...' : 'Обновить Show UI'}
+          title={refreshInProgress ? copy.refreshBusy : copy.refreshIdle}
           onPress={onRefreshShowUi}
           disabled={refreshInProgress}
         />
@@ -234,15 +265,13 @@ export default function SettingsScreen({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Код доступа</Text>
+        <Text style={styles.label}>{copy.accessCodeLabel}</Text>
         <PrimaryButton
-          title="Сменить код доступа"
+          title={copy.resetAccess}
           danger
           onPress={onResetActivation}
         />
-        <Text style={styles.syncStatus}>
-          Сбросит текущую активацию и вернет на экран ввода кода.
-        </Text>
+        <Text style={styles.syncStatus}>{copy.resetHint}</Text>
       </View>
     </ScrollView>
   )

@@ -171,7 +171,9 @@ export default function HuaweiGeneralPage({
   scrollY,
   onOpenSettings,
   isLightTheme = true,
+  copy,
 }) {
+  const text = copy?.general || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -243,7 +245,7 @@ export default function HuaweiGeneralPage({
         <Animated.Text
           style={[styles.headerTitle, { fontSize: titleFontSize, color: palette.textPrimary }]}
         >
-          Настройки
+          {text.headerSettings}
         </Animated.Text>
       </Animated.View>
 
@@ -258,12 +260,12 @@ export default function HuaweiGeneralPage({
       >
         <View style={[styles.searchBox, { backgroundColor: palette.searchBg }]}>
           <Ionicons name="search-outline" size={20} color={palette.searchText} />
-          <Text style={[styles.searchText, { color: palette.searchText }]}>Поиск</Text>
+          <Text style={[styles.searchText, { color: palette.searchText }]}>{text.searchPlaceholder}</Text>
         </View>
 
         <ProfileRow
           title={settings.showOperatorName || ''}
-          subtitle="Аккаунт HUAWEI, Платежи и покупки, Облако и прочее"
+          subtitle={text.profileSubtitle}
           avatarUri={operatorAvatarUri}
           palette={palette}
         />
@@ -271,7 +273,7 @@ export default function HuaweiGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Wi-Fi"
+            title={text.wifiTitle}
             iconSource={WIFI_ICON}
             onPress={() => setPage('wifi')}
             segmentCount={4}
@@ -281,8 +283,8 @@ export default function HuaweiGeneralPage({
           />
           <Row
             palette={palette}
-            title="Bluetooth"
-            rightText="Включено"
+            title={text.bluetoothTitle}
+            rightText={text.bluetoothEnabled}
             iconSource={BLUETOOTH_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(0, segment)}
@@ -291,7 +293,7 @@ export default function HuaweiGeneralPage({
           />
           <Row
             palette={palette}
-            title="Мобильная сеть"
+            title={text.mobileNetworkTitle}
             iconSource={NETWORK_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(4, segment)}
@@ -300,7 +302,7 @@ export default function HuaweiGeneralPage({
           />
           <Row
             palette={palette}
-            title="Суперустройство"
+            title={text.superDeviceTitle}
             iconSource={SUPERDEVICE_ICON}
             segmentCount={4}
             onSegmentTouch={(segment) => setRankSegment(8, segment)}
@@ -309,7 +311,7 @@ export default function HuaweiGeneralPage({
           />
           <Row
             palette={palette}
-            title="Другие соединения"
+            title={text.otherConnectionsTitle}
             iconSource={OTHER_DEVICE_ICON}
             segmentCount={2}
             onSegmentTouch={(segment) => setRankSegment(12, segment)}
@@ -320,20 +322,20 @@ export default function HuaweiGeneralPage({
         </Block>
 
         <Block palette={palette}>
-          <Row palette={palette} title="Рабочий экран" iconSource={WORKSCREEN_ICON} />
+          <Row palette={palette} title={text.homeScreenTitle} iconSource={WORKSCREEN_ICON} />
           <Row
             palette={palette}
-            title="Экран и яркость"
+            title={text.displayTitle}
             iconSource={SCREEN_LIGHT_ICON}
             noBorder
           />
         </Block>
 
         <Block palette={palette}>
-          <Row palette={palette} title="Звуки и вибрация" iconSource={SOUND_ICON} />
+          <Row palette={palette} title={text.soundTitle} iconSource={SOUND_ICON} />
           <Row
             palette={palette}
-            title="Уведомления и строка состояния"
+            title={text.notificationsTitle}
             iconSource={NOTIFICATIONS_ICON}
             noBorder
           />
@@ -342,35 +344,35 @@ export default function HuaweiGeneralPage({
         <Block palette={palette}>
           <Row
             palette={palette}
-            title="Биометрические данные и пароли"
+            title={text.biometricsTitle}
             iconSource={BIOMETRY_ICON}
           />
-          <Row palette={palette} title="Приложения и службы" iconSource={APPLICATIONS_ICON} />
-          <Row palette={palette} title="Батарея" iconSource={BATTERY_ICON} />
-          <Row palette={palette} title="Память" iconSource={MEMORY_ICON} />
-          <Row palette={palette} title="Безопасность" iconSource={SAFETY_ICON} />
-          <Row palette={palette} title="Конфиденциальность" iconSource={CONFIDENTIAL_ICON} />
-          <Row palette={palette} title="Данные о местоположении" iconSource={GPS_ICON} noBorder />
+          <Row palette={palette} title={text.appsServicesTitle} iconSource={APPLICATIONS_ICON} />
+          <Row palette={palette} title={text.batteryTitle} iconSource={BATTERY_ICON} />
+          <Row palette={palette} title={text.memoryTitle} iconSource={MEMORY_ICON} />
+          <Row palette={palette} title={text.safetyTitle} iconSource={SAFETY_ICON} />
+          <Row palette={palette} title={text.privacyTitle} iconSource={CONFIDENTIAL_ICON} />
+          <Row palette={palette} title={text.locationTitle} iconSource={GPS_ICON} noBorder />
         </Block>
 
         <Block palette={palette}>
-          <Row palette={palette} title="Цифровой баланс" iconSource={DIGIT_BALANCE_ICON} />
-          <Row palette={palette} title="HUAWEI Assistant" iconSource={HUAWEI_ASSISTANT_ICON} />
+          <Row palette={palette} title={text.wellbeingTitle} iconSource={DIGIT_BALANCE_ICON} />
+          <Row palette={palette} title={text.assistantTitle} iconSource={HUAWEI_ASSISTANT_ICON} />
           <Row
             palette={palette}
-            title="Специальные возможности"
+            title={text.accessibilityTitle}
             iconSource={SPECIAL_ICON}
             noBorder
           />
         </Block>
 
         <Block palette={palette}>
-          <Row palette={palette} title="Пользователи и аккаунты" iconSource={ACCOUNTS_ICON} />
-          <Row palette={palette} title="HMS Core" iconSource={HMS_ICON} />
-          <Row palette={palette} title="Система и обновления" iconSource={SETTINGS_ICON} />
+          <Row palette={palette} title={text.usersAccountsTitle} iconSource={ACCOUNTS_ICON} />
+          <Row palette={palette} title={text.hmsTitle} iconSource={HMS_ICON} />
+          <Row palette={palette} title={text.systemTitle} iconSource={SETTINGS_ICON} />
           <Row
             palette={palette}
-            title="О телефоне"
+            title={text.aboutPhoneTitle}
             iconSource={ABOUT_PHONE_ICON}
             onPress={onOpenSettings}
             noBorder

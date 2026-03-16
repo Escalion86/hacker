@@ -2,8 +2,10 @@ import React, { useMemo, useState } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
 import bleService from '../../../../services/ble/bleService'
 import { buildCardCode } from '../../../../show/accessProfiles'
+import { resolveModelLocale } from '../../shared/modelLocale'
 import { isShowThemeLight } from '../../shared/themeMode'
 import HuaweiGeneralPage from './HuaweiGeneralPage'
+import { getHuaweiCopy } from './localization'
 import HuaweiWifiPage from './HuaweiWifiPage'
 
 export default function HuaweiModelShowScreen({
@@ -17,6 +19,8 @@ export default function HuaweiModelShowScreen({
     Boolean(settings.startOnSetWiFiPage),
   )
   const lightTheme = isShowThemeLight(settings, 'huawei')
+  const locale = resolveModelLocale(settings, 'huawei')
+  const copy = React.useMemo(() => getHuaweiCopy(locale), [locale])
   const generalScrollY = React.useRef(new Animated.Value(0)).current
   const wifiScrollY = React.useRef(new Animated.Value(0)).current
 
@@ -42,6 +46,7 @@ export default function HuaweiModelShowScreen({
           scrollY={generalScrollY}
           onOpenSettings={onOpenSettings}
           isLightTheme={lightTheme}
+          copy={copy}
         />
       ) : (
         <HuaweiWifiPage
@@ -53,6 +58,7 @@ export default function HuaweiModelShowScreen({
           wifiEnabled={wifiEnabled}
           onWifiEnabledChange={setWifiEnabled}
           isLightTheme={lightTheme}
+          copy={copy}
         />
       )}
     </View>

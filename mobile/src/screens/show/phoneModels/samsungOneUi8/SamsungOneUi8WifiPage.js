@@ -156,7 +156,9 @@ export default function SamsungOneUi8WifiPage({
   wifiEnabled,
   onWifiEnabledChange,
   isLightTheme = false,
+  copy,
 }) {
+  const text = copy?.wifi || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -207,7 +209,7 @@ export default function SamsungOneUi8WifiPage({
         >
           <Ionicons name="chevron-back" size={24} color={palette.textPrimary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>{text.headerTitle}</Text>
         <Pressable hitSlop={10} style={styles.headerIcon}>
           <Ionicons name="qr-code-outline" size={22} color={palette.textPrimary} />
         </Pressable>
@@ -233,7 +235,7 @@ export default function SamsungOneUi8WifiPage({
                 { color: wifiEnabled ? '#4d86ff' : palette.textSecondary },
               ]}
             >
-              {wifiEnabled ? 'Включено' : 'Выключено'}
+              {wifiEnabled ? text.statusOn : text.statusOff}
             </Text>
             <Pressable onPress={onSwitchPress} hitSlop={10}>
               <SwitchMock on={wifiEnabled} />
@@ -242,7 +244,7 @@ export default function SamsungOneUi8WifiPage({
         </View>
 
         <View style={{ gap: 8 }}>
-          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>Доступные сети</Text>
+          <Text style={[styles.sectionTitle, { color: palette.textSecondary }]}>{text.availableNetworksTitle}</Text>
 
           {spotsForView.length === 0 ? null : (
             <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
@@ -262,7 +264,7 @@ export default function SamsungOneUi8WifiPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <View style={styles.addRow}>
               <Ionicons name="add" size={34} color="#2fc35b" />
-              <Text style={[styles.addText, { color: palette.textPrimary }]}>Добавить сеть</Text>
+              <Text style={[styles.addText, { color: palette.textPrimary }]}>{text.addNetworkTitle}</Text>
             </View>
           </View>
 

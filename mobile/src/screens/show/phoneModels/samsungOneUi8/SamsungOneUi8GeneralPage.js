@@ -129,6 +129,7 @@ export default function SamsungOneUi8GeneralPage({
   scrollY,
   cardCode,
   isLightTheme = false,
+  copy,
 }) {
   const palette = isLightTheme
     ? {
@@ -197,6 +198,8 @@ export default function SamsungOneUi8GeneralPage({
 
   const profileName = (settings.showOperatorName || '').trim() || 'Алексей Белинский'
   const avatarUri = (settings.showOperatorAvatar || '').trim()
+  const text = copy || {}
+  const general = text.general || {}
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.pageBg }}>
@@ -236,7 +239,7 @@ export default function SamsungOneUi8GeneralPage({
             },
           ]}
         >
-          Настройки
+          {text.headerSettings}
         </Animated.Text>
         <Ionicons
           style={{ position: 'absolute', right: 14, bottom: 20 }}
@@ -247,7 +250,7 @@ export default function SamsungOneUi8GeneralPage({
       </Animated.View>
       {settings.learn ? (
         <View style={styles.learnCode}>
-          <Text style={styles.code}>Код: {cardCode}</Text>
+          <Text style={styles.code}>{text.learnCodeLabel}: {cardCode}</Text>
         </View>
       ) : null}
       <Animated.ScrollView
@@ -275,7 +278,7 @@ export default function SamsungOneUi8GeneralPage({
             <Animated.Text
               style={[styles.headerTitleBig, { opacity: bigHeaderOpacity, color: palette.textPrimary }]}
             >
-              Настройки
+              {text.headerSettings}
             </Animated.Text>
           </Animated.View>
         </View>
@@ -284,7 +287,7 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, styles.profileCard, { backgroundColor: palette.cardBg }]}>
             <View style={styles.profileTextWrap}>
               <Text style={[styles.profileName, { color: palette.textPrimary }]}>{profileName}</Text>
-              <Text style={[styles.profileSub, { color: palette.textSecondary }]}>Samsung account</Text>
+              <Text style={[styles.profileSub, { color: palette.textSecondary }]}>{text.profileSub}</Text>
             </View>
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} style={styles.avatar} />
@@ -296,8 +299,8 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Подключения"
-              subtitle="Wi-Fi • Bluetooth • Диспетчер SIM-карт"
+              title={general.connectionsTitle}
+              subtitle={general.connectionsSubtitle}
               icon={<IconBall name="wifi" color="#336ee6" />}
               segmentCount={4}
               onSegmentTouch={(segment) => {
@@ -322,8 +325,8 @@ export default function SamsungOneUi8GeneralPage({
             />
             <Row
               palette={palette}
-              title="Подключенные устройства"
-              subtitle="Быстрая отправка • Samsung DeX • Android Auto"
+              title={general.connectedDevicesTitle}
+              subtitle={general.connectedDevicesSubtitle}
               icon={<IconBall name="phone-portrait" color="#336ee6" />}
               onPress={() => setRankSegment(0, 0)}
               segmentCount={4}
@@ -337,8 +340,8 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Galaxy AI"
-              subtitle="Ассистент по письму • Ассистент по заметкам • Ассистент по фотографиям"
+              title={general.galaxyAiTitle}
+              subtitle={general.galaxyAiSubtitle}
               icon={<IconBall name="sparkles" color="#1c9fd8" />}
               segmentCount={4}
               onSegmentTouch={(segment) => setRankSegment(4, segment)}
@@ -347,8 +350,8 @@ export default function SamsungOneUi8GeneralPage({
             />
             <Row
               palette={palette}
-              title="Режимы и сценарии"
-              subtitle="Режимы • Сценарии"
+              title={general.modesTitle}
+              subtitle={general.modesSubtitle}
               icon={<IconBall name="checkmark-done-circle" color="#6858ef" />}
               segmentCount={4}
               onSegmentTouch={(segment) => setRankSegment(8, segment)}
@@ -357,8 +360,8 @@ export default function SamsungOneUi8GeneralPage({
             />
             <Row
               palette={palette}
-              title="Звуки и вибрация"
-              subtitle="Рингтон • Громкость • Вибрация"
+              title={general.soundsTitle}
+              subtitle={general.soundsSubtitle}
               icon={<IconBall name="volume-high" color="#655ce8" />}
               segmentCount={2}
               onSegmentTouch={(segment) => setRankSegment(12, segment)}
@@ -367,8 +370,8 @@ export default function SamsungOneUi8GeneralPage({
             />
             <Row
               palette={palette}
-              title="Уведомления"
-              subtitle="Строка состояния • Не беспокоить"
+              title={general.notificationsTitle}
+              subtitle={general.notificationsSubtitle}
               icon={<IconBall name="notifications" color="#dd621a" />}
               noBorder
             />
@@ -377,20 +380,20 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Дисплей"
-              subtitle="Яркость • Комфорт для глаз • Навигационная панель"
+              title={general.displayTitle}
+              subtitle={general.displaySubtitle}
               icon={<IconBall name="sunny" color="#95c11f" />}
             />
             <Row
               palette={palette}
-              title="Батарея"
-              subtitle="Энергосбережение • Зарядка"
+              title={general.batteryTitle}
+              subtitle={general.batterySubtitle}
               icon={<IconBall name="battery-half" color="#56bf3f" />}
             />
             <Row
               palette={palette}
-              title="Обои и стиль"
-              subtitle="Обои • Палитра цветов"
+              title={general.wallpaperTitle}
+              subtitle={general.wallpaperSubtitle}
               icon={<IconBall name="image" color="#d45684" />}
               noBorder
             />
@@ -399,20 +402,20 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Безопасность и конфиденциальность"
-              subtitle="Биометрия • Разрешения"
+              title={general.securityPrivacyTitle}
+              subtitle={general.securityPrivacySubtitle}
               icon={<IconBall name="shield-checkmark" color="#6a59ee" />}
             />
             <Row
               palette={palette}
-              title="Локация"
-              subtitle="Доступ к местоположению"
+              title={general.locationTitle}
+              subtitle={general.locationSubtitle}
               icon={<IconBall name="location" color="#6a59ee" />}
             />
             <Row
               palette={palette}
-              title="Экстренные ситуации"
-              subtitle="SOS и медданные"
+              title={general.emergencyTitle}
+              subtitle={general.emergencySubtitle}
               icon={<IconBall name="warning" color="#d63c39" />}
               noBorder
             />
@@ -421,20 +424,20 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Учетные записи и архивация"
-              subtitle="Управление аккаунтами • Smart Switch"
+              title={general.accountsBackupTitle}
+              subtitle={general.accountsBackupSubtitle}
               icon={<IconBall name="sync" color="#3f82ff" />}
             />
             <Row
               palette={palette}
-              title="Google"
-              subtitle="Службы Google"
+              title={general.googleTitle}
+              subtitle={general.googleSubtitle}
               icon={<IconBall name="logo-google" color="#3f82ff" />}
             />
             <Row
               palette={palette}
-              title="Дополнительные функции"
-              subtitle="Labs • Боковая кнопка"
+              title={general.advancedFeaturesTitle}
+              subtitle={general.advancedFeaturesSubtitle}
               icon={<IconBall name="sparkles" color="#e4ad45" />}
               noBorder
             />
@@ -443,20 +446,20 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Использование устройства и родительский контроль"
-              subtitle="Время экрана • Таймеры"
+              title={general.wellbeingTitle}
+              subtitle={general.wellbeingSubtitle}
               icon={<IconBall name="timer-outline" color="#63be3c" />}
             />
             <Row
               palette={palette}
-              title="Обслуживание устройства"
-              subtitle="Хранилище • Память • Защита"
+              title={general.deviceCareTitle}
+              subtitle={general.deviceCareSubtitle}
               icon={<IconBall name="build" color="#7871b8" />}
             />
             <Row
               palette={palette}
-              title="Приложения"
-              subtitle="Приложения по умолчанию"
+              title={general.appsTitle}
+              subtitle={general.appsSubtitle}
               icon={<IconBall name="apps" color="#3f82ff" />}
               noBorder
             />
@@ -465,38 +468,38 @@ export default function SamsungOneUi8GeneralPage({
           <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
             <Row
               palette={palette}
-              title="Общие настройки"
-              subtitle="Язык и клавиатура • Дата и время"
+              title={general.generalManagementTitle}
+              subtitle={general.generalManagementSubtitle}
               icon={<IconBall name="settings" color="#7871b8" />}
             />
             <Row
               palette={palette}
-              title="Специальные возможности"
-              subtitle="Отображение • Слышимость • Подвижность"
+              title={general.accessibilityTitle}
+              subtitle={general.accessibilitySubtitle}
               icon={<IconBall name="accessibility" color="#63be3c" />}
             />
             <Row
               palette={palette}
-              title="Обновление ПО"
-              subtitle="Загрузка и установка"
+              title={general.softwareUpdateTitle}
+              subtitle={general.softwareUpdateSubtitle}
               icon={<IconBall name="download" color="#3f82ff" />}
             />
             <Row
               palette={palette}
-              title="Советы и руководство пользователя"
-              subtitle="Полезные советы • Новые функции"
+              title={general.tipsTitle}
+              subtitle={general.tipsSubtitle}
               icon={<IconBall name="bulb" color="#e4ad45" />}
             />
             <Row
               palette={palette}
-              title="Сведения о телефоне"
-              subtitle="Состояние • Юридическая информация"
+              title={general.aboutPhoneTitle}
+              subtitle={general.aboutPhoneSubtitle}
               icon={<IconBall name="information-circle" color="#7871b8" />}
             />
             <Row
               palette={palette}
-              title="Параметры разработчика"
-              subtitle="Открыть экран настроек приложения"
+              title={general.developerOptionsTitle}
+              subtitle={general.developerOptionsSubtitle}
               icon={<IconBall name="code-slash" color="#7871b8" />}
               onPress={onOpenSettings}
               noBorder

@@ -15,7 +15,13 @@ const WIFI_SPOT_2 = require('../../../../icons/huawei/wifispot2.png')
 const WIFI_SPOT_3 = require('../../../../icons/huawei/wifispot3.png')
 const WIFI_SPOT_4 = require('../../../../icons/huawei/wifispot4.png')
 const WIFI_SPOT_5 = require('../../../../icons/huawei/wifispot5.png')
+const WIFI_SPOT_1_DARK = require('../../../../icons/huawei/wifispot1_BlackTheme.png')
+const WIFI_SPOT_2_DARK = require('../../../../icons/huawei/wifispot2_BlackTheme.png')
+const WIFI_SPOT_3_DARK = require('../../../../icons/huawei/wifispot3_BlackTheme.png')
+const WIFI_SPOT_4_DARK = require('../../../../icons/huawei/wifispot4_BlackTheme.png')
+const WIFI_SPOT_5_DARK = require('../../../../icons/huawei/wifispot5_BlackTheme.png')
 const HUAWEI_BACK_ARROW = require('../../../../icons/huawei/ArrowBack.png')
+const HUAWEI_BACK_ARROW_DARK = require('../../../../icons/huawei/ArrowBack_BlackTheme.png')
 
 function clampSignalLevel(level) {
   const parsed = Number(level)
@@ -27,13 +33,18 @@ function randomHuaweiLevel() {
   return 1 + Math.floor(Math.random() * 5)
 }
 
-function resolveWifiSpotIcon(level) {
+function resolveWifiSpotIcon(level, isLightTheme) {
   const safeLevel = clampSignalLevel(level)
-  if (safeLevel <= 1) return WIFI_SPOT_1
-  if (safeLevel === 2) return WIFI_SPOT_2
-  if (safeLevel === 3) return WIFI_SPOT_3
-  if (safeLevel === 4) return WIFI_SPOT_4
-  return WIFI_SPOT_5
+  const spots = isLightTheme
+    ? [WIFI_SPOT_1, WIFI_SPOT_2, WIFI_SPOT_3, WIFI_SPOT_4, WIFI_SPOT_5]
+    : [
+        WIFI_SPOT_1_DARK,
+        WIFI_SPOT_2_DARK,
+        WIFI_SPOT_3_DARK,
+        WIFI_SPOT_4_DARK,
+        WIFI_SPOT_5_DARK,
+      ]
+  return spots[safeLevel - 1] || spots[2]
 }
 
 function stableLevelFromSpot(spot, index) {
@@ -75,8 +86,8 @@ function SwitchMock({ on }) {
   )
 }
 
-function WifiSignal({ level = 4 }) {
-  const icon = resolveWifiSpotIcon(level)
+function WifiSignal({ level = 4, isLightTheme = true }) {
+  const icon = resolveWifiSpotIcon(level, isLightTheme)
   return (
     <View style={styles.wifiSignalWrap}>
       <Image source={icon} style={styles.wifiSignalImage} />
@@ -86,12 +97,13 @@ function WifiSignal({ level = 4 }) {
 
 function WifiRow({
   title,
-  subtitle = 'Защищено',
+  subtitle = '',
   level = 4,
   noBorder = false,
   onPress,
   connected = false,
   palette,
+  isLightTheme = true,
 }) {
   return (
     <Pressable onPress={onPress}>
@@ -116,7 +128,7 @@ function WifiRow({
             {subtitle}
           </Text>
         </View>
-        <WifiSignal level={level} />
+        <WifiSignal level={level} isLightTheme={isLightTheme} />
       </View>
       {!noBorder ? (
         <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
@@ -134,7 +146,9 @@ export default function HuaweiWifiPage({
   wifiEnabled,
   onWifiEnabledChange,
   isLightTheme = true,
+  copy,
 }) {
+  const text = copy?.wifi || {}
   const palette = isLightTheme
     ? {
         pageBg: '#eceef1',
@@ -180,6 +194,7 @@ export default function HuaweiWifiPage({
           text: spot,
           level: clampSignalLevel(stableLevelFromSpot(spot, index)),
         }))
+  const backArrowIcon = isLightTheme ? HUAWEI_BACK_ARROW : HUAWEI_BACK_ARROW_DARK
 
   return (
     <View style={[styles.page, { backgroundColor: palette.pageBg }]}>
@@ -189,9 +204,9 @@ export default function HuaweiWifiPage({
           hitSlop={10}
           style={styles.headerBack}
         >
-          <Image source={HUAWEI_BACK_ARROW} style={styles.headerBackImage} />
+          <Image source={backArrowIcon} style={styles.headerBackImage} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
+        <Text style={[styles.headerTitle, { color: palette.textPrimary }]}>{text.headerTitle}</Text>
         <Pressable hitSlop={10} style={styles.headerHelp}>
           <Ionicons name="help-circle-outline" size={27} color={palette.icon} />
         </Pressable>
@@ -208,37 +223,60 @@ export default function HuaweiWifiPage({
       >
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           <View style={styles.wifiToggleRow}>
-            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>Wi-Fi</Text>
+            <Text style={[styles.wifiToggleTitle, { color: palette.textPrimary }]}>{text.toggleTitle}</Text>
             <Pressable onPress={onSwitchPress} hitSlop={10}>
               <SwitchMock on={wifiEnabled} />
             </Pressable>
           </View>
           <View style={[styles.wifiRowDivider, { borderBottomColor: palette.divider }]} />
           <Pressable style={styles.wifiHelperRow}>
-            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>Другие настройки</Text>
+            <Text style={[styles.wifiHelperText, { color: palette.textPrimary }]}>{text.otherSettingsTitle}</Text>
             <Ionicons name="chevron-forward" size={18} color={palette.section} />
           </Pressable>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: palette.section }]}>ДОСТУПНО</Text>
+        <Text style={[styles.sectionTitle, { color: palette.section }]}>{text.availableTitle}</Text>
         <View style={[styles.card, { backgroundColor: palette.cardBg }]}>
           {spotsForView.length > 0 ? (
             spotsForView.map((spot, index, arr) => (
               <WifiRow
                 key={spot.key}
                 title={spot.text}
+                subtitle={text.protectedLabel}
                 level={spot.level}
                 noBorder={index === arr.length - 1}
                 onPress={handleWifiSpotPress}
                 palette={palette}
+                isLightTheme={isLightTheme}
               />
             ))
           ) : (
             <>
-              <WifiRow title="Beeline_2G_A0AA0C" palette={palette} />
-              <WifiRow title="TP-Link_1456" palette={palette} />
-              <WifiRow title="WIFI" palette={palette} />
-              <WifiRow title="Beeline_5G_F17476" noBorder palette={palette} />
+              <WifiRow
+                title="Beeline_2G_A0AA0C"
+                subtitle={text.protectedLabel}
+                palette={palette}
+                isLightTheme={isLightTheme}
+              />
+              <WifiRow
+                title="TP-Link_1456"
+                subtitle={text.protectedLabel}
+                palette={palette}
+                isLightTheme={isLightTheme}
+              />
+              <WifiRow
+                title="WIFI"
+                subtitle={text.protectedLabel}
+                palette={palette}
+                isLightTheme={isLightTheme}
+              />
+              <WifiRow
+                title="Beeline_5G_F17476"
+                subtitle={text.protectedLabel}
+                noBorder
+                palette={palette}
+                isLightTheme={isLightTheme}
+              />
             </>
           )}
         </View>
