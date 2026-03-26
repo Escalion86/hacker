@@ -26,6 +26,10 @@ export default function SamsungOneUi8ModelShowScreen({
   const lightTheme = isShowThemeLight(settings, 'samsungOneUi8')
   const locale = resolveModelLocale(settings, 'samsungOneUi8')
   const copy = React.useMemo(() => getSamsungOneUi8Copy(locale), [locale])
+  const learnHintText =
+    settings.mode === 'wordSet'
+      ? copy.learnHintWordSet || copy.learnHintCard || ''
+      : copy.learnHintCard || copy.learnHintWordSet || ''
 
   const cardCode = useMemo(
     () => buildCardCode(settings.cardRankIndex, settings.cardMastIndex),
@@ -58,6 +62,7 @@ export default function SamsungOneUi8ModelShowScreen({
           setPage={setPage}
           scrollY={connectionsScrollY}
           wifiEnabled={wifiEnabled}
+          learnMode={settings.learn}
           isLightTheme={lightTheme}
           copy={copy}
         />
@@ -71,6 +76,7 @@ export default function SamsungOneUi8ModelShowScreen({
           cardCode={cardCode}
           wifiEnabled={wifiEnabled}
           onWifiEnabledChange={setWifiEnabled}
+          learnMode={settings.learn}
           isLightTheme={lightTheme}
           copy={copy}
         />
@@ -88,7 +94,7 @@ export default function SamsungOneUi8ModelShowScreen({
           ]}
         >
           <Text style={[styles.learnHintText, { color: lightTheme ? '#3b4354' : '#d8dde9' }]}>
-            {copy.learnHint}
+            {learnHintText}
           </Text>
         </View>
       )}

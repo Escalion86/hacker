@@ -1,10 +1,16 @@
 import React from 'react'
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import PrimaryButton from '../components/PrimaryButton'
 import Toggle from '../components/Toggle'
 import { buildCardCode, resolvePhoneModelByAccessCode } from '../show/accessProfiles'
 import { getSettingsCopy } from './localization/settingsLocalization'
 import { resolveModelLocale } from './show/shared/modelLocale'
+import {
+  MAX_WORD_SET_WORDS,
+  normalizeWordSets,
+  resolveWordFromActiveSet,
+} from './show/shared/wordSets'
 import { colors, spacing } from '../theme/tokens'
 
 export default function SettingsScreen({
@@ -37,11 +43,140 @@ export default function SettingsScreen({
               : match[2]
     return `${match[1]} ${suit}`
   }
+
+  const [creatingWordSet, setCreatingWordSet] = React.useState(false)
+  const [draftWordSetName, setDraftWordSetName] = React.useState('')
+  const [draftWords, setDraftWords] = React.useState([''])
+
+  const normalizedWordSets = React.useMemo(
+    () => normalizeWordSets(settings.wordSets),
+    [settings.wordSets],
+  )
+  const activeWordSet =
+    normalizedWordSets.find((set) => set.id === settings.selectedWordSetId) ||
+    normalizedWordSets[0] ||
+    null
+  const activeWordState = resolveWordFromActiveSet(
+    settings,
+    settings.wordSetWordIndex,
+  )
+
+  const setDraftWordAt = (index, value) => {
+    const nextWords = [...draftWords]
+    nextWords[index] = value
+    setDraftWords(nextWords.slice(0, MAX_WORD_SET_WORDS))
+  }
+
+  const draftRowsCount = React.useMemo(() => {
+    const firstEmpty = draftWords.findIndex((word) => !String(word || '').trim())
+    if (firstEmpty === -1) return Math.min(MAX_WORD_SET_WORDS, draftWords.length + 1)
+    return Math.min(MAX_WORD_SET_WORDS, Math.max(1, firstEmpty + 1))
+  }, [draftWords])
+
+  const hasWordsForSave = React.useMemo(
+    () => draftWords.some((word) => String(word || '').trim()),
+    [draftWords],
+  )
+
+  const resetWordSetDraft = () => {
+    setCreatingWordSet(false)
+    setDraftWordSetName('')
+    setDraftWords([''])
+  }
+
+  const createWordSet = () => {
+    if (!hasWordsForSave) return
+
+    const words = draftWords
+      .map((word) => String(word || '').trim())
+      .filter(Boolean)
+      .slice(0, MAX_WORD_SET_WORDS)
+
+    const timestamp = Date.now().toString(36)
+    const nextSet = {
+      id: `set_${timestamp}`,
+      name:
+        String(draftWordSetName || '').trim() ||
+        `List ${normalizedWordSets.length + 1}`,
+      words,
+    }
+    const nextWordSets = [...normalizedWordSets, nextSet]
+    const firstWord = words[0] || settings.wifi || 'Hacked'
+
+    onChange({
+      mode: 'wordSet',
+      wordSets: nextWordSets,
+      selectedWordSetId: nextSet.id,
+      wordSetWordIndex: 0,
+      wifi: firstWord,
+    })
+
+    resetWordSetDraft()
+  }
+
+  const selectWordSet = (wordSet) => {
+    const firstWord = String(wordSet?.words?.[0] || '').trim()
+    onChange({
+      selectedWordSetId: wordSet.id,
+      wordSetWordIndex: 0,
+      wifi: firstWord || settings.wifi || 'Hacked',
+    })
+  }
+
+  const deleteWordSet = (wordSet) => {
+    const messageTemplate =
+      copy.wordSetDeleteConfirmMessage ||
+      'Are you sure you want to delete list "{name}"?'
+    const message = String(messageTemplate).replace(
+      '{name}',
+      String(wordSet?.name || ''),
+    )
+    Alert.alert(
+      copy.wordSetDeleteConfirmTitle || 'Delete list?',
+      message,
+      [
+        {
+          text: copy.wordSetDeleteCancel || 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: copy.wordSetDeleteOk || 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            const nextWordSets = normalizedWordSets.filter(
+              (item) => item.id !== wordSet.id,
+            )
+            const wasSelected =
+              String(settings.selectedWordSetId || '') === String(wordSet.id || '')
+            const nextSelected = wasSelected
+              ? nextWordSets[0] || null
+              : nextWordSets.find(
+                  (item) => item.id === settings.selectedWordSetId,
+                ) || nextWordSets[0] || null
+            const nextPatch = {
+              wordSets: nextWordSets,
+              selectedWordSetId: nextSelected?.id || '',
+              wordSetWordIndex: 0,
+            }
+            if (nextSelected?.words?.length) {
+              nextPatch.wifi = nextSelected.words[0]
+            }
+            onChange(nextPatch)
+          },
+        },
+      ],
+    )
+  }
   const phoneModel =
     String(settings.phoneModel || '').trim() ||
     resolvePhoneModelByAccessCode(settings.accessCode)
   const locale = resolveModelLocale(settings, phoneModel || 'samsungOneUi8')
   const copy = getSettingsCopy(locale)
+  const getWordPlaceholder = (index) =>
+    String(copy.wordSetWordPlaceholder || 'Word {n}').replace(
+      '{n}',
+      String(index + 1),
+    )
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -92,6 +227,15 @@ export default function SettingsScreen({
           >
             {copy.modeCard}
           </Text>
+          <Text
+            style={[
+              styles.chip,
+              settings.mode === 'wordSet' ? styles.chipActive : styles.chipIdle,
+            ]}
+            onPress={() => onChange({ mode: 'wordSet' })}
+          >
+            {copy.modeWordSet}
+          </Text>
         </View>
       </View>
 
@@ -118,6 +262,90 @@ export default function SettingsScreen({
           </Text>
         </View>
       )}
+
+      {settings.mode === 'wordSet' && (
+        <View style={styles.card}>
+          <Text style={styles.label}>{copy.wordSetLabel}</Text>
+          <Text style={styles.labelMuted}>{copy.wordSetSelectLabel}</Text>
+          <View style={styles.wordSetList}>
+            {normalizedWordSets.map((wordSet) => (
+              <View key={wordSet.id} style={styles.wordSetListRow}>
+                <Pressable
+                  style={[
+                    styles.wordSetSelect,
+                    (activeWordSet?.id || '') === wordSet.id
+                      ? styles.wordSetSelectActive
+                      : styles.wordSetSelectIdle,
+                  ]}
+                  onPress={() => selectWordSet(wordSet)}
+                >
+                  <Text style={styles.wordSetSelectText}>{wordSet.name}</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.wordSetDeleteButton}
+                  onPress={() => deleteWordSet(wordSet)}
+                >
+                  <Ionicons name="trash" size={18} color="#ff4d4f" />
+                </Pressable>
+              </View>
+            ))}
+          </View>
+          {!activeWordSet ? (
+            <Text style={styles.syncStatus}>{copy.wordSetEmptyHint}</Text>
+          ) : (
+            <Text style={styles.syncStatus}>
+              {`${copy.wordSetDefaultPrefix || 'Default'}: ${
+                activeWordSet.words[0] || activeWordState.word || '...'
+              }`}
+            </Text>
+          )}
+          <View style={styles.rowButtons}>
+            <Text
+              style={[styles.chip, creatingWordSet ? styles.chipActive : styles.chipIdle]}
+              onPress={() => setCreatingWordSet((prev) => !prev)}
+            >
+              {copy.wordSetCreate}
+            </Text>
+          </View>
+
+          {creatingWordSet ? (
+            <View style={styles.wordSetCreateWrap}>
+              <Text style={styles.labelMuted}>{copy.wordSetCreateName}</Text>
+              <TextInput
+                value={draftWordSetName}
+                onChangeText={setDraftWordSetName}
+                placeholder="My list"
+                placeholderTextColor={colors.muted}
+                style={styles.input}
+              />
+              <Text style={styles.labelMuted}>{copy.wordSetCreateWords}</Text>
+              {Array.from({ length: draftRowsCount }).map((_, index) => (
+                <TextInput
+                  key={`word-set-word-${index}`}
+                  value={draftWords[index] || ''}
+                  onChangeText={(value) => setDraftWordAt(index, value)}
+                  placeholder={getWordPlaceholder(index)}
+                  placeholderTextColor={colors.muted}
+                  style={styles.input}
+                />
+              ))}
+              <PrimaryButton
+                title={copy.wordSetSave}
+                onPress={createWordSet}
+                disabled={!hasWordsForSave}
+              />
+            </View>
+          ) : null}
+        </View>
+      )}
+
+      <Toggle
+        label={copy.startOnWifiToggle}
+        value={settings.startOnSetWiFiPage}
+        onToggle={() =>
+          onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })
+        }
+      />
 
       <View style={styles.card}>
         <Text style={styles.label}>{copy.delayLabel}</Text>
@@ -202,13 +430,6 @@ export default function SettingsScreen({
         </View>
       ) : null}
 
-      <Toggle
-        label={copy.startOnWifiToggle}
-        value={settings.startOnSetWiFiPage}
-        onToggle={() =>
-          onChange({ startOnSetWiFiPage: !settings.startOnSetWiFiPage })
-        }
-      />
       <Toggle
         label={copy.learnToggle}
         value={settings.learn}
@@ -339,5 +560,49 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     lineHeight: 16,
+  },
+  labelMuted: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  wordSetCreateWrap: {
+    gap: spacing.sm,
+  },
+  wordSetList: {
+    gap: spacing.sm,
+  },
+  wordSetListRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  wordSetSelect: {
+    flex: 1,
+    borderRadius: 12,
+    minHeight: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  wordSetSelectActive: {
+    backgroundColor: colors.accent,
+  },
+  wordSetSelectIdle: {
+    backgroundColor: '#313948',
+  },
+  wordSetSelectText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  wordSetDeleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#24181a',
+    borderWidth: 1,
+    borderColor: '#4b1f23',
   },
 })

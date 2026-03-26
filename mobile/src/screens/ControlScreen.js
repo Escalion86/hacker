@@ -4,6 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import PrimaryButton from '../components/PrimaryButton';
 import bleService from '../services/ble/bleService';
 import { buildCardCode } from '../show/accessProfiles';
+import { resolveWordFromActiveSet } from './show/shared/wordSets';
 import { colors, spacing } from '../theme/tokens';
 
 export default function ControlScreen({ settings }) {
@@ -71,8 +72,23 @@ export default function ControlScreen({ settings }) {
     if (settings.mode === 'card') {
       return buildCardCode(settings.cardRankIndex, settings.cardMastIndex);
     }
+    if (settings.mode === 'wordSet') {
+      const selected = resolveWordFromActiveSet(
+        settings,
+        settings.wordSetWordIndex,
+      );
+      return selected.word || settings.wifi || 'Hacked';
+    }
     return settings.wifi || 'Hacked';
-  }, [settings.mode, settings.wifi, settings.cardRankIndex, settings.cardMastIndex]);
+  }, [
+    settings.mode,
+    settings.wifi,
+    settings.cardRankIndex,
+    settings.cardMastIndex,
+    settings.wordSetWordIndex,
+    settings.wordSets,
+    settings.selectedWordSetId,
+  ]);
 
   const handleConnect = async () => {
     if (!bluetoothOn) return;

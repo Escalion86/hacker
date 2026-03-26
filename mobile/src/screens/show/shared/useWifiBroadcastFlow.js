@@ -1,5 +1,6 @@
 import React from 'react'
 import bleService from '../../../services/ble/bleService'
+import { resolveWordFromActiveSet } from './wordSets'
 
 const MAX_ANIMATED_SPOTS = 12
 const NOISE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*+-?'
@@ -116,12 +117,18 @@ export function useWifiBroadcastFlow({
   )
 
   const primaryTarget = React.useMemo(() => {
+    const wordSetState = resolveWordFromActiveSet(
+      settings,
+      settings.wordSetWordIndex,
+    )
     const base =
       mode === 'card'
         ? toSuitSymbolCode(cardCode)
+        : mode === 'wordSet'
+          ? wordSetState.word || wifiWord || 'Hacked'
         : wifiWord || 'Hacked'
     return buildWordTarget(base, dotEnabled)
-  }, [mode, cardCode, wifiWord, dotEnabled])
+  }, [mode, settings, cardCode, wifiWord, dotEnabled])
 
   const startWifiAnimation = React.useCallback(
     (targetSsid, onComplete, options = {}) => {

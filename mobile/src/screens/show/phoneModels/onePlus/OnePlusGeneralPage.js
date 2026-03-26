@@ -2,6 +2,10 @@ import React, { useRef } from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons'
 import { Image } from 'react-native'
+import {
+  buildWordSetLearnLabels,
+  resolveActiveWordSetWords,
+} from '../../shared/wordSets'
 
 const WIFI_ICON = require('../../../../icons/onePlus/WiFi.png')
 const NETWORK_ICON = require('../../../../icons/onePlus/Network.png')
@@ -67,6 +71,7 @@ function Row({
   onSegmentTouch,
   showLearnOverlay = false,
   learnOverlayLabels = [],
+  learnOverlayCompact = false,
   palette = DEFAULT_PALETTE,
 }) {
   const rowWidthRef = useRef(1)
@@ -112,7 +117,14 @@ function Row({
                 index > 0 && styles.learnOverlaySegmentBorder,
               ]}
             >
-              <Text style={styles.learnOverlayText}>{label}</Text>
+              <Text
+                style={[
+                  styles.learnOverlayText,
+                  learnOverlayCompact && styles.learnOverlayTextCompact,
+                ]}
+              >
+                {label}
+              </Text>
             </View>
           ))}
         </View>
@@ -204,6 +216,11 @@ export default function OnePlusGeneralPage({
         arrow: '#565b64',
       }
   const hasManualRankSelectionRef = useRef(false)
+  const isWordSetMode = settings.mode === 'wordSet'
+  const activeWordSetWords = React.useMemo(
+    () => resolveActiveWordSetWords(settings),
+    [settings],
+  )
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 80],
     outputRange: [HEADER_HEIGHT_MAX, HEADER_HEIGHT_MIN],
@@ -223,6 +240,17 @@ export default function OnePlusGeneralPage({
   const setRankSegment = (base, segment) => {
     hasManualRankSelectionRef.current = true
     onChange({ cardRankIndex: Math.min(13, base + segment) })
+  }
+
+  const setWordSetSegment = (base, segment) => {
+    if (!isWordSetMode) return
+    const index = Math.max(0, base + segment)
+    const nextWord = String(activeWordSetWords[index] || '').trim()
+    if (!nextWord) return
+    onChange({
+      wordSetWordIndex: index,
+      wifi: nextWord,
+    })
   }
 
   const setMastAndOpenWifi = (segment) => {
@@ -289,10 +317,11 @@ export default function OnePlusGeneralPage({
             // rightText="DIREZABLe"
             icon={<Image source={WIFI_ICON} style={styles.onePlusIcon} />}
             onPress={() => setPage('wifi')}
-            segmentCount={4}
-            onSegmentTouch={setMastAndOpenWifi}
+            segmentCount={isWordSetMode ? 0 : 4}
+            onSegmentTouch={isWordSetMode ? undefined : setMastAndOpenWifi}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['♠️', '♥️', '♣️', '♦️']}
+            learnOverlayCompact={isWordSetMode}
+            learnOverlayLabels={isWordSetMode ? [] : ['♠️', '♥️', '♣️', '♦️']}
           />
           <Row
             palette={palette}
@@ -306,18 +335,40 @@ export default function OnePlusGeneralPage({
               />
             }
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(0, segment)}
+            onSegmentTouch={(segment) => {
+              if (isWordSetMode) {
+                setWordSetSegment(0, segment)
+                return
+              }
+              setRankSegment(0, segment)
+            }}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['A', '2', '3', '4']}
+            learnOverlayCompact={isWordSetMode}
+            learnOverlayLabels={
+              isWordSetMode
+                ? buildWordSetLearnLabels(activeWordSetWords, 0, 4)
+                : ['A', '2', '3', '4']
+            }
           />
           <Row
             palette={palette}
             title={text.mobileNetworkTitle}
             icon={<Image source={NETWORK_ICON} style={styles.onePlusIcon} />}
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(4, segment)}
+            onSegmentTouch={(segment) => {
+              if (isWordSetMode) {
+                setWordSetSegment(4, segment)
+                return
+              }
+              setRankSegment(4, segment)
+            }}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['5', '6', '7', '8']}
+            learnOverlayCompact={isWordSetMode}
+            learnOverlayLabels={
+              isWordSetMode
+                ? buildWordSetLearnLabels(activeWordSetWords, 4, 4)
+                : ['5', '6', '7', '8']
+            }
           />
           <Row
             palette={palette}
@@ -327,9 +378,20 @@ export default function OnePlusGeneralPage({
             }
             noBorder
             segmentCount={4}
-            onSegmentTouch={(segment) => setRankSegment(8, segment)}
+            onSegmentTouch={(segment) => {
+              if (isWordSetMode) {
+                setWordSetSegment(8, segment)
+                return
+              }
+              setRankSegment(8, segment)
+            }}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['9', '10', 'J', 'Q']}
+            learnOverlayCompact={isWordSetMode}
+            learnOverlayLabels={
+              isWordSetMode
+                ? buildWordSetLearnLabels(activeWordSetWords, 8, 4)
+                : ['9', '10', 'J', 'Q']
+            }
           />
         </Block>
 
@@ -340,10 +402,21 @@ export default function OnePlusGeneralPage({
             icon={
               <Image source={GENERAL_SCREEN_ICON} style={styles.onePlusIcon} />
             }
-            segmentCount={2}
-            onSegmentTouch={(segment) => setRankSegment(12, segment)}
+            segmentCount={isWordSetMode ? 4 : 2}
+            onSegmentTouch={(segment) => {
+              if (isWordSetMode) {
+                setWordSetSegment(12, segment)
+                return
+              }
+              setRankSegment(12, segment)
+            }}
             showLearnOverlay={settings.learn}
-            learnOverlayLabels={['K', 'Joker']}
+            learnOverlayCompact={isWordSetMode}
+            learnOverlayLabels={
+              isWordSetMode
+                ? buildWordSetLearnLabels(activeWordSetWords, 12, 4)
+                : ['K', 'Joker']
+            }
           />
           <Row
             palette={palette}
@@ -660,6 +733,12 @@ const styles = StyleSheet.create({
     color: '#d9e6ff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  learnOverlayTextCompact: {
+    fontSize: 12,
+    lineHeight: 14,
+    textAlign: 'center',
+    paddingHorizontal: 4,
   },
   segmentTouchWrap: {
     position: 'absolute',

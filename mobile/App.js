@@ -17,6 +17,7 @@ import {
   resolvePhoneModelByTemplateId,
 } from './src/show/accessProfiles';
 import { resolveShowTheme } from './src/screens/show/shared/themeMode';
+import { resolveWordFromActiveSet } from './src/screens/show/shared/wordSets';
 
 function AppContent() {
   const systemScheme = useColorScheme();
@@ -34,21 +35,30 @@ function AppContent() {
   const bottomInset = Platform.OS === 'android' ? 56 : 0;
   const normalizedCode = (settings.accessCode || '').trim().toLowerCase();
   const effectiveAccessCode = resolvedAccessCode || normalizedCode;
+  const canOpenControl = effectiveAccessCode === 'escalion';
   const effectivePhoneModel =
     (settings.phoneModel || '').trim() ||
     resolvePhoneModelByAccessCode(effectiveAccessCode);
   const hasValidCode = Boolean(effectiveAccessCode && effectivePhoneModel);
   const learnCardCode = buildCardCode(settings.cardRankIndex, settings.cardMastIndex);
+  const learnWordSet = resolveWordFromActiveSet(
+    settings,
+    settings.wordSetWordIndex,
+  ).word;
+  const activeTab =
+    tab === 'control' && !canOpenControl
+      ? 'show'
+      : tab;
   const showScreenBottomPadding =
-    tab === 'show' &&
+    activeTab === 'show' &&
     (effectivePhoneModel === 'onePlus' || effectivePhoneModel === 'huawei')
       ? 0
       : bottomInset;
   const showTheme = resolveShowTheme(settings, effectivePhoneModel);
   const showScreenBg = showTheme === 'light' ? '#eceef1' : '#000';
-  const appSurfaceBg = tab === 'show' ? showScreenBg : colors.bg;
+  const appSurfaceBg = activeTab === 'show' ? showScreenBg : colors.bg;
   const statusBarStyle =
-    tab === 'show'
+    activeTab === 'show'
       ? showTheme === 'light'
         ? 'dark'
         : 'light'
@@ -211,6 +221,12 @@ function AppContent() {
     };
   }, [hasValidCode]);
 
+  useEffect(() => {
+    if (canOpenControl) return;
+    if (tab !== 'control') return;
+    setTab('show');
+  }, [canOpenControl, tab]);
+
   if (loading) {
     return (
       <View style={styles.loadingWrap}>
@@ -248,7 +264,7 @@ function AppContent() {
           {
             backgroundColor: appSurfaceBg,
             paddingTop: topInset,
-            paddingBottom: tab === 'show' ? showScreenBottomPadding : 0,
+            paddingBottom: activeTab === 'show' ? showScreenBottomPadding : 0,
           },
         ]}
       >
@@ -264,17 +280,21 @@ function AppContent() {
             ]}
           />
         ) : null}
-        {tab === 'show' && settings.learn ? (
+        {activeTab === 'show' && settings.learn ? (
           <View
             pointerEvents="none"
             style={[styles.learnCodeBadge, { top: topInset + 8 }]}
           >
-            <Text style={styles.learnCodeText}>Код: {learnCardCode}</Text>
+            <Text style={styles.learnCodeText}>
+              {settings.mode === 'wordSet'
+                ? `Слово: ${learnWordSet || settings.wifi || '...'}`
+                : `Код: ${learnCardCode}`}
+            </Text>
           </View>
         ) : null}
-        {tab === 'control' ? (
+        {activeTab === 'control' ? (
           <ControlScreen settings={{ ...settings, accessCode: effectiveAccessCode }} />
-        ) : tab === 'show' ? (
+        ) : activeTab === 'show' ? (
           <ShowSettingsScreen
             settings={{ ...settings, accessCode: effectiveAccessCode }}
             onChange={updateSettings}
@@ -291,7 +311,14 @@ function AppContent() {
           />
         )}
       </View>
-      {tab !== 'show' ? <BottomTabs tab={tab} setTab={setTab} bottomInset={bottomInset} /> : null}
+      {activeTab !== 'show' ? (
+        <BottomTabs
+          tab={activeTab}
+          setTab={setTab}
+          bottomInset={bottomInset}
+          canOpenControl={canOpenControl}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

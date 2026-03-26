@@ -64,6 +64,7 @@ export default function SamsungOneUi8ConnectionsPage({
   setPage,
   scrollY,
   wifiEnabled,
+  learnMode = false,
   isLightTheme = false,
   copy,
 }) {
@@ -106,7 +107,10 @@ export default function SamsungOneUi8ConnectionsPage({
       </View>
 
       <Animated.ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[
+          styles.scroll,
+          learnMode && styles.scrollWithLearnHint,
+        ]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true },
@@ -223,6 +227,9 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 24,
     gap: 14,
+  },
+  scrollWithLearnHint: {
+    paddingBottom: 110,
   },
   card: {
     borderRadius: 23,

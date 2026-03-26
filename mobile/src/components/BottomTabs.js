@@ -2,12 +2,19 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing } from '../theme/tokens';
 
-export default function BottomTabs({ tab, setTab, bottomInset = 0 }) {
+export default function BottomTabs({
+  tab,
+  setTab,
+  bottomInset = 0,
+  canOpenControl = true,
+}) {
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(bottomInset, spacing.md) }]}>
-      <Pressable style={[styles.tab, tab === 'control' && styles.tabActive]} onPress={() => setTab('control')}>
-        <Text style={styles.tabText}>Control</Text>
-      </Pressable>
+      {canOpenControl ? (
+        <Pressable style={[styles.tab, tab === 'control' && styles.tabActive]} onPress={() => setTab('control')}>
+          <Text style={styles.tabText}>Control</Text>
+        </Pressable>
+      ) : null}
       <Pressable style={[styles.tab, tab === 'show' && styles.tabActive]} onPress={() => setTab('show')}>
         <Text style={styles.tabText}>Show</Text>
       </Pressable>

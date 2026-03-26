@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { normalizeWordSets } from '../screens/show/shared/wordSets';
 
 export const SETTINGS_KEY = 'hacker.settings.v1';
 
@@ -9,6 +10,9 @@ export const defaultSettings = {
   uiThemeMode: 'model',
   mode: 'word',
   wifi: 'Hacked',
+  wordSets: [],
+  selectedWordSetId: '',
+  wordSetWordIndex: 0,
   secondWordEnabled: false,
   secondWord: '',
   secondWordTrigger: 'tap',
@@ -34,7 +38,20 @@ export async function loadSettings() {
     }
 
     const parsed = JSON.parse(raw);
-    return { ...defaultSettings, ...parsed };
+    const merged = { ...defaultSettings, ...parsed };
+    const wordSets = normalizeWordSets(merged.wordSets);
+    const selectedWordSetId =
+      wordSets.find((item) => item.id === merged.selectedWordSetId)?.id || '';
+    const wordSetWordIndex = Number.isFinite(Number(merged.wordSetWordIndex))
+      ? Math.max(0, Math.floor(Number(merged.wordSetWordIndex)))
+      : 0;
+
+    return {
+      ...merged,
+      wordSets,
+      selectedWordSetId,
+      wordSetWordIndex,
+    };
   } catch {
     return defaultSettings;
   }

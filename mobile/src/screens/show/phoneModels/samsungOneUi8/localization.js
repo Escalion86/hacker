@@ -3,8 +3,10 @@ import { pickLocalizedCopy } from '../../shared/modelLocale'
 const samsungOneUi8Copy = {
   ru: {
     learnCodeLabel: 'Код',
-    learnHint:
-      'Свайп по "Подключения" меняет масть. Номинал задается тапами по скрытым сегментам строк ниже.',
+    learnHintCard:
+      'Свайп по сегментам под кнопкой "Подключения" выбирает номинал карты. Масть карты задается тапом по нужному сегменту в кнопке "Подключения". Если номинал не выбран, то по умолчанию считается выбранным A (Туз).',
+    learnHintWordSet:
+      'Свайп по нужному сегменту выбирает его, после чего нажмите "Подключения" для перехода к следующему экрану. Если не делать свайп, то по умолчанию считается выбранным первое слово.',
     headerSettings: 'Настройки',
     profileSub: 'Samsung account',
     general: {
@@ -88,8 +90,10 @@ const samsungOneUi8Copy = {
   },
   de: {
     learnCodeLabel: 'Code',
-    learnHint:
-      'Wischen auf "Verbindungen" wechselt die Farbe. Der Kartenwert wird durch Tippen auf die versteckten Segmente in den Zeilen darunter gesetzt.',
+    learnHintCard:
+      'Durch Wischen in den Segmenten unter "Verbindungen" wird der Kartenwert gewahlt. Die Kartenfarbe wird durch Tippen auf ein Segment in "Verbindungen" gesetzt.',
+    learnHintWordSet:
+      'Tippen auf die Segmente in den Zeilen darunter wahlt ein Wort aus der aktiven Liste. "Verbindungen" offnet nur den nachsten Bildschirm.',
     headerSettings: 'Einstellungen',
     profileSub: 'Samsung Account',
     general: {
@@ -172,8 +176,10 @@ const samsungOneUi8Copy = {
   },
   en: {
     learnCodeLabel: 'Code',
-    learnHint:
-      'Swipe on "Connections" changes the suit. Card rank is set by tapping hidden row segments below.',
+    learnHintCard:
+      'Swiping segments below "Connections" selects the card rank. Card suit is selected by tapping a segment inside "Connections".',
+    learnHintWordSet:
+      'Tapping row segments below selects a word from the active list. "Connections" only opens the next screen.',
     headerSettings: 'Settings',
     profileSub: 'Samsung Account',
     general: {

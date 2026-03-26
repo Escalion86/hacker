@@ -8,6 +8,10 @@ import {
   Image,
 } from 'react-native'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  buildWordSetLearnLabels,
+  resolveActiveWordSetWords,
+} from '../../shared/wordSets'
 
 function IconBall({ name, lib = 'ion', color = '#317dff' }) {
   return (
@@ -33,6 +37,7 @@ function Row({
   onSegmentTouch,
   showLearnOverlay = false,
   learnOverlayLabels = [],
+  learnOverlayCompact = false,
   onLearnSelect,
   palette,
 }) {
@@ -110,7 +115,13 @@ function Row({
                 index > 0 && styles.learnOverlaySegmentBorder,
               ]}
             >
-              <Text pointerEvents="none" style={styles.learnOverlayText}>
+              <Text
+                pointerEvents="none"
+                style={[
+                  styles.learnOverlayText,
+                  learnOverlayCompact && styles.learnOverlayTextCompact,
+                ]}
+              >
                 {label}
               </Text>
             </View>
@@ -153,6 +164,11 @@ export default function SamsungOneUi8GeneralPage({
   const scrollRef = useRef(null)
   const swipeStartY = useRef(0)
   const hasManualRankSelectionRef = useRef(false)
+  const isWordSetMode = settings.mode === 'wordSet'
+  const activeWordSetWords = React.useMemo(
+    () => resolveActiveWordSetWords(settings),
+    [settings],
+  )
   const HERO_HEIGHT = 300
   const TITLE_HEIGHT = HERO_HEIGHT - 90
 
@@ -165,6 +181,17 @@ export default function SamsungOneUi8GeneralPage({
   const setRankSegment = (base, segment) => {
     hasManualRankSelectionRef.current = true
     onChange({ cardRankIndex: Math.min(13, base + segment) })
+  }
+
+  const setWordSetSegment = (base, segment) => {
+    if (!isWordSetMode) return
+    const index = Math.max(0, base + segment)
+    const nextWord = String(activeWordSetWords[index] || '').trim()
+    if (!nextWord) return
+    onChange({
+      wordSetWordIndex: index,
+      wifi: nextWord,
+    })
   }
 
   const bigHeaderOpacity = scrollY.interpolate({
@@ -255,7 +282,10 @@ export default function SamsungOneUi8GeneralPage({
       ) : null}
       <Animated.ScrollView
         ref={scrollRef}
-        contentContainerStyle={[styles.scroll]}
+        contentContainerStyle={[
+          styles.scroll,
+          settings.learn && styles.scrollWithLearnHint,
+        ]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true },
@@ -302,22 +332,35 @@ export default function SamsungOneUi8GeneralPage({
               title={general.connectionsTitle}
               subtitle={general.connectionsSubtitle}
               icon={<IconBall name="wifi" color="#336ee6" />}
-              segmentCount={4}
-              onSegmentTouch={(segment) => {
-                onChange({
-                  cardMastIndex: segment,
-                  cardRankIndex: hasManualRankSelectionRef.current
-                    ? settings.cardRankIndex
-                    : 0,
-                })
+              segmentCount={isWordSetMode ? 0 : 4}
+              onSegmentTouch={
+                isWordSetMode
+                  ? undefined
+                  : (segment) => {
+                      onChange({
+                        cardMastIndex: segment,
+                        cardRankIndex: hasManualRankSelectionRef.current
+                          ? settings.cardRankIndex
+                          : 0,
+                      })
+                      setPage('connections')
+                    }
+              }
+              onPress={() => {
                 setPage('connections')
               }}
               showLearnOverlay={settings.learn}
-              learnOverlayLabels={['♠️', '♥️', '♣️', '♦️']}
+              learnOverlayCompact={isWordSetMode}
+              learnOverlayLabels={
+                isWordSetMode
+                  ? []
+                  : ['♠️', '♥️', '♣️', '♦️']
+              }
               onPressIn={(event) => {
                 swipeStartY.current = event.nativeEvent.pageY
               }}
               onPressOut={(event) => {
+                if (isWordSetMode) return
                 const delta = event.nativeEvent.pageY - swipeStartY.current
                 if (delta <= -16) shiftRank(1)
                 if (delta >= 16) shiftRank(-1)
@@ -328,11 +371,25 @@ export default function SamsungOneUi8GeneralPage({
               title={general.connectedDevicesTitle}
               subtitle={general.connectedDevicesSubtitle}
               icon={<IconBall name="phone-portrait" color="#336ee6" />}
-              onPress={() => setRankSegment(0, 0)}
+              onPress={() => {
+                if (isWordSetMode) return
+                setRankSegment(0, 0)
+              }}
               segmentCount={4}
-              onSegmentTouch={(segment) => setRankSegment(0, segment)}
+              onSegmentTouch={(segment) => {
+                if (isWordSetMode) {
+                  setWordSetSegment(0, segment)
+                  return
+                }
+                setRankSegment(0, segment)
+              }}
               showLearnOverlay={settings.learn}
-              learnOverlayLabels={['A', '2', '3', '4']}
+              learnOverlayCompact={isWordSetMode}
+              learnOverlayLabels={
+                isWordSetMode
+                  ? buildWordSetLearnLabels(activeWordSetWords, 0, 4)
+                  : ['A', '2', '3', '4']
+              }
               noBorder
             />
           </View>
@@ -344,9 +401,20 @@ export default function SamsungOneUi8GeneralPage({
               subtitle={general.galaxyAiSubtitle}
               icon={<IconBall name="sparkles" color="#1c9fd8" />}
               segmentCount={4}
-              onSegmentTouch={(segment) => setRankSegment(4, segment)}
+              onSegmentTouch={(segment) => {
+                if (isWordSetMode) {
+                  setWordSetSegment(4, segment)
+                  return
+                }
+                setRankSegment(4, segment)
+              }}
               showLearnOverlay={settings.learn}
-              learnOverlayLabels={['5', '6', '7', '8']}
+              learnOverlayCompact={isWordSetMode}
+              learnOverlayLabels={
+                isWordSetMode
+                  ? buildWordSetLearnLabels(activeWordSetWords, 4, 4)
+                  : ['5', '6', '7', '8']
+              }
             />
             <Row
               palette={palette}
@@ -354,19 +422,41 @@ export default function SamsungOneUi8GeneralPage({
               subtitle={general.modesSubtitle}
               icon={<IconBall name="checkmark-done-circle" color="#6858ef" />}
               segmentCount={4}
-              onSegmentTouch={(segment) => setRankSegment(8, segment)}
+              onSegmentTouch={(segment) => {
+                if (isWordSetMode) {
+                  setWordSetSegment(8, segment)
+                  return
+                }
+                setRankSegment(8, segment)
+              }}
               showLearnOverlay={settings.learn}
-              learnOverlayLabels={['9', '10', 'J', 'Q']}
+              learnOverlayCompact={isWordSetMode}
+              learnOverlayLabels={
+                isWordSetMode
+                  ? buildWordSetLearnLabels(activeWordSetWords, 8, 4)
+                  : ['9', '10', 'J', 'Q']
+              }
             />
             <Row
               palette={palette}
               title={general.soundsTitle}
               subtitle={general.soundsSubtitle}
               icon={<IconBall name="volume-high" color="#655ce8" />}
-              segmentCount={2}
-              onSegmentTouch={(segment) => setRankSegment(12, segment)}
+              segmentCount={isWordSetMode ? 4 : 2}
+              onSegmentTouch={(segment) => {
+                if (isWordSetMode) {
+                  setWordSetSegment(12, segment)
+                  return
+                }
+                setRankSegment(12, segment)
+              }}
               showLearnOverlay={settings.learn}
-              learnOverlayLabels={['K', 'Joker']}
+              learnOverlayCompact={isWordSetMode}
+              learnOverlayLabels={
+                isWordSetMode
+                  ? buildWordSetLearnLabels(activeWordSetWords, 12, 4)
+                  : ['K', 'Joker']
+              }
             />
             <Row
               palette={palette}
@@ -546,6 +636,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     gap: 14,
   },
+  scrollWithLearnHint: {
+    paddingBottom: 110,
+  },
   cardsStack: {
     gap: 14,
   },
@@ -657,6 +750,12 @@ const styles = StyleSheet.create({
     color: '#d9e6ff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  learnOverlayTextCompact: {
+    fontSize: 12,
+    lineHeight: 14,
+    textAlign: 'center',
+    paddingHorizontal: 4,
   },
   learnCode: {
     position: 'absolute',
