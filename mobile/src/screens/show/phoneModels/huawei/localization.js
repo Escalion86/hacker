@@ -34,6 +34,8 @@ const huaweiCopy = {
     wifi: {
       headerTitle: 'Wi-Fi',
       toggleTitle: 'Wi-Fi',
+      secondWordSyncing: 'Синхронизация второго слова с устройством...',
+      secondWordFailed: 'Не удалось синхронизировать второе слово',
       otherSettingsTitle: 'Другие настройки',
       availableTitle: 'ДОСТУПНО',
       protectedLabel: 'Защищено',
@@ -72,6 +74,8 @@ const huaweiCopy = {
     wifi: {
       headerTitle: 'WLAN',
       toggleTitle: 'WLAN',
+      secondWordSyncing: 'Zweites Wort wird mit dem Gerat synchronisiert...',
+      secondWordFailed: 'Zweites Wort konnte nicht synchronisiert werden',
       otherSettingsTitle: 'Weitere Einstellungen',
       availableTitle: 'VERFÜGBAR',
       protectedLabel: 'Gesichert',
@@ -110,6 +114,8 @@ const huaweiCopy = {
     wifi: {
       headerTitle: 'Wi-Fi',
       toggleTitle: 'Wi-Fi',
+      secondWordSyncing: 'Syncing second word with device...',
+      secondWordFailed: 'Failed to sync second word',
       otherSettingsTitle: 'Other settings',
       availableTitle: 'AVAILABLE',
       protectedLabel: 'Secured',

@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const { buildShowConfigRouter } = require('./routes/showConfig');
 const { buildAdminRouter } = require('./routes/admin');
+const { buildFirmwareRouter } = require('./routes/firmware');
 const healthRouter = require('./routes/health');
 const { requireAdminKey } = require('./middleware/requireAdminKey');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
@@ -35,6 +36,10 @@ function createApp(env) {
   app.use('/api', publicLimiter);
   app.use('/api', healthRouter);
   app.use('/api', buildShowConfigRouter({ accessCodePepper: env.accessCodePepper }));
+  app.use(
+    '/api',
+    buildFirmwareRouter({ firmwareRoot: path.join(__dirname, '../public/firmware') }),
+  );
   app.use('/api', requireAdminKey(env.adminApiKey), buildAdminRouter({ accessCodePepper: env.accessCodePepper }));
   app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
 

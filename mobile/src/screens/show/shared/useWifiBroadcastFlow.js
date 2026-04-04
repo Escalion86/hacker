@@ -201,23 +201,26 @@ export function useWifiBroadcastFlow({
   const runSecondStart = React.useCallback(
     async (flowId) => {
       if (!hasSecondWordFlow) return
+      if (flowId !== flowIdRef.current || !mountedRef.current) return
       const secondTarget = buildWordTarget(secondWord, dotEnabled)
       const existingCount =
         animatedSpots.length > 0
           ? animatedSpots.length
           : wifiSpots.filter((spot) => spot && spot.trim() !== '').length
 
-      try {
-        await bleService.sendStart({
+      secondSwitchDoneRef.current = true
+      startWifiAnimation(secondTarget.withDot, null, { fixedCount: existingCount })
+
+      void bleService
+        .sendStart({
           ssid: secondTarget.withoutDot,
           dot: dotEnabled,
           minutes: minutesBeforeStop,
         })
-        if (flowId !== flowIdRef.current || !mountedRef.current) return
-
-        secondSwitchDoneRef.current = true
-        startWifiAnimation(secondTarget.withDot, null, { fixedCount: existingCount })
-      } catch {}
+        .catch(() => {
+          if (flowId !== flowIdRef.current || !mountedRef.current) return
+          bleService.emitStatus('Ошибка: синхронизация второго слова не удалась')
+        })
     },
     [
       animatedSpots.length,
@@ -365,9 +368,9 @@ export function useWifiBroadcastFlow({
 
   const handleWifiSpotPress = React.useCallback(() => {
     if (!wifiEnabled) return
+    if (!running) return
     if (!hasSecondWordFlow) return
     if (secondWordTrigger !== 'tap') return
-    if (!firstAnimationDoneRef.current) return
     if (secondSwitchDoneRef.current) return
     if (secondSwitchTimeoutRef.current) return
 
@@ -384,6 +387,7 @@ export function useWifiBroadcastFlow({
     }, secondWordDelaySec * 1000)
   }, [
     wifiEnabled,
+    running,
     hasSecondWordFlow,
     secondWordTrigger,
     secondWordDelaySec,

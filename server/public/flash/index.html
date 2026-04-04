@@ -78,6 +78,32 @@
         margin-top: 18px;
         color: #fca5a5;
       }
+
+      .field {
+        margin: 18px 0 12px;
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .field select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #334155;
+        background: #0b1220;
+        color: var(--text);
+        font-size: 15px;
+      }
+
+      .field-note {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
     </style>
   </head>
   <body>
@@ -105,11 +131,82 @@
         <li>Отключите плату от компьютера.</li>
         <li>Отключите тумблер питания платы если он есть и заново включите.</li>
       </ol>
-      <esp-web-install-button manifest="manifest.json">
+
+      <div class="field">
+        <label for="firmware-version">Версия прошивки</label>
+        <select id="firmware-version" disabled>
+          <option>Загрузка списка версий...</option>
+        </select>
+        <p id="firmware-note" class="field-note">
+          Если список недоступен, будет использована стандартная прошивка.
+        </p>
+      </div>
+
+      <esp-web-install-button id="install-button" manifest="manifest.json">
         <button slot="activate">Установить прошивку</button>
       </esp-web-install-button>
     </main>
     <script>
+      ;(() => {
+        const selectEl = document.getElementById('firmware-version')
+        const noteEl = document.getElementById('firmware-note')
+        const installButtonEl = document.getElementById('install-button')
+        const fallbackManifest = 'manifest.json'
+
+        const setManifest = (manifestUrl) => {
+          installButtonEl.setAttribute('manifest', manifestUrl || fallbackManifest)
+        }
+
+        const fillSelect = ({ versions, defaultVersion }) => {
+          if (!Array.isArray(versions) || !versions.length) {
+            selectEl.innerHTML = '<option>Нет доступных прошивок</option>'
+            selectEl.disabled = true
+            noteEl.textContent = 'В папке /firmware не найдено корректных версий.'
+            setManifest(fallbackManifest)
+            return
+          }
+
+          const optionsHtml = versions
+            .map(
+              (item) =>
+                `<option value="${item.manifestUrl}" data-version="${item.id}">${item.label}</option>`,
+            )
+            .join('')
+          selectEl.innerHTML = optionsHtml
+          selectEl.disabled = false
+
+          const selected =
+            versions.find((item) => item.id === defaultVersion) ?? versions[0]
+          if (selected) {
+            selectEl.value = selected.manifestUrl
+            setManifest(selected.manifestUrl)
+            noteEl.textContent = `Выбрана версия: ${selected.label}`
+          }
+        }
+
+        selectEl.addEventListener('change', () => {
+          const selectedOption = selectEl.options[selectEl.selectedIndex]
+          setManifest(selectEl.value)
+          noteEl.textContent = `Выбрана версия: ${selectedOption.text}`
+        })
+
+        fetch('/api/firmware-manifests')
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+            return response.json()
+          })
+          .then(fillSelect)
+          .catch(() => {
+            selectEl.innerHTML = '<option>Стандартная версия</option>'
+            selectEl.disabled = true
+            noteEl.textContent =
+              'Список версий недоступен, используется стандартный manifest.json.'
+            setManifest(fallbackManifest)
+          })
+      })()
+
       // ESP Web Tools не предоставляет публичный i18n API для install-диалога.
       // Делаем мягкую локализацию текста в shadow DOM после открытия окна.
       ;(() => {
