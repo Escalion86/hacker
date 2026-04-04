@@ -10,7 +10,12 @@ const REQUIRED_PARTS = [
 ];
 
 function isSafeVersionName(name) {
-  return /^[a-z0-9._-]+$/i.test(name);
+  if (typeof name !== 'string') return false;
+  const trimmed = name.trim();
+  if (!trimmed || trimmed !== name) return false;
+  if (trimmed.includes('..')) return false;
+  if (trimmed.includes('/') || trimmed.includes('\\')) return false;
+  return true;
 }
 
 async function readFirmwareVersions(firmwareRoot) {
