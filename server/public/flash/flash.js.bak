@@ -1,55 +1,44 @@
 ;(() => {
-  const boardEl = document.getElementById('board-type')
   const selectEl = document.getElementById('firmware-version')
   const noteEl = document.getElementById('firmware-note')
   const installButtonEl = document.getElementById('install-button')
   const fallbackManifest = 'manifest.json'
 
-  const BOARDS = [
-    { id: 'ESP32', label: 'ESP32 (классическая)' },
-    { id: 'ESP32-C6', label: 'Seeed XIAO ESP32-C6' },
-  ]
-
-  let allVersions = []
-
   const setManifest = (manifestUrl) => {
     installButtonEl.setAttribute('manifest', manifestUrl || fallbackManifest)
   }
 
-  const versionsForBoard = (boardId) =>
-    allVersions.filter((item) => item.chipFamily === boardId)
-
-  const fillVersions = (boardId) => {
-    const versions = versionsForBoard(boardId)
-    if (!versions.length) {
-      selectEl.innerHTML = '<option>Нет прошивок для этой платы</option>'
+  const fillSelect = ({ versions, defaultVersion }) => {
+    if (!Array.isArray(versions) || !versions.length) {
+      selectEl.innerHTML = '<option>Нет доступных прошивок</option>'
       selectEl.disabled = true
-      noteEl.textContent =
-        'Для выбранной платы пока нет доступных прошивок.'
+      noteEl.textContent = 'В папке /firmware не найдено корректных версий.'
       setManifest(fallbackManifest)
       return
     }
 
-    selectEl.innerHTML = versions
+    const optionsHtml = versions
       .map(
         (item) =>
-          `<option value="${item.manifestUrl}">${item.label}</option>`,
+          `<option value="${item.manifestUrl}" data-version="${item.id}">${item.label}</option>`,
       )
       .join('')
+    selectEl.innerHTML = optionsHtml
     selectEl.disabled = false
-    selectEl.selectedIndex = 0
-    setManifest(selectEl.value)
-    noteEl.textContent = `Выбрана версия: ${selectEl.options[0].text} — плата ${
-      BOARDS.find((b) => b.id === boardId)?.label || boardId
-    }.`
+
+    const selected =
+      versions.find((item) => item.id === defaultVersion) ?? versions[0]
+    if (selected) {
+      selectEl.value = selected.manifestUrl
+      setManifest(selected.manifestUrl)
+      noteEl.textContent = `Выбрана версия: ${selected.label}`
+    }
   }
 
-  boardEl.addEventListener('change', () => fillVersions(boardEl.value))
   selectEl.addEventListener('change', () => {
+    const selectedOption = selectEl.options[selectEl.selectedIndex]
     setManifest(selectEl.value)
-    noteEl.textContent = `Выбрана версия: ${
-      selectEl.options[selectEl.selectedIndex].text
-    }.`
+    noteEl.textContent = `Выбрана версия: ${selectedOption.text}`
   })
 
   fetch('/api/firmware-manifests')
@@ -59,37 +48,8 @@
       }
       return response.json()
     })
-    .then(({ versions }) => {
-      if (!Array.isArray(versions) || !versions.length) {
-        throw new Error('empty')
-      }
-      allVersions = versions.map((item) => ({
-        id: item.id,
-        label: item.label || item.id,
-        chipFamily: item.chipFamily || 'ESP32',
-        manifestUrl: item.manifestUrl,
-      }))
-
-      // Показываем только платы, для которых реально есть прошивки.
-      const availableBoards = BOARDS.filter((board) =>
-        versionsForBoard(board.id).length,
-      )
-      if (!availableBoards.length) {
-        throw new Error('no_matching_boards')
-      }
-
-      boardEl.innerHTML = availableBoards
-        .map((board) => `<option value="${board.id}">${board.label}</option>`)
-        .join('')
-      boardEl.disabled = false
-
-      // По умолчанию — классический ESP32; плату C6 пользователь выбирает сам.
-      boardEl.value = availableBoards[0].id
-      fillVersions(availableBoards[0].id)
-    })
+    .then(fillSelect)
     .catch(() => {
-      boardEl.innerHTML = '<option>ESP32 (классическая)</option>'
-      boardEl.disabled = true
       selectEl.innerHTML = '<option>Стандартная версия</option>'
       selectEl.disabled = true
       noteEl.textContent =

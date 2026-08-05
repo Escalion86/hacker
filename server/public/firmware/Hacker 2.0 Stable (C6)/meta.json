@@ -1,0 +1,11 @@
+{
+  "name": "FakeWiFi PRO (ESP32-C6) - Hacker 2.0 Stable",
+  "label": "Hacker 2.0 Stable",
+  "chipFamily": "ESP32-C6",
+  "parts": [
+    { "file": "bootloader.bin", "offset": 0 },
+    { "file": "partitions.bin", "offset": 32768 },
+    { "file": "boot_app0.bin", "offset": 57344 },
+    { "file": "firmware.bin", "offset": 65536 }
+  ]
+}
