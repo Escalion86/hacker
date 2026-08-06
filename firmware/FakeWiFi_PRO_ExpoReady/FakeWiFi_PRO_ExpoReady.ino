@@ -14,7 +14,10 @@ unsigned long interval = 60000;
 
 const uint8_t networkCount = 12;
 uint8_t macs[12][6];
-uint8_t packet[12][128];
+uint8_t packet[12][160];
+// Samsung/One UI scanners dwell longest on 1, 6, 11 -> group fake APs there.
+// Grouped order also minimizes esp_wifi_set_channel() calls per sweep.
+const uint8_t apChannel[networkCount] = {1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11};
 int ssidLen = 0;
 
 BLEServer* pServer = NULL;
@@ -135,7 +138,9 @@ void rebuildPacketsForCurrentSsid() {
       packetLength = packetLength + j;
     }
 
-    packet[j][packetLength] = j + 1; // channel
+    packet[j][packetLength] = 0x03;      // DS Parameter Set IE (id)
+    packet[j][packetLength + 1] = 0x01;  // length
+    packet[j][packetLength + 2] = apChannel[j]; // real TX channel
   }
 }
 
@@ -290,6 +295,7 @@ void setup() {
     for (int j = 0; j < 6; j++) {
       macs[i][j] = random(256);
     }
+    macs[i][0] = (macs[i][0] & 0xFC) | 0x02; // locally administered unicast MAC
   }
 
   // Create the BLE Device
@@ -408,18 +414,13 @@ void loop() {
       // Serial.println(F("Device Connected"));
     }
 
-  static uint8_t channel = 0;
-  
   if (ssid != "") {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis <= interval) {
       for (int i = 0; i < networkCount; i++) {
-        channel++;
-        if (channel > 12) {
-          channel = 1;
-        }
-        sendBeacon(channel);
+        sendBeacon(i);
       }
+      delay(1); // give BLE/coex air between sweeps
     } else {
 #if CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
       esp_coex_preference_set(ESP_COEX_PREFER_BALANCE);
@@ -431,18 +432,21 @@ void loop() {
   }
 }
 
-  void sendBeacon(uint8_t channel) {
-    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  void sendBeacon(uint8_t idx) {
+    esp_wifi_set_channel(apChannel[idx], WIFI_SECOND_CHAN_NONE);
 
-    int j = channel - 1;
+    int j = idx;
 
     // BSSID stays stable per fake AP (set once in rebuildPacketsForCurrentSsid),
     // so phone scanners can lock onto and keep each entry.
 
-    int packetSize = 39 + ssidLen + j;  
+    int packetSize = 41 + ssidLen + j;  // header + SSID(+spaces) + DS IE
 
-    for (int t = 0; t < 3; t++) {
-      if (esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false) == ESP_OK) break;
-      delayMicroseconds(300); // radio busy (BLE coex), retry shortly
+    for (int t = 0; t < 2; t++) {           // two passes per sweep = denser spam
+      if (esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false) != ESP_OK) {
+        delayMicroseconds(250);             // radio busy (BLE coex), retry once
+        esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
+      }
+      delayMicroseconds(150);
     }
   }
