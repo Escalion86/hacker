@@ -5,6 +5,7 @@
 
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_coexist.h>
 
 // Timer
 unsigned long previousMillis = 0;
@@ -139,6 +140,9 @@ void rebuildPacketsForCurrentSsid() {
 }
 
 void stopBroadcastAndNotify() {
+#if CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
+  esp_coex_preference_set(ESP_COEX_PREFER_BALANCE);
+#endif
   digitalWrite(ledPin, LOW);
   ssid = "";
   ssidLen = 0;
@@ -147,6 +151,10 @@ void stopBroadcastAndNotify() {
 }
 
 void startBroadcastFromValues(const String& nextSsid, unsigned long nextInterval) {
+#if CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
+  // One shared radio: let WiFi injection win airtime over the BLE link.
+  esp_coex_preference_set(ESP_COEX_PREFER_WIFI);
+#endif
   interval = nextInterval;
   ssid = nextSsid;
   ssidLen = ssid.length();
@@ -278,7 +286,6 @@ void setup() {
 
   // +Fake Wi-Fi
   WiFi.mode(WIFI_AP);
-  esp_wifi_set_promiscuous(true);
   for (int i = 0; i < 12; i++) {
     for (int j = 0; j < 6; j++) {
       macs[i][j] = random(256);
@@ -401,20 +408,22 @@ void loop() {
       // Serial.println(F("Device Connected"));
     }
 
-  uint8_t channel = 1;
+  static uint8_t channel = 0;
   
   if (ssid != "") {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis <= interval) {
-      for (int i = 1; i < networkCount; i++) {
-        if (channel == 12) {
+      for (int i = 0; i < networkCount; i++) {
+        channel++;
+        if (channel > 12) {
           channel = 1;
-        } else {
-          channel++;
         }
         sendBeacon(channel);
       }
     } else {
+#if CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
+      esp_coex_preference_set(ESP_COEX_PREFER_BALANCE);
+#endif
       ssid = "";
       ssidLen = 0;
       digitalWrite(ledPin, LOW);
@@ -427,18 +436,13 @@ void loop() {
 
     int j = channel - 1;
 
-    // Set MAC Address
-    packet[j][10] = packet[j][16] = random(256);
-    packet[j][11] = packet[j][17] = random(256);
-    packet[j][12] = packet[j][18] = random(256);
-    packet[j][13] = packet[j][19] = random(256);
-    packet[j][14] = packet[j][20] = random(256);
-    packet[j][15] = packet[j][21] = random(256);
-   
+    // BSSID stays stable per fake AP (set once in rebuildPacketsForCurrentSsid),
+    // so phone scanners can lock onto and keep each entry.
+
     int packetSize = 39 + ssidLen + j;  
 
-    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
-    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
-    esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false);
-    // delay(1);
+    for (int t = 0; t < 3; t++) {
+      if (esp_wifi_80211_tx(WIFI_IF_AP, packet[j], packetSize, false) == ESP_OK) break;
+      delayMicroseconds(300); // radio busy (BLE coex), retry shortly
+    }
   }
