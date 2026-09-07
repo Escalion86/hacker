@@ -1,0 +1,9 @@
+{
+  "additionalFiles": "../..",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "",
+  "fqbn": "esp32:esp32:XIAO_ESP32C6:PartitionScheme=huge_app",
+  "hardwareFolders": "/home/alex/.arduino15/packages/esp32/hardware/esp32/3.3.11,/home/alex/.arduino15/packages/esp32/hardware/esp32/3.3.11",
+  "otherLibrariesFolders": "/home/alex/Arduino/libraries",
+  "sketchLocation": "/home/apps/hacker20/firmware/Hacker20_C6_Display"
+}
