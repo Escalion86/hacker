@@ -24,8 +24,10 @@ bool displayOk = false;
 //   A0 = шина BAT+ на плате (ПОСЛЕ тумблера)   -> BAT+ пяток -> R -> A0 -> R -> GND
 //   A2 = плюс батареи (ДО тумблера)            -> "+" батареи -> R -> A2 -> R -> GND
 //  Тумблер замкнут  => A0 == A2 (одна точка).
-//  Тумблер разомкнут + USB => A0 «висит» на заряднике (SGM40567, лимит 120мА,
-//  шина проседает под нагрузкой), A2 показывает реальную батарею.
+//  Тумблер разомкнут + USB => A0 «висит» на шине (зарядник/модуль), A2 показывает
+//  реальную батарею. Заряд при разомкнутом тумблере идёт (внешний модуль
+//  подключён к банке напрямую, до тумблера) — поэтому индикация заряда
+//  считается по (usbConnected && hasBattery), без учёта тумблера.
 // ============================================================
 #define VBAT_PIN A0         // шина (после тумблера)
 #define VBATT_SIDE_PIN A2   // батарея (до тумблера)
@@ -80,8 +82,8 @@ const int ledPin = 15; // XIAO ESP32-C6: встроенный пользоват
 #define SPOT_NAME_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
 #define DEVICE_STATUS_CHARACTERISTIC_UUID "19b10003-e8f2-537e-4f6c-d104768a1214"
 
-// --- Радио: при зарядке (USB + тумблер вкл) BLE и WiFi полностью выключены ---
-bool chargeRadiosOff = false;
+// --- Радио: зарядка больше НЕ глушит BLE/WiFi. Внешний модуль заряда даёт
+//     +200 мА (внутренний +120 мА), потребление с радио 100–130 мА — заряд идёт. ---
 
 void ensureWifiOn() {
   if (WiFi.getMode() != WIFI_AP) {
@@ -198,7 +200,9 @@ void drawBoltIcon(int x, int y) {
   u8g2.drawXBMP(x, y, 6, 8, boltBitmap);
 }
 
-// «Зарядка НЕ идёт»: молния перечёркнута (кабель есть, а батарея отключена тумблером)
+// «Зарядка НЕ идёт»: молния перечёркнута (кабель вставлен, а батареи нет)
+// Актуально только когда батарея отсутствует/не читается: при разомкнутом
+// тумблере зарядка идёт (внешний модуль заряжает банку напрямую).
 void drawNoChargeIcon(int x, int y) {
   drawBoltIcon(x, y);
   u8g2.drawLine(x + 6, y, x - 1, y + 8);
@@ -220,10 +224,11 @@ void updateDisplay() {
 
   // Строка 1: батарейка слева (+ зарядка), таймер справа
   drawBatteryIcon(0, 1, hasBattery ? batPct : 0);
-  bool charging = usbConnected && hasBattery && toggleClosed;
-  bool noChargeUsb =
-    (hasBattery && !toggleClosed)   // тумблер выкл: питание только от USB -> зарядка не идёт
-    || (!hasBattery && usbConnected); // батареи нет вообще, кабель вставлен
+  // Зарядка = есть 5 В (USB/модуль) и подключена батарея.
+  // Тумблер НЕ важен: внешний модуль заряжает банку напрямую, до тумблера,
+  // поэтому заряд идёт и при разомкнутом тумблере — и это видно на экране.
+  bool charging = usbConnected && hasBattery;
+  bool noChargeUsb = usbConnected && !hasBattery; // кабель есть, а батареи нет
   if (charging) {
     // Батарея на шине — идёт зарядка
     drawBoltIcon(23, 2);
@@ -517,12 +522,8 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
           }
 
           if (isStart) {
-            if (usbConnected && toggleClosed) {
-              // Режим зарядки: устройство не работает, трансляции запрещены
-              pDeviceStatusCharacteristic->setValue(NACK_INVALID_COMMAND);
-              pDeviceStatusCharacteristic->notify();
-              return;
-            }
+            // Трансляции разрешены и во время зарядки: внешний модуль даёт
+            // +200 мА — тока хватает и на заряд, и на работу радио.
             startBroadcastFromValues(nextSsid, nextInterval);
           }
         }
@@ -664,7 +665,7 @@ void loop() {
     }
     // disconnecting
     if (!deviceConnected && oldDeviceConnected) {
-      if (!chargeRadiosOff) pServer->startAdvertising(); // restart advertising (не при зарядке)
+      pServer->startAdvertising(); // restart advertising
       oldDeviceConnected = deviceConnected;
     }
     // connecting
@@ -701,20 +702,8 @@ void loop() {
     updateUsbState();
     updateDisplay();
 
-    // Зарядка = USB + тумблер вкл (батарея на шине): полностью глушим радио —
-    // устройство не работает и не светится в BLE.
-    // Тумблер выкл + USB: устройство работает от USB как обычно.
-    bool wantCharge = usbConnected && toggleClosed;
-    if (wantCharge != chargeRadiosOff) {
-      chargeRadiosOff = wantCharge;
-      if (wantCharge) {
-        if (ssid != "") stopBroadcastAndNotify(); // гасим текущую трансляцию
-        BLEDevice::getAdvertising()->stop();      // BLE полностью выключен
-        ensureWifiOff();
-      } else {
-        BLEDevice::getAdvertising()->start();     // радио снова работает
-      }
-    }
+    // Радио при зарядке больше не глушится (см. комментарий выше): внешний
+    // модуль заряда даёт +200 мА, суммарно ~320 мА против потребления 100–130 мА.
   }
 
   // В простое не жжём CPU впустую: пауза заметно снижает потребление,
