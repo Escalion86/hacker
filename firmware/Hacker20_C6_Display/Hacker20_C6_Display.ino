@@ -44,6 +44,10 @@ bool toggleClosed = false;  // батарея подключена к шине (
 #define VBUS_DIVIDER 2.0f
 bool usbConnected = false;
 
+// Режим «только зарядка»: кабель вставлен, а тумблер разомкнут (устройство выключено).
+// Экран живёт от 5 В и показывает уровень заряда, а радио (BLE + WiFi) полностью выключено.
+bool chargeOnlyMode = false;
+
 // Timer
 unsigned long previousMillis = 0;
 unsigned long previousMillisforWifiSpots =0;
@@ -82,8 +86,9 @@ const int ledPin = 15; // XIAO ESP32-C6: встроенный пользоват
 #define SPOT_NAME_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
 #define DEVICE_STATUS_CHARACTERISTIC_UUID "19b10003-e8f2-537e-4f6c-d104768a1214"
 
-// --- Радио: зарядка больше НЕ глушит BLE/WiFi. Внешний модуль заряда даёт
-//     +200 мА (внутренний +120 мА), потребление с радио 100–130 мА — заряд идёт. ---
+// --- Радио: глушится ТОЛЬКО в режиме «только зарядка» (кабель вставлен + тумблер
+//     разомкнут = устройство выключено, экран показывает заряд) — см. chargeOnlyMode.
+//     Во всех остальных состояниях, включая зарядку при замкнутом тумблере, BLE/WiFi живут. ---
 
 void ensureWifiOn() {
   if (WiFi.getMode() != WIFI_AP) {
@@ -254,7 +259,11 @@ void updateDisplay() {
   }
 
   // Строка 2: статус
-  if (ssid != "") {
+  if (chargeOnlyMode) {
+    // Устройство «выключено» (тумблер разомкнут), питание от кабеля — показываем только заряд
+    u8g2.setCursor(0, 31);
+    u8g2.print("зарядка");
+  } else if (ssid != "") {
     // Трансляция: иконка Wi-Fi + что транслируется
     drawWifiIcon(5, 28);
     String rank;
@@ -619,7 +628,7 @@ void setup() {
 
 void loop() {
     // notify changed value
-    if (deviceConnected && ssid == "" && !wifiSpotsSended) {
+    if (deviceConnected && ssid == "" && !wifiSpotsSended && !chargeOnlyMode) {
       unsigned long currentMillis = millis();
       if (currentMillis - previousMillisforWifiSpots <= 3000) {
         // previousMillisforWifiSpots = currentMillis;    
@@ -702,8 +711,21 @@ void loop() {
     updateUsbState();
     updateDisplay();
 
-    // Радио при зарядке больше не глушится (см. комментарий выше): внешний
-    // модуль заряда даёт +200 мА, суммарно ~320 мА против потребления 100–130 мА.
+    // Радио живёт всегда, кроме режима «только зарядка»:
+    // кабель вставлен + тумблер разомкнут (устройство выключено) → глушим BLE и WiFi,
+    // а экран продолжает показывать уровень заряда.
+    bool wantChargeOnly = usbConnected && !toggleClosed;
+    if (wantChargeOnly != chargeOnlyMode) {
+      chargeOnlyMode = wantChargeOnly;
+      if (wantChargeOnly) {
+        if (ssid != "") stopBroadcastAndNotify(); // гасим текущую трансляцию
+        BLEDevice::getAdvertising()->stop();      // BLE полностью выключен
+        ensureWifiOff();
+      } else {
+        BLEDevice::getAdvertising()->start();     // радио снова работает
+      }
+      updateDisplay();
+    }
   }
 
   // В простое не жжём CPU впустую: пауза заметно снижает потребление,
