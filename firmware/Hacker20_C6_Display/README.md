@@ -29,7 +29,7 @@ arduino-cli compile --fqbn "esp32:esp32:XIAO_ESP32C6:PartitionScheme=huge_app" \
 | boot_app0.bin | `~/.arduino15/.../esp32/3.3.11/tools/partitions/boot_app0.bin` | 57344 |
 | firmware.bin | из out/ | 65536 |
 плюс meta.json (label «Hacker 2.0 с дисплеем - Stable», chipFamily ESP32-C6). Затем `pm2 restart hacker20`.
-Бинарники в public/firmware в git НЕ трекаются. Бэкапы версий — в `/home/alex/firmware-backups/`.
+Бинарники вариантов в public/firmware трекаются в git (build/-артефакты — нет). Бэкапы версий — в `/home/alex/firmware-backups/`.
 
 ## Экран
 - Строка 1: батарейка слева (иконка+заполнение); при зарядке — молния + %; таймер до конца трансляции — справа вверху
