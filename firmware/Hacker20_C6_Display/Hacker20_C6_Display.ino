@@ -230,11 +230,9 @@ void updateDisplay() {
 
   // Строка 1: батарейка слева (+ зарядка), таймер справа
   drawBatteryIcon(0, 1, hasBattery ? batPct : 0);
-  // Зарядка = есть 5 В (USB/модуль) и подключена батарея.
-  // Тумблер НЕ важен: внешний модуль заряжает банку напрямую, до тумблера,
-  // поэтому заряд идёт и при разомкнутом тумблере — и это видно на экране.
-  bool charging = usbConnected && hasBattery;
-  bool noChargeUsb = usbConnected && !hasBattery; // кабель есть, а батареи нет
+  // EY9-001 подключён к батарее после тумблера: заряд идёт только при ON.
+  bool charging = usbConnected && hasBattery && toggleClosed;
+  bool noChargeUsb = usbConnected && (!hasBattery || !toggleClosed);
   if (charging) {
     // Батарея на шине — идёт зарядка
     drawBoltIcon(23, 2);
@@ -261,9 +259,9 @@ void updateDisplay() {
 
   // Строка 2: статус
   if (chargeOnlyMode) {
-    // Устройство «выключено» (тумблер разомкнут), питание от кабеля — показываем только заряд
+    // Тумблер разомкнут: XIAO питается от USB, но батарея отключена от зарядника.
     u8g2.setCursor(0, 31);
-    u8g2.print("зарядка");
+    u8g2.print("заряд выкл");
   } else if (ssid != "") {
     // Трансляция: иконка Wi-Fi + что транслируется
     drawWifiIcon(5, 28);

@@ -82,8 +82,8 @@
   <text class="small" x="170" y="432">200k</text>
   <path class="gnd" d="M150 462 V840"/>
 
-  <!-- Battery plus to charger -->
-  <path class="plus" d="M1270 700 V300"/>
+  <!-- Charger B+ joins the switched battery node, so charging is possible only at ON -->
+  <path class="plus" d="M1270 300 V480 H690 V500"/>
 
   <!-- Battery plus to switch, diode, BAT+ -->
   <path class="plus" d="M1270 700 H900 V500 H820"/>
