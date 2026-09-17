@@ -14,7 +14,8 @@
 
 // ============================================================
 //  OLED SSD1306 128x32 (тот же, что в CO2-датчике), I2C 0x3C
-//  XIAO ESP32-C6: SDA=D4 (GPIO22), SCL=D5 (GPIO23)
+//  XIAO ESP32-C6: SDA=D4 (GPIO22), SCL=D5 (GPIO23).
+//  Если D4 повреждён/замкнут, поддерживается запасной SDA=D6 (GPIO16).
 // ============================================================
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R2, /* reset = */ U8X8_PIN_NONE); // R2 = перевёрнуто на 180°
 bool displayOk = false;
@@ -25,20 +26,35 @@ bool i2cDevicePresent(uint8_t address) {
 }
 
 void initDisplay() {
-  // Явно задаём контакты XIAO ESP32-C6: это не затрагивает BLE/Wi-Fi.
+  // Сначала пробуем штатные контакты XIAO ESP32-C6.
   Wire.begin(D4, D5);
   Wire.setClock(100000);
   delay(100); // OLED должен успеть выйти из сброса после подачи питания.
 
   uint8_t oledAddress = 0;
+  uint8_t oledSdaPin = D4;
   if (i2cDevicePresent(0x3C)) {
     oledAddress = 0x3C;
   } else if (i2cDevicePresent(0x3D)) {
     oledAddress = 0x3D;
   }
 
+  // Ремонтный вариант: переносится только SDA с D4 на соседний D6,
+  // SCL остаётся на D5. Остальная логика прошивки не меняется.
   if (oledAddress == 0) {
-    Serial.println("OLED: I2C device not found on D4/D5");
+    Wire.end();
+    Wire.begin(D6, D5);
+    Wire.setClock(100000);
+    oledSdaPin = D6;
+    if (i2cDevicePresent(0x3C)) {
+      oledAddress = 0x3C;
+    } else if (i2cDevicePresent(0x3D)) {
+      oledAddress = 0x3D;
+    }
+  }
+
+  if (oledAddress == 0) {
+    Serial.println("OLED: I2C device not found on D4/D5 or D6/D5");
     return;
   }
 
@@ -51,7 +67,8 @@ void initDisplay() {
 
   displayOk = true;
   u8g2.setFlipMode(0);
-  Serial.printf("OLED: found at 0x%02X\n", oledAddress);
+  Serial.printf("OLED: found at 0x%02X, SDA=D%d, SCL=D5\n",
+                oledAddress, oledSdaPin == D4 ? 4 : 6);
 }
 
 // ============================================================
