@@ -20,13 +20,13 @@ U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R2, /* reset = */ U8X8_PIN_NONE
 bool displayOk = false;
 
 // ============================================================
-//  Батарея, внешние делители 1:2 (по два резистора 200 кОм):
+//  Батарея, внешние делители 1:2 (две равные пары 200/220 кОм):
 //   A0 = выход тумблера ДО защитного диода      -> тумблер -> R -> A0 -> R -> GND
 //   A2 = плюс батареи (ДО тумблера)            -> "+" батареи -> R -> A2 -> R -> GND
-//  Тумблер замкнут  => A0 показывает напряжение батареи.
+//  Тумблер замкнут  => A0 == A2 (одна точка).
 //  Тумблер разомкнут => нижний резистор делителя стягивает A0 к GND.
-//  Верх A0 нельзя подключать к BAT-пятаку XIAO: при USB штатный зарядник
-//  поднимает этот пятак и делает определение тумблера недостоверным.
+//  EY9-001 B+ также подключён к выходу тумблера, поэтому заряд возможен
+//  только при замкнутом тумблере.
 // ============================================================
 #define VBAT_PIN A0         // выход тумблера, до последовательного диода
 #define VBATT_SIDE_PIN A2   // батарея (до тумблера)
@@ -46,7 +46,6 @@ bool usbConnected = false;
 // Режим «только зарядка»: кабель вставлен, а тумблер разомкнут (устройство выключено).
 // Экран живёт от 5 В и показывает уровень заряда, а радио (BLE + WiFi) полностью выключено.
 bool chargeOnlyMode = false;
-bool bleReady = false;
 
 // Timer
 unsigned long previousMillis = 0;
@@ -134,9 +133,8 @@ void updateBatteryState() {
   hasBattery = (vbatV >= 2.0f);
   if (hasBattery) {
     batPct = batteryPercent(vbatV);
-    // A0 подключён к выходу тумблера до диода: при выключенном тумблере
-    // нижний резистор делителя гарантированно стягивает вход к нулю.
-    toggleClosed = (vbusV >= 2.0f);
+    // Тумблер замкнут: шина и батарея — одна точка (±0.25В на разброс делителей)
+    toggleClosed = (vbusV >= vbatV - 0.25f) && (vbusV <= vbatV + 0.25f);
   } else {
     toggleClosed = false;
   }
@@ -259,7 +257,7 @@ void updateDisplay() {
 
   // Строка 2: статус
   if (chargeOnlyMode) {
-    // Тумблер разомкнут: XIAO питается от USB, но батарея отключена от зарядника.
+    // XIAO питается от USB, но батарея отключена от зарядника тумблером.
     u8g2.setCursor(0, 31);
     u8g2.print("заряд выкл");
   } else if (ssid != "") {
@@ -554,8 +552,6 @@ void setup() {
   analogSetPinAttenuation(VBATT_SIDE_PIN, ADC_11db);
   analogSetPinAttenuation(VBUS_PIN, ADC_11db);
   updateBatteryState();
-  updateUsbState();
-  chargeOnlyMode = usbConnected && !toggleClosed;
 
   // +Fake Wi-Fi (включаем только на время трансляции — экономия при зарядке)
   WiFi.mode(WIFI_OFF);
@@ -566,15 +562,12 @@ void setup() {
     macs[i][0] = (macs[i][0] & 0xFC) | 0x02; // locally administered unicast MAC
   }
 
-  // В режиме зарядки BLE-контроллер вообще не инициализируем. Остановка
-  // advertising сама по себе не выключает BLE-радио и не рвёт соединение.
-  if (!chargeOnlyMode) {
-    // Create the BLE Device
-    BLEDevice::init("Hacker");
+  // Create the BLE Device
+  BLEDevice::init("Hacker");
 
-    // Create the BLE Server
-    pServer = BLEDevice::createServer();
-    pServer->setCallbacks(new MyServerCallbacks());
+  // Create the BLE Server
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
   // Create the BLE Service
   // BLEService *pService = pServer->createService(SERVICE_UUID);
   BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID));
@@ -623,9 +616,7 @@ void setup() {
   pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
   pAdvertising->setMinInterval(160);   // 100 мс — обычная реклама
   pAdvertising->setMaxInterval(160);
-    BLEDevice::startAdvertising();
-    bleReady = true;
-  }
+  BLEDevice::startAdvertising();
  // Serial.println(F("Waiting a client connection to notify..."));
 
   lastDisplayUpdate = millis();
@@ -634,7 +625,7 @@ void setup() {
 
 void loop() {
     // notify changed value
-    if (bleReady && deviceConnected && ssid == "" && !wifiSpotsSended && !chargeOnlyMode) {
+    if (deviceConnected && ssid == "" && !wifiSpotsSended && !chargeOnlyMode) {
       unsigned long currentMillis = millis();
       if (currentMillis - previousMillisforWifiSpots <= 3000) {
         // previousMillisforWifiSpots = currentMillis;    
@@ -679,12 +670,12 @@ void loop() {
         // delay(3000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
     }
     // disconnecting
-    if (bleReady && !deviceConnected && oldDeviceConnected) {
+    if (!deviceConnected && oldDeviceConnected) {
       pServer->startAdvertising(); // restart advertising
       oldDeviceConnected = deviceConnected;
     }
     // connecting
-    if (bleReady && deviceConnected && !oldDeviceConnected) {
+    if (deviceConnected && !oldDeviceConnected) {
       // do stuff here on connecting
       oldDeviceConnected = deviceConnected;
       // Serial.println(F("Device Connected"));
@@ -715,19 +706,27 @@ void loop() {
     lastDisplayUpdate = now;
     updateBatteryState();
     updateUsbState();
-    // При изменении положения тумблера во время питания от USB перезапускаемся.
-    // На следующем старте BLE либо не будет инициализирован вовсе (зарядка),
-    // либо поднимется штатно (рабочий режим).
+    updateDisplay();
+
+    // Радио живёт всегда, кроме режима «только зарядка»:
+    // кабель вставлен + тумблер разомкнут (устройство выключено) → глушим BLE и WiFi,
+    // а экран продолжает показывать уровень заряда.
     bool wantChargeOnly = usbConnected && !toggleClosed;
     if (wantChargeOnly != chargeOnlyMode) {
-      ensureWifiOff();
-      delay(50);
-      ESP.restart();
+      chargeOnlyMode = wantChargeOnly;
+      if (wantChargeOnly) {
+        if (ssid != "") stopBroadcastAndNotify(); // гасим текущую трансляцию
+        BLEDevice::getAdvertising()->stop();      // BLE полностью выключен
+        ensureWifiOff();
+      } else {
+        BLEDevice::getAdvertising()->start();     // радио снова работает
+      }
+      updateDisplay();
     }
-    updateDisplay();
   }
 
-  // В простое не жжём CPU впустую: пауза заметно снижает потребление.
+  // В простое не жжём CPU впустую: пауза заметно снижает потребление,
+  // и зарядка от USB (лимит 120мА) перестаёт проигрывать разряду.
   // Во время трансляции паузы нет — биконам нужен плотный цикл.
   if (ssid == "") {
     delay(50);
