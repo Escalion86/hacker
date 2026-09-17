@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <style>
+      .bg { fill:#f7f7f4; }
+      .card { fill:#fff; stroke:#232323; stroke-width:3; rx:18; }
+      .title { font:700 32px Arial,sans-serif; fill:#171717; }
+      .head { font:700 22px Arial,sans-serif; fill:#171717; }
+      .txt { font:18px Arial,sans-serif; fill:#202020; }
+      .small { font:15px Arial,sans-serif; fill:#444; }
+      .plus { stroke:#d73535; stroke-width:7; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+      .gnd { stroke:#252525; stroke-width:7; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+      .sense { stroke:#1976d2; stroke-width:5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+      .i2c { stroke:#7b4bb7; stroke-width:5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+      .node { fill:#fff; stroke:#202020; stroke-width:3; }
+      .label { font:700 17px Arial,sans-serif; fill:#fff; }
+      .note { fill:#fff5cc; stroke:#b88900; stroke-width:2; rx:12; }
+    </style>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#d73535"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1400" height="900"/>
+  <text class="title" x="55" y="58">Hacker20 — питание и зарядка Li‑Po 450 мА·ч</text>
+  <text class="txt" x="55" y="90">Два диода 1N5819. Серебристая полоса на корпусе всегда со стороны вертикальной черты символа диода.</text>
+
+  <!-- XIAO -->
+  <rect class="card" x="80" y="170" width="330" height="510"/>
+  <text class="head" x="245" y="210" text-anchor="middle">Seeed XIAO ESP32‑C6</text>
+  <rect x="160" y="232" width="170" height="56" rx="12" fill="#333"/>
+  <text class="label" x="245" y="267" text-anchor="middle">USB‑C (сюда кабель)</text>
+
+  <circle class="node" cx="390" cy="335" r="9"/><text class="txt" x="300" y="341">5V / VBUS</text>
+  <circle class="node" cx="390" cy="430" r="9"/><text class="txt" x="312" y="436">BAT+</text>
+  <circle class="node" cx="390" cy="535" r="9"/><text class="txt" x="329" y="541">3V3</text>
+  <circle class="node" cx="390" cy="580" r="9"/><text class="txt" x="339" y="586">D4</text>
+  <circle class="node" cx="390" cy="620" r="9"/><text class="txt" x="339" y="626">D5</text>
+  <circle class="node" cx="390" cy="655" r="9"/><text class="txt" x="323" y="661">GND</text>
+
+  <circle class="node" cx="100" cy="350" r="9"/><text class="txt" x="120" y="356">D1 (A1): USB</text>
+  <circle class="node" cx="100" cy="455" r="9"/><text class="txt" x="120" y="461">D0 (A0): тумблер</text>
+  <circle class="node" cx="100" cy="515" r="9"/><text class="txt" x="120" y="521">D2 (A2): аккумулятор</text>
+
+  <!-- Charger -->
+  <rect class="card" x="925" y="175" width="365" height="280"/>
+  <text class="head" x="1108" y="215" text-anchor="middle">Зарядный модуль EY9‑001</text>
+  <text class="small" x="1108" y="244" text-anchor="middle">300 мА только если аккумулятор допускает ≥0,67C</text>
+  <circle class="node" cx="945" cy="335" r="9"/><text class="txt" x="965" y="341">IN+</text>
+  <circle class="node" cx="945" cy="405" r="9"/><text class="txt" x="965" y="411">IN− / B−</text>
+  <circle class="node" cx="1270" cy="300" r="9"/><text class="txt" x="1198" y="306">B+</text>
+
+  <!-- Battery -->
+  <rect class="card" x="965" y="585" width="325" height="190"/>
+  <text class="head" x="1128" y="625" text-anchor="middle">Li‑Po 1S, 450 мА·ч</text>
+  <text class="txt" x="1128" y="656" text-anchor="middle">с защитой PCM</text>
+  <circle class="node" cx="985" cy="700" r="9"/><text class="txt" x="1005" y="706">−</text>
+  <circle class="node" cx="1270" cy="700" r="9"/><text class="txt" x="1234" y="706">+</text>
+
+  <!-- OLED -->
+  <rect class="card" x="535" y="590" width="300" height="210"/>
+  <text class="head" x="685" y="630" text-anchor="middle">OLED SSD1306</text>
+  <text class="txt" x="570" y="675">VCC</text><circle class="node" cx="555" cy="668" r="8"/>
+  <text class="txt" x="570" y="714">SDA</text><circle class="node" cx="555" cy="707" r="8"/>
+  <text class="txt" x="570" y="753">SCL</text><circle class="node" cx="555" cy="746" r="8"/>
+  <text class="txt" x="570" y="792">GND</text><circle class="node" cx="555" cy="785" r="8"/>
+
+  <!-- VBUS to charger with diode -->
+  <path class="plus" d="M399 335 H600"/>
+  <polygon points="600,310 600,360 650,335" fill="#d73535"/>
+  <line x1="658" y1="307" x2="658" y2="363" stroke="#202020" stroke-width="8"/>
+  <path class="plus" d="M658 335 H945" marker-end="url(#arrowRed)"/>
+  <text class="head" x="628" y="292" text-anchor="middle">D_IN 1N5819</text>
+  <text class="small" x="674" y="382">ПОЛОСА → к IN+</text>
+
+  <!-- A1 divider -->
+  <path class="sense" d="M515 335 V350 H435"/>
+  <rect x="363" y="342" width="72" height="17" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="399" y="330" text-anchor="middle">200k</text>
+  <path class="sense" d="M363 350 H100"/>
+  <path class="sense" d="M150 350 V390"/>
+  <rect x="142" y="390" width="17" height="72" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="170" y="432">200k</text>
+  <path class="gnd" d="M150 462 V840"/>
+
+  <!-- Battery plus to charger -->
+  <path class="plus" d="M1270 700 V300"/>
+
+  <!-- Battery plus to switch, diode, BAT+ -->
+  <path class="plus" d="M1270 700 H900 V500 H820"/>
+  <circle cx="795" cy="500" r="8" fill="#202020"/>
+  <circle cx="730" cy="500" r="8" fill="#202020"/>
+  <line x1="730" y1="500" x2="787" y2="468" stroke="#202020" stroke-width="7" stroke-linecap="round"/>
+  <text class="head" x="760" y="454" text-anchor="middle">ТУМБЛЕР</text>
+  <path class="plus" d="M730 500 H660"/>
+  <polygon points="660,475 660,525 610,500" fill="#d73535"/>
+  <line x1="602" y1="472" x2="602" y2="528" stroke="#202020" stroke-width="8"/>
+  <path class="plus" d="M602 500 H470 V430 H399" marker-end="url(#arrowRed)"/>
+  <text class="head" x="630" y="552" text-anchor="middle">D_BAT 1N5819</text>
+  <text class="small" x="525" y="574">ПОЛОСА → к BAT+ XIAO</text>
+
+  <!-- A0 sense from switched node before D_BAT -->
+  <path class="sense" d="M690 500 V455 H500"/>
+  <rect x="428" y="447" width="72" height="17" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="464" y="440" text-anchor="middle">200k</text>
+  <path class="sense" d="M428 455 H100"/>
+  <path class="sense" d="M205 455 V500"/>
+  <rect x="197" y="500" width="17" height="72" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="220" y="544">200k</text>
+  <path class="gnd" d="M205 572 V840"/>
+
+  <!-- A2 divider -->
+  <path class="sense" d="M900 700 V515 H500"/>
+  <rect x="428" y="507" width="72" height="17" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="464" y="500" text-anchor="middle">200k</text>
+  <path class="sense" d="M428 515 H100"/>
+  <path class="sense" d="M260 515 V590"/>
+  <rect x="252" y="590" width="17" height="72" fill="#e5b64d" stroke="#333" stroke-width="2"/>
+  <text class="small" x="275" y="635">200k</text>
+  <path class="gnd" d="M260 662 V840"/>
+
+  <!-- OLED wires -->
+  <path class="i2c" d="M399 535 H470 V668 H547"/>
+  <path class="i2c" d="M399 580 H485 V707 H547"/>
+  <path class="i2c" d="M399 620 H500 V746 H547"/>
+  <path class="gnd" d="M399 655 H455 V785 H547"/>
+
+  <!-- Common ground -->
+  <path class="gnd" d="M150 840 H1180 V700 H985"/>
+  <path class="gnd" d="M945 405 H880 V840"/>
+  <text class="small" x="1180" y="866" text-anchor="end">Общий минус: XIAO GND = EY9 IN−/B− = аккумулятор −</text>
+
+  <rect class="note" x="55" y="110" width="1290" height="42"/>
+  <text class="txt" x="700" y="138" text-anchor="middle">Перед аккумулятором: diode-test, проверка отсутствия КЗ; OFF без USB → на VBUS должно быть ≈0 В.</text>
+</svg>
