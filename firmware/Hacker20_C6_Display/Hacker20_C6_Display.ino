@@ -19,6 +19,41 @@
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R2, /* reset = */ U8X8_PIN_NONE); // R2 = перевёрнуто на 180°
 bool displayOk = false;
 
+bool i2cDevicePresent(uint8_t address) {
+  Wire.beginTransmission(address);
+  return Wire.endTransmission() == 0;
+}
+
+void initDisplay() {
+  // Явно задаём контакты XIAO ESP32-C6: это не затрагивает BLE/Wi-Fi.
+  Wire.begin(D4, D5);
+  Wire.setClock(100000);
+  delay(100); // OLED должен успеть выйти из сброса после подачи питания.
+
+  uint8_t oledAddress = 0;
+  if (i2cDevicePresent(0x3C)) {
+    oledAddress = 0x3C;
+  } else if (i2cDevicePresent(0x3D)) {
+    oledAddress = 0x3D;
+  }
+
+  if (oledAddress == 0) {
+    Serial.println("OLED: I2C device not found on D4/D5");
+    return;
+  }
+
+  // U8g2 принимает 8-битный адрес, поэтому 7-битный адрес I2C сдвигается.
+  u8g2.setI2CAddress(oledAddress << 1);
+  if (!u8g2.begin()) {
+    Serial.println("OLED: initialization failed");
+    return;
+  }
+
+  displayOk = true;
+  u8g2.setFlipMode(0);
+  Serial.printf("OLED: found at 0x%02X\n", oledAddress);
+}
+
 // ============================================================
 //  Батарея, внешние делители 1:2 (две равные пары 200/220 кОм):
 //   A0 = выход тумблера ДО защитного диода      -> тумблер -> R -> A0 -> R -> GND
@@ -204,9 +239,8 @@ void drawBoltIcon(int x, int y) {
   u8g2.drawXBMP(x, y, 6, 8, boltBitmap);
 }
 
-// «Зарядка НЕ идёт»: молния перечёркнута (кабель вставлен, а батареи нет)
-// Актуально только когда батарея отсутствует/не читается: при разомкнутом
-// тумблере зарядка идёт (внешний модуль заряжает банку напрямую).
+// «Зарядка НЕ идёт»: молния перечёркнута (кабель вставлен, но тумблер
+// разомкнут либо батарея отсутствует/не читается).
 void drawNoChargeIcon(int x, int y) {
   drawBoltIcon(x, y);
   u8g2.drawLine(x + 6, y, x - 1, y + 8);
@@ -541,11 +575,8 @@ void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
 
-  // OLED: пробуем инициализировать (устройство работает и без дисплея)
-  if (u8g2.begin()) {
-    displayOk = true;
-    u8g2.setFlipMode(0);
-  }
+  // OLED: устройство продолжает работать, даже если дисплей не найден.
+  initDisplay();
 
   // Батарея
   analogSetPinAttenuation(VBAT_PIN, ADC_11db);
